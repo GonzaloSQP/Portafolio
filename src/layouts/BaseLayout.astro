@@ -11,16 +11,18 @@ interface Props {
   currentPath?: string;
 }
 
-const defaultDescription = "Arquitecto de software senior especializado en sistemas distribuidos, streaming reactivo Jakarta EE, optimización Oracle SQL y facturación masiva SUNAT.";
+const defaultDescription = "Arquitecto backend: streaming reactivo de +1M registros en <15 min con Jakarta EE y Oracle SQL, y facturación masiva UBL 2.1 SUNAT para +30 empresas.";
 
 const {
-  title = `${portfolioData.name} | Arquitecto de Software & Sistemas Distribuidos`,
+  title = "Marcio Sequeiros | Arquitecto de Software & Sistemas Distribuidos",
   description = defaultDescription,
-  image = '/og-image.png',
+  image = 'https://dev.apiscusco.com/og-image.png',
   currentPath = Astro.url.pathname,
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://dev.apiscusco.com');
+const siteOrigin = 'https://dev.apiscusco.com';
+const canonicalURL = new URL(Astro.url.pathname, siteOrigin);
+const absoluteOgImage = image.startsWith('http') ? image : new URL(image, siteOrigin).toString();
 
 const schemaData = {
   "@context": "https://schema.org",
@@ -59,20 +61,44 @@ const schemaData = {
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={image} />
+    <meta property="og:image" content={absoluteOgImage} />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={image} />
+    <meta name="twitter:image" content={absoluteOgImage} />
 
-    <!-- Favicon -->
+    <!-- Favicon & Dual Theme Colors para Modo Oscuro y Claro -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#080c14" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#090d16" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8fafc" />
+
+    <!-- Transiciones de Navegación Suaves para Multi-página Estática -->
+    <meta name="view-transition" content="same-origin" />
 
     <!-- JSON-LD Datos Estructurados -->
     <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+
+    <!-- Speculation Rules para Precarga Instantánea de Proyectos -->
+    <script type="speculationrules" is:inline>
+      {
+        "prefetch": [
+          {
+            "source": "list",
+            "urls": [
+              "/proyectos",
+              "/sobre-mi",
+              "/contacto",
+              "/blog",
+              "/proyectos/banca-streaming-jakarta",
+              "/proyectos/centralizador-facturacion-electronica",
+              "/proyectos/apis-cusco-consultas"
+            ]
+          }
+        ]
+      }
+    </script>
 
     <!-- Script crítico inline para prevención estricta de FOUC -->
     <script is:inline>

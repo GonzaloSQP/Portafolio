@@ -184,12 +184,14 @@ const bankingProject = portfolioData.projects.find((p) => p.id === 'banca-stream
         </p>
 
         <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+          <!--email_off-->
           <a
             href={`mailto:${portfolioData.contact.email}`}
             class="px-5 py-2.5 rounded-sm bg-accent text-bg font-mono text-xs font-black uppercase tracking-wider hover:bg-accent-hover transition-colors shadow-sm focus-visible:outline-accent"
           >
             Enviar Correo ({portfolioData.contact.email})
           </a>
+          <!--/email_off-->
           <a
             href={`https://wa.me/51929803589?text=Hola%20Marcio,%20vi%20tu%20portafolio%20de%20arquitectura%20y%20me%20gustar%C3%ADa%20conversar.`}
             target="_blank"

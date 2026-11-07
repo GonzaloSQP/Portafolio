@@ -89,7 +89,7 @@ export const portfolioData: Profile = {
       technologies: ["Jakarta EE", "Java", "Oracle SQL", "Visual Basic", "Reactive Streams", "Microservicios"],
       category: "Streaming & Big Data",
       status: "Entregado",
-      statusDetail: "Sector Financiero · COOPAC Los Andes (Bajo NDA)",
+      statusDetail: "Sector Financiero · Confidencial (Bajo NDA)",
       featured: true,
       ctaText: "Ver arquitectura y pipeline de streaming →",
       baseline: "Reporteador legado en Visual Basic tardaba más de 4 horas con consultas Oracle no indexadas de 300+ líneas y caídas recurrentes por OutOfMemory en periodos de cierre.",
@@ -340,6 +340,9 @@ export async function preAuditInvoice(invoicePayload: InvoicePayload): Promise<A
       statusDetail: "Plataforma activa en www.apiscusco.com",
       featured: true,
       ctaText: "Ver arquitectura de facturación masiva →",
+      baseline: "Emisión de facturas síncronas bloqueaba terminales de venta en cierres de mes y la generación de PDFs tomaba más de 1.5s por documento.",
+      metricOutcome: "Capacidad de >150,000 comprobantes mensuales y generación de PDF vectoriales en <180 ms con particionamiento mensual en PostgreSQL.",
+      measurementMethod: "Particionamiento mensual en PostgreSQL, pruebas de carga k6 e instrumentación APM en contenedores Docker.",
       links: {
         demo: "https://www.apiscusco.com"
       },
@@ -362,10 +365,13 @@ export async function preAuditInvoice(invoicePayload: InvoicePayload): Promise<A
       ],
       technologies: ["TypeScript", "Web Audio API", "Node.js", "Tailwind CSS"],
       category: "Web & Multimedia",
-      status: "En Producción",
-      statusDetail: "Aplicación web activa en musica.apiscusco.com",
+      status: "Entregado",
+      statusDetail: "Entregado · musica.apiscusco.com",
       featured: true,
       ctaText: "Ver reproductor web en vivo →",
+      baseline: "Reproductores web tradicionales sufrían pausas de búfer de 400-800 ms entre canciones y pérdida de cola de reproducción al recargar.",
+      metricOutcome: "Latencia de reproducción <50 ms mediante Web Audio API y 60 FPS continuos en UI móvil y de escritorio.",
+      measurementMethod: "Chrome DevTools Performance Profiler y telemetría de eventos del navegador.",
       links: {
         demo: "https://musica.apiscusco.com"
       },

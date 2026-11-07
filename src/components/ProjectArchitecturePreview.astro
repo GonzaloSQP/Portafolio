@@ -1,0 +1,224 @@
+---
+interface Props {
+  projectId: string;
+  projectTitle: string;
+}
+
+const { projectId, projectTitle } = Astro.props;
+
+// Configuraciones de arquitectura esquemática por proyecto
+interface NodeConfig {
+  label: string;
+  sub: string;
+  tag: string;
+}
+
+interface DiagramSpec {
+  flowDescription: string;
+  nodes: [NodeConfig, NodeConfig, NodeConfig, NodeConfig];
+  protocolLabels: [string, string, string];
+  keyMetric: string;
+}
+
+const diagrams: Record<string, DiagramSpec> = {
+  'banca-streaming-jakarta': {
+    flowDescription: 'Pipeline de streaming reactivo: Oracle DB cursor streaming hacia buffer Jakarta EE y persistencia concurrente en Core Bancario',
+    nodes: [
+      { label: 'Oracle SQL', sub: 'Cursor Histórico', tag: 'DB' },
+      { label: 'Jakarta EE', sub: 'Reactive Buffer', tag: 'STREAM' },
+      { label: 'Batch Chunk', sub: 'Lotes de 2,500', tag: 'BATCH' },
+      { label: 'Core Bancario', sub: 'Conciliación OK', tag: 'CORE' }
+    ],
+    protocolLabels: ['JDBC Fetch: 2.5k', 'Flow API', 'Idempotente'],
+    keyMetric: 'THROUGHPUT: >1,200 REG/S · HEAP: 380 MB'
+  },
+  'centralizador-facturacion-electronica': {
+    flowDescription: 'Arquitectura tributaria multi-tenant: Ingesta de 30+ ERPs, pre-auditoría en memoria, cola Redis y despacho firmado a SUNAT',
+    nodes: [
+      { label: '30+ ERPs', sub: 'Multi-Tenant POS', tag: 'INGEST' },
+      { label: 'Pre-Auditoría', sub: 'UBL 2.1 en Memoria', tag: 'AUDIT' },
+      { label: 'Cola Redis', sub: 'Outbox / Retries', tag: 'QUEUE' },
+      { label: 'SUNAT SEE', sub: 'Firma X.509 + CDR', tag: 'GOV' }
+    ],
+    protocolLabels: ['REST HTTPS', 'In-Memory', 'SOAP / X.509'],
+    keyMetric: 'TASA RECHAZO: <1.2% · DESPACHO: 3.2s'
+  },
+  'apis-cusco-consultas': {
+    flowDescription: 'Microservicios de consulta de alta concurrencia: Anycast Edge, microservicios REST, caché en memoria Redis y conectores gubernamentales',
+    nodes: [
+      { label: 'POS & Apps', sub: 'DNI, RUC, Placas', tag: 'CLIENT' },
+      { label: 'Cloudflare', sub: 'Anycast Edge CDN', tag: 'GATEWAY' },
+      { label: 'Redis Cache', sub: 'TTL Adaptativo', tag: 'CACHE' },
+      { label: 'Upstream Gov', sub: 'RENIEC / SUNAT', tag: 'ORIGIN' }
+    ],
+    protocolLabels: ['TLS 1.3', 'Hit 95ms', 'Miss Fetch'],
+    keyMetric: 'LATENCIA: 95 MS · DISPONIBILIDAD: 99.8%'
+  },
+  'apiscusco-facturacion-gran-escala': {
+    flowDescription: 'Plataforma SaaS de facturación masiva: Ingesta transaccional, worker pool de renderizado vectorial PDF/QR y particionamiento PostgreSQL',
+    nodes: [
+      { label: 'Puntos Venta', sub: 'Comercio Masivo', tag: 'STORE' },
+      { label: 'Ingestion API', sub: 'Jakarta EE Core', tag: 'API' },
+      { label: 'Worker Pool', sub: 'Render PDF / QR', tag: 'WORKER' },
+      { label: 'PostgreSQL', sub: 'Partición Mensual', tag: 'SQL' }
+    ],
+    protocolLabels: ['Async Enqueue', 'PDF <180ms', 'Particionado'],
+    keyMetric: 'CAPACIDAD: >150K DOCS/MES · SQL: <250MS'
+  },
+  'xmusic-web-app': {
+    flowDescription: 'Pipeline de audio web: Eventos de usuario, AudioContext en Web Audio API, buffer PCM de decodificación y salida continua a 60 FPS',
+    nodes: [
+      { label: 'UI Reactiva', sub: 'Gestor de Listas', tag: 'UI' },
+      { label: 'Web Audio', sub: 'AudioContext Graph', tag: 'AUDIO' },
+      { label: 'Stream Buffer', sub: 'Zero-Copy Chunks', tag: 'BUFFER' },
+      { label: 'Salida DAC', sub: 'Hardware Audio', tag: 'OUT' }
+    ],
+    protocolLabels: ['DOM Event', 'Web Audio API', 'Latencia <50ms'],
+    keyMetric: 'LATENCIA: <50 MS · RENDIMIENTO: 60 FPS'
+  }
+};
+
+const currentDiagram = diagrams[projectId] || diagrams['banca-streaming-jakarta'];
+---
+
+<div class="mt-3 mb-4 rounded-sm bg-bg border border-border/70 p-2.5 sm:p-3 overflow-hidden" aria-label={currentDiagram.flowDescription}>
+  <!-- Encabezado técnico del diagrama -->
+  <div class="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-border/50 text-[10px] font-mono">
+    <div class="flex items-center gap-1.5 text-accent font-bold">
+      <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+      </svg>
+      <span class="uppercase tracking-wider">Topología de Arquitectura & Protocolo</span>
+    </div>
+    <span class="text-[9px] font-bold text-success bg-success/10 border border-success/25 px-1.5 py-0.2 rounded-sm hidden sm:inline">
+      {currentDiagram.keyMetric}
+    </span>
+  </div>
+
+  <!-- SVG Diagrama Vectorial Escalable -->
+  <div class="w-full">
+    <svg
+      viewBox="0 0 540 82"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      class="w-full h-auto text-text-main"
+      role="img"
+      aria-hidden="true"
+    >
+      <!-- Definiciones de Marcadores de Flecha y Gradientes -->
+      <defs>
+        <marker
+          id={`arrow-${projectId}`}
+          markerWidth="6"
+          markerHeight="6"
+          refX="5"
+          refY="3"
+          orient="auto"
+          markerUnits="strokeWidth"
+        >
+          <path d="M0,1 L5,3 L0,5 Z" fill="currentColor" class="text-accent" />
+        </marker>
+      </defs>
+
+      <!-- Conectores y Flechas entre Nodos -->
+      <!-- Nodo 0 -> Nodo 1 -->
+      <line
+        x1="110"
+        y1="36"
+        x2="148"
+        y2="36"
+        stroke="currentColor"
+        class="text-accent/60"
+        stroke-width="1.5"
+        stroke-dasharray="3 2"
+        marker-end={`url(#arrow-${projectId})`}
+      />
+      <text x="130" y="26" text-anchor="middle" class="fill-text-dim text-[8px] font-mono tracking-tight">
+        {currentDiagram.protocolLabels[0]}
+      </text>
+
+      <!-- Nodo 1 -> Nodo 2 -->
+      <line
+        x1="250"
+        y1="36"
+        x2="288"
+        y2="36"
+        stroke="currentColor"
+        class="text-accent/60"
+        stroke-width="1.5"
+        stroke-dasharray="3 2"
+        marker-end={`url(#arrow-${projectId})`}
+      />
+      <text x="270" y="26" text-anchor="middle" class="fill-text-dim text-[8px] font-mono tracking-tight">
+        {currentDiagram.protocolLabels[1]}
+      </text>
+
+      <!-- Nodo 2 -> Nodo 3 -->
+      <line
+        x1="390"
+        y1="36"
+        x2="428"
+        y2="36"
+        stroke="currentColor"
+        class="text-accent/60"
+        stroke-width="1.5"
+        stroke-dasharray="3 2"
+        marker-end={`url(#arrow-${projectId})`}
+      />
+      <text x="410" y="26" text-anchor="middle" class="fill-text-dim text-[8px] font-mono tracking-tight">
+        {currentDiagram.protocolLabels[2]}
+      </text>
+
+      <!-- Renderizado de los 4 Nodos Arquitectónicos -->
+      {currentDiagram.nodes.map((node, index) => {
+        const xOffset = 5 + index * 140;
+        return (
+          <g transform={`translate(${xOffset}, 12)`}>
+            <!-- Caja del Nodo -->
+            <rect
+              width="105"
+              height="48"
+              rx="2"
+              class="fill-surface stroke-border hover:stroke-accent transition-colors"
+              stroke-width="1"
+            />
+            <!-- Tag superior derecho -->
+            <rect
+              x="68"
+              y="4"
+              width="32"
+              height="12"
+              rx="1"
+              class="fill-accent-bg stroke-accent/20"
+              stroke-width="0.5"
+            />
+            <text
+              x="84"
+              y="13"
+              text-anchor="middle"
+              class="fill-accent text-[7.5px] font-mono font-bold"
+            >
+              {node.tag}
+            </text>
+            <!-- Título del Nodo -->
+            <text
+              x="8"
+              y="22"
+              class="fill-text-main text-[10px] font-bold font-mono tracking-tight"
+            >
+              {node.label}
+            </text>
+            <!-- Subtítulo técnico -->
+            <text
+              x="8"
+              y="38"
+              class="fill-text-muted text-[8px] font-sans"
+            >
+              {node.sub}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  </div>
+</div>
