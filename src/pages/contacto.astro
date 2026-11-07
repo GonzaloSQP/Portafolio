@@ -118,7 +118,8 @@ const PUBLIC_CONTACT_FORM_ENDPOINT = `https://formsubmit.co/ajax/${portfolioData
           <form id="contact-form" class="space-y-4" data-endpoint={PUBLIC_CONTACT_FORM_ENDPOINT}>
             <!-- Honeypot anti-bots -->
             <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" />
-            <input type="hidden" name="_replyto" value={portfolioData.contact.email} />
+            <input type="hidden" name="_captcha" value="false" />
+            <input type="hidden" name="_template" value="table" />
 
             <div class="space-y-1">
               <label for="name" class="block text-xs font-mono font-bold text-text-main uppercase">
@@ -210,6 +211,11 @@ const PUBLIC_CONTACT_FORM_ENDPOINT = `https://formsubmit.co/ajax/${portfolioData
 
       // Verificación honeypot
       if (formData.get('_honey')) return;
+
+      // Reply-To debe ser el correo del visitante, no el del propietario
+      const visitorEmail = String(formData.get('email') || '');
+      if (visitorEmail) formData.set('_replyto', visitorEmail);
+      formData.set('_subject', `[Portafolio] Consulta de ${String(formData.get('name') || 'visitante')}`);
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Enviando...';
