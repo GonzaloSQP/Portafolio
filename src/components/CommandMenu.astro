@@ -1,0 +1,134 @@
+---
+// CommandMenu.astro: Modal de búsqueda rápida tipo Spotlight (Ctrl+K / Cmd+K)
+import { portfolioData } from '../data/portfolioData';
+
+const searchableItems = [
+  ...portfolioData.projects.map((p) => ({
+    title: p.title,
+    category: `Proyecto · ${p.category}`,
+    href: `/proyectos/${p.id}`,
+    keywords: `${p.technologies.join(' ')} ${p.summary}`
+  })),
+  { title: 'Inicio (Hero, Streaming & Métricas)', category: 'Página', href: '/', keywords: 'inicio hero metricas' },
+  { title: 'Catálogo de Proyectos y Arquitecturas', category: 'Página', href: '/proyectos', keywords: 'proyectos casos' },
+  { title: 'Sobre Mí (Trayectoria, Formación & Experiencia)', category: 'Página', href: '/sobre-mi', keywords: 'sobre mi perfil educacion coopac ssp pmi' },
+  { title: 'Contacto Directo & Canales', category: 'Página', href: '/contacto', keywords: 'contacto email github linkedin whatsapp' },
+];
+---
+
+<div
+  id="command-menu-modal"
+  class="fixed inset-0 z-50 hidden bg-bg/80 backdrop-blur-sm p-4 sm:p-6 md:p-20 overflow-y-auto"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="cmd-search-input"
+>
+  <div class="relative mx-auto max-w-xl rounded-2xl border border-border bg-surface shadow-2xl overflow-hidden transition-all">
+    <!-- Input de búsqueda -->
+    <div class="flex items-center px-4 border-b border-border">
+      <svg class="w-5 h-5 text-accent shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input
+        id="cmd-search-input"
+        type="search"
+        placeholder="Buscar proyectos, tecnologías (Jakarta, Oracle, SUNAT...) [ESC para salir]"
+        class="w-full bg-transparent px-3 py-4 text-sm text-text-main placeholder-text-muted focus:outline-none"
+        autocomplete="off"
+      />
+      <kbd class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono text-text-muted rounded bg-surface-hover border border-border">
+        ESC
+      </kbd>
+    </div>
+
+    <!-- Lista de resultados -->
+    <div id="cmd-results-list" class="max-h-80 overflow-y-auto p-2 space-y-1">
+      {searchableItems.map((item) => (
+        <a
+          href={item.href}
+          class="cmd-item flex items-center justify-between p-3 rounded-xl hover:bg-surface-hover hover:text-accent text-text-main transition-colors group"
+          data-keywords={`${item.title.toLowerCase()} ${item.category.toLowerCase()} ${item.keywords.toLowerCase()}`}
+        >
+          <div>
+            <div class="text-sm font-semibold group-hover:text-accent transition-colors">
+              {item.title}
+            </div>
+            <div class="text-[11px] font-mono text-text-muted">
+              {item.category}
+            </div>
+          </div>
+          <span class="text-xs text-text-muted group-hover:text-accent group-hover:translate-x-1 transition-all">
+            ↵
+          </span>
+        </a>
+      ))}
+    </div>
+
+    <!-- Pie del Modal -->
+    <div class="p-3 bg-bg/50 border-t border-border flex items-center justify-between text-[11px] font-mono text-text-muted">
+      <span>Navegar con ↑ / ↓ y pulsar Enter</span>
+      <span>Acceso rápido: <strong>Ctrl + K</strong></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setupCommandMenu() {
+    const modal = document.getElementById('command-menu-modal');
+    const input = document.getElementById('cmd-search-input') as HTMLInputElement | null;
+    const items = document.querySelectorAll<HTMLAnchorElement>('.cmd-item');
+
+    if (!modal || !input) return;
+
+    function openModal() {
+      modal?.classList.remove('hidden');
+      input?.focus();
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal?.classList.add('hidden');
+      if (input) input.value = '';
+      filterItems('');
+      document.body.style.overflow = '';
+    }
+
+    function filterItems(query: string) {
+      const q = query.toLowerCase().trim();
+      items.forEach((item) => {
+        const kw = item.getAttribute('data-keywords') || '';
+        if (!q || kw.includes(q)) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+    }
+
+    input.addEventListener('input', (e) => {
+      filterItems((e.target as HTMLInputElement).value);
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (modal.classList.contains('hidden')) openModal();
+        else closeModal();
+      } else if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Exponer botón global
+    const triggerButtons = document.querySelectorAll('.cmd-trigger-btn');
+    triggerButtons.forEach((btn) => {
+      btn.addEventListener('click', () => openModal());
+    });
+  }
+
+  setupCommandMenu();
+</script>

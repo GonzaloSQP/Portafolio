@@ -1,0 +1,48 @@
+---
+// ArchitectureFlow.astro: Diagrama visual de flujo de datos y arquitectura de microservicios
+interface Props {
+  flow: string[];
+  title?: string;
+}
+
+const {
+  flow,
+  title = "Flujo de Datos y Topología de Componentes"
+} = Astro.props;
+---
+
+<div class="rounded-2xl border border-border bg-surface p-6 sm:p-8 space-y-4 shadow-sm">
+  <div class="flex items-center gap-2">
+    <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
+    <h3 class="text-lg font-bold font-mono text-text-main uppercase tracking-wider">
+      {title}
+    </h3>
+  </div>
+
+  <div class="pt-4 overflow-x-auto">
+    <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 min-w-[500px]">
+      {flow.map((step, idx) => (
+        <div class="flex-1 flex flex-col md:flex-row items-center gap-3">
+          <!-- Bloque de etapa -->
+          <div class="w-full p-4 rounded-xl bg-surface-hover border border-border text-center space-y-1 shadow-sm">
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-accent/10 text-accent">
+              FASE 0{idx + 1}
+            </span>
+            <div class="text-xs sm:text-sm font-bold text-text-main mt-1">
+              {step}
+            </div>
+          </div>
+
+          <!-- Flecha conectora (salvo en el último elemento) -->
+          {idx < flow.length - 1 && (
+            <div class="text-accent shrink-0 flex items-center justify-center rotate-90 md:rotate-0 my-1 md:my-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</div>

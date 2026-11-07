@@ -3,30 +3,35 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import MetricsStrip from '../components/MetricsStrip.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import LiveApiStatus from '../components/LiveApiStatus.astro';
+import BenchmarkChart from '../components/BenchmarkChart.astro';
 import { portfolioData } from '../data/portfolioData';
 
 const featuredProjects = portfolioData.projects.filter((p) => p.featured);
-const pmiCert = portfolioData.certifications[0];
+const bankingProject = portfolioData.projects.find((p) => p.id === 'banca-streaming-jakarta');
 ---
 
 <BaseLayout currentPath="/">
-  <!-- Sección Hero Principal -->
+  <!-- Hero con Pipeline Reactivo -->
   <Hero />
 
-  <!-- Banda de Métricas Clave -->
+  <!-- Banda de Métricas Técnicas Cuantitativas -->
   <MetricsStrip />
 
-  <!-- Sección de Proyectos Destacados -->
+  <!-- Sección de Casos de Estudio y Arquitectura de Misión Crítica -->
   <section id="proyectos" class="py-16 sm:py-24" aria-labelledby="featured-projects-title">
-    <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+    <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <span class="text-xs font-mono text-accent font-semibold tracking-wider uppercase">
             Casos de Estudio & Arquitectura
           </span>
           <h2 id="featured-projects-title" class="text-2xl sm:text-4xl font-black text-text-main tracking-tight mt-1">
-            Proyectos de Misión Crítica
+            Arquitecturas y Sistemas de Misión Crítica
           </h2>
+          <p class="text-sm sm:text-base text-text-muted mt-2 max-w-xl">
+            Sistemas en producción y migraciones complejas con métricas empíricas de rendimiento antes y después de su despliegue.
+          </p>
         </div>
         <a
           href="/proyectos"
@@ -48,87 +53,74 @@ const pmiCert = portfolioData.certifications[0];
     </div>
   </section>
 
-  <!-- Sección de Experiencia y Certificación PMI -->
-  <section class="py-16 border-t border-border bg-surface/20" aria-labelledby="credentials-title">
+  <!-- Sección Novedosa: Telemetría en Vivo & Benchmark Técnico -->
+  <section class="py-16 border-t border-border bg-surface/30" aria-label="Telemetría y benchmarks en vivo">
     <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-        <div class="lg:col-span-7 space-y-4">
-          <span class="text-xs font-mono text-accent font-semibold uppercase">
-            Rigor Metodológico & Gestión
-          </span>
-          <h2 id="credentials-title" class="text-2xl sm:text-3xl font-black text-text-main tracking-tight">
-            Ingeniería de software respaldada por gestión certificada
-          </h2>
-          <p class="text-sm sm:text-base text-text-muted leading-relaxed">
-            La construcción de sistemas distribuidos y plataformas fiscales de gran envergadura requiere tanto destreza arquitectónica como control predictivo de riesgos, cronogramas y requerimientos de calidad.
-          </p>
+      <div class="mb-10 text-center max-w-2xl mx-auto space-y-2">
+        <span class="text-xs font-mono text-accent font-semibold uppercase">
+          Verificación Técnica en Vivo
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-text-main tracking-tight">
+          Evidencia de Rendimiento y Telemetría Real
+        </h2>
+        <p class="text-sm text-text-muted">
+          Demostración tangible de latencia en microservicios e impacto medido en migración de datos.
+        </p>
+      </div>
 
-          <div class="pt-2 flex flex-wrap items-center gap-4">
-            <a
-              href="/sobre-mi"
-              class="inline-flex items-center text-sm font-bold text-accent hover:underline"
-            >
-              Conocer trayectoria completa y experiencia laboral →
-            </a>
-          </div>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Widget de Estado en Vivo y Playground de APIs -->
+        <div class="lg:col-span-6">
+          <LiveApiStatus />
         </div>
 
-        <!-- Tarjeta de Certificación PMI -->
-        <div class="lg:col-span-5 p-6 rounded-2xl border border-accent/30 bg-surface shadow-md">
-          <div class="flex items-start gap-4">
-            <div class="p-3 rounded-xl bg-accent/10 text-accent shrink-0">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-              </svg>
-            </div>
-            <div>
-              <span class="text-xs font-mono font-bold text-success uppercase">Credencial Oficial</span>
-              <h3 class="text-lg font-bold text-text-main mt-0.5">{pmiCert.name}</h3>
-              <p class="text-xs text-text-muted mt-1">{pmiCert.issuer}</p>
-              <div class="mt-3 pt-3 border-t border-border flex flex-wrap items-center justify-between text-xs font-mono">
-                <span class="text-text-muted">Licencia: <strong class="text-text-main">{pmiCert.credentialId}</strong></span>
-                <a
-                  href={pmiCert.verificationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-accent hover:underline font-medium"
-                >
-                  Verificar en Certiport ↗
-                </a>
-              </div>
-            </div>
-          </div>
+        <!-- Mini Benchmark Visual de la Migración Bancaria -->
+        <div class="lg:col-span-6">
+          {bankingProject && bankingProject.benchmarks && (
+            <BenchmarkChart
+              title="Benchmark: Monolito VB vs Jakarta Streaming"
+              subtitle="Medición con Oracle SQL Trace, VisualVM Heap Monitor y pruebas de carga concurrente"
+              benchmarks={bankingProject.benchmarks}
+            />
+          )}
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Banner de Contacto Directo -->
+  <!-- Banner de Contacto Directo y Conversión -->
   <section class="py-16 sm:py-20" aria-label="Llamada a la acción de contacto">
     <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
       <div class="p-8 sm:p-12 rounded-3xl bg-surface border border-border shadow-xl text-center max-w-3xl mx-auto space-y-6">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-mono font-bold">
+          DISPONIBLE PARA PROYECTOS Y CONSULTORÍA
+        </div>
         <h2 class="text-2xl sm:text-3xl font-black text-text-main tracking-tight">
-          ¿Tienes un reto de ingeniería, streaming o integración tributaria?
+          ¿Tienes un reto de ingeniería, streaming o integración fiscal?
         </h2>
         <p class="text-sm sm:text-base text-text-muted">
-          Disponible para proyectos de alta complejidad, consultorías técnicas en microservicios, optimización de bases de datos Oracle SQL y arquitecturas de datos.
+          Especializado en modernización de sistemas críticos, optimización de consultas masivas en Oracle SQL, pipelines de streaming y arquitecturas de microservicios.
         </p>
         <div class="pt-2 flex flex-wrap items-center justify-center gap-4">
           <a
             href={`mailto:${portfolioData.contact.email}`}
-            class="px-6 py-3 rounded-xl bg-accent text-bg font-bold text-sm sm:text-base hover:bg-accent-hover transition-colors shadow-md focus-visible:outline-accent"
+            class="px-6 py-3.5 rounded-xl bg-accent text-bg font-bold text-sm sm:text-base hover:bg-accent-hover transition-colors shadow-md focus-visible:outline-accent"
           >
             Enviar Correo ({portfolioData.contact.email})
           </a>
           <a
-            href="/contacto"
-            class="px-6 py-3 rounded-xl bg-surface-hover border border-border text-text-main font-semibold text-sm sm:text-base hover:bg-surface transition-colors focus-visible:outline-accent"
+            href={`https://wa.me/51929803589?text=Hola%20Marcio,%20vi%20tu%20portafolio%20de%20arquitectura%20y%20me%20gustar%C3%ADa%20conversar.`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="px-6 py-3.5 rounded-xl bg-surface-hover border border-border text-text-main font-semibold text-sm sm:text-base hover:bg-surface transition-colors focus-visible:outline-accent inline-flex items-center gap-2"
           >
-            Ver Canales de Contacto
+            <span>WhatsApp Directo</span>
+            <svg class="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/>
+            </svg>
           </a>
         </div>
       </div>
     </div>
   </section>
 </BaseLayout>
-

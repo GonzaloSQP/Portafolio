@@ -18,18 +18,14 @@ const currentYear = new Date().getFullYear();
           </span>
         </div>
         <p class="text-xs text-text-muted max-w-md">
-          Arquitectura de software de alto rendimiento, microservicios reactivos y facturación electrónica a gran escala.
+          {portfolioData.title} · Sistemas distribuidos de alto volumen, streaming reactivo y plataformas tributarias.
         </p>
       </div>
 
-      <!-- Certificación Oficial -->
-      <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface border border-border text-xs">
-        <svg class="w-4 h-4 text-accent shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-        <span class="font-medium text-text-main">
-          PMI Project Management Ready® (Licencia: {portfolioData.certifications[0].credentialId})
-        </span>
+      <!-- Credenciales y Certificación Discreta -->
+      <div class="flex items-center gap-2 text-xs text-text-muted">
+        <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+        <span>Acreditación: <strong class="text-text-main">{portfolioData.certifications[0].name}</strong> (PMI · ID: {portfolioData.certifications[0].credentialId})</span>
       </div>
 
       <!-- Enlaces Externos Reales -->
@@ -72,8 +68,7 @@ const currentYear = new Date().getFullYear();
 
     <div class="mt-8 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between text-xs text-text-muted gap-4">
       <p>© {currentYear} Marcio Gonzalo Sequeiros Palomino. Todos los derechos reservados.</p>
-      <p class="font-mono">Arquitectura estática SSG · Zero-cost Cloudflare Edge</p>
+      <p class="font-mono">Sitio estático · Cloudflare Edge · CDN global</p>
     </div>
   </div>
 </footer>
-

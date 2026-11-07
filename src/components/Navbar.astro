@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import CommandMenu from './CommandMenu.astro';
 
 interface Props {
   currentPath?: string;
@@ -9,13 +10,13 @@ const { currentPath = '/' } = Astro.props;
 
 const navLinks = [
   { href: '/', label: 'Inicio' },
-  { href: '/proyectos', label: 'Proyectos' },
+  { href: '/proyectos', label: 'Proyectos & Arquitectura' },
   { href: '/sobre-mi', label: 'Sobre Mí' },
   { href: '/contacto', label: 'Contacto' },
 ];
 ---
 
-<header class="sticky top-0 z-50 w-full border-b border-border bg-bg/85 backdrop-blur-md transition-colors">
+<header class="sticky top-0 z-40 w-full border-b border-border bg-bg/85 backdrop-blur-md transition-colors">
   <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
     <!-- Logotipo / Identidad -->
     <a
@@ -26,7 +27,10 @@ const navLinks = [
       <span class="w-8 h-8 rounded-lg bg-accent text-bg flex items-center justify-center font-mono text-sm font-black shadow-sm group-hover:scale-105 transition-transform">
         MS
       </span>
-      <span class="text-base sm:text-lg">Marcio Sequeiros</span>
+      <div class="flex flex-col">
+        <span class="text-sm sm:text-base leading-tight font-black">Marcio Sequeiros</span>
+        <span class="text-[10px] font-mono text-text-muted leading-none hidden sm:block">Software Architect</span>
+      </div>
     </a>
 
     <!-- Navegación de Escritorio -->
@@ -36,7 +40,7 @@ const navLinks = [
         return (
           <a
             href={link.href}
-            class={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+            class={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               isActive
                 ? 'text-accent bg-accent/10 font-semibold'
                 : 'text-text-muted hover:text-text-main hover:bg-surface'
@@ -49,8 +53,23 @@ const navLinks = [
       })}
     </nav>
 
-    <!-- Acciones derechas (Tema + Botón móvil) -->
-    <div class="flex items-center gap-3">
+    <!-- Acciones derechas (Buscador Ctrl+K + Tema + Botón móvil) -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Botón de Búsqueda Rápida Spotlight -->
+      <button
+        type="button"
+        class="cmd-trigger-btn flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-border bg-surface text-text-muted hover:text-text-main hover:border-accent/50 text-xs transition-colors"
+        aria-label="Abrir buscador rápido (Ctrl+K)"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <span class="hidden sm:inline font-mono">Buscar</span>
+        <kbd class="hidden sm:inline-block px-1.5 py-0.2 rounded bg-surface-hover border border-border text-[10px] font-mono">
+          Ctrl K
+        </kbd>
+      </button>
+
       <ThemeToggle />
 
       <!-- Botón Menú Móvil -->
@@ -97,6 +116,8 @@ const navLinks = [
   </div>
 </header>
 
+<CommandMenu />
+
 <script>
   function setupMobileMenu() {
     const btn = document.getElementById('mobile-menu-btn');
@@ -126,7 +147,6 @@ const navLinks = [
 
     btn.addEventListener('click', () => toggleMenu());
 
-    // Cerrar al pulsar Escape
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !menu.classList.contains('hidden')) {
         toggleMenu(false);
@@ -134,7 +154,6 @@ const navLinks = [
       }
     });
 
-    // Cerrar al pulsar un enlace
     links.forEach((l) => {
       l.addEventListener('click', () => toggleMenu(false));
     });
@@ -142,4 +161,3 @@ const navLinks = [
 
   setupMobileMenu();
 </script>
-

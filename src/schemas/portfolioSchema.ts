@@ -12,6 +12,7 @@ export const ALLOWED_TECHNOLOGIES = [
   'Java',
   'Oracle SQL',
   'Visual Basic',
+  'C# (ASP.NET)',
   'Reactive Streams',
   'Microservicios',
   'REST APIs',
@@ -28,7 +29,22 @@ export const ALLOWED_TECHNOLOGIES = [
   'Tailwind CSS'
 ] as const;
 
-export const ProjectStatusSchema = z.enum(['activo', 'mantenimiento', 'archivado', 'prototipo']);
+export const ProjectStatusSchema = z.enum([
+  'En Producción',
+  'Entregado',
+  'Confidencial (Bajo NDA)',
+  'activo',
+  'mantenimiento',
+  'archivado',
+  'prototipo'
+]);
+
+export const BenchmarkMetricSchema = z.object({
+  label: z.string(),
+  before: z.string(),
+  after: z.string(),
+  improvement: z.string(),
+});
 
 export const ProjectSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/, 'El ID debe contener solo minúsculas, números y guiones'),
@@ -40,7 +56,14 @@ export const ProjectSchema = z.object({
   technologies: z.array(z.enum(ALLOWED_TECHNOLOGIES)).min(1),
   category: z.enum(ALLOWED_CATEGORIES),
   status: ProjectStatusSchema,
+  statusDetail: z.string().optional(),
   featured: z.boolean(),
+  ctaText: z.string().optional(),
+  baseline: z.string().optional(),
+  metricOutcome: z.string().optional(),
+  measurementMethod: z.string().optional(),
+  architectureFlow: z.array(z.string()).optional(),
+  benchmarks: z.array(BenchmarkMetricSchema).optional(),
   links: z.object({
     demo: z.string().url().regex(/^https:\/\//, 'Las URLs de demo deben ser HTTPS').optional(),
     repo: z.string().url().regex(/^https:\/\//, 'Las URLs de repositorio deben ser HTTPS').optional(),
@@ -67,6 +90,13 @@ export const CertificationSchema = z.object({
   status: z.enum(['vigente', 'en_renovacion', 'expirado']),
 });
 
+export const EducationSchema = z.object({
+  institution: z.string(),
+  degree: z.string(),
+  period: z.string(),
+  detail: z.string().optional(),
+});
+
 export const ExperienceSchema = z.object({
   company: z.string(),
   role: z.string(),
@@ -85,10 +115,12 @@ export const ProfileSchema = z.object({
   specialties: z.array(z.string()).min(2),
   contact: z.object({
     email: z.string().email(),
+    phone: z.string().optional(),
     github: z.string().url().regex(/^https:\/\//),
     linkedin: z.string().url().regex(/^https:\/\//),
   }),
   certifications: z.array(CertificationSchema),
+  education: z.array(EducationSchema).optional(),
   experience: z.array(ExperienceSchema),
   projects: z.array(ProjectSchema),
 });
@@ -96,5 +128,6 @@ export const ProfileSchema = z.object({
 export type Project = z.infer<typeof ProjectSchema>;
 export type Profile = z.infer<typeof ProfileSchema>;
 export type Certification = z.infer<typeof CertificationSchema>;
+export type Education = z.infer<typeof EducationSchema>;
 export type Experience = z.infer<typeof ExperienceSchema>;
-
+export type BenchmarkMetric = z.infer<typeof BenchmarkMetricSchema>;

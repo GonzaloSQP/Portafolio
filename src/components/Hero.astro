@@ -3,18 +3,18 @@ import { portfolioData } from '../data/portfolioData';
 import StreamCanvas from '../generative/StreamCanvas.astro';
 ---
 
-<section class="relative pt-12 pb-16 lg:pt-20 lg:pb-24 overflow-hidden" aria-labelledby="hero-title">
+<section class="relative pt-10 pb-16 lg:pt-16 lg:pb-24 overflow-hidden" aria-labelledby="hero-title">
   <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
       <!-- Columna de Contenido (Izquierda) -->
       <div class="lg:col-span-7 space-y-6">
-        <!-- Badge de rol profesional -->
+        <!-- Badge de especialidad técnica -->
         <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs sm:text-sm font-medium">
           <span class="w-2 h-2 rounded-full bg-accent animate-ping"></span>
           <span>{portfolioData.title}</span>
         </div>
 
-        <!-- H1 Principal con escala clamp -->
+        <!-- H1 Principal -->
         <h1
           id="hero-title"
           class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-text-main leading-[1.12]"
@@ -22,47 +22,53 @@ import StreamCanvas from '../generative/StreamCanvas.astro';
           Sistemas distribuidos, <span class="text-accent">streaming masivo</span> y facturación de alta escala.
         </h1>
 
-        <!-- Párrafo de propuesta de valor -->
+        <!-- Párrafo de propuesta de valor con contexto empírico -->
         <p class="text-base sm:text-lg text-text-muted leading-relaxed max-w-2xl">
-          Ingeniero de software con experiencia comprobada modernizando arquitecturas críticas: migración de reportería bancaria legada a microservicios Jakarta EE procesando <strong class="text-text-main font-semibold">más de 1,000,000 de registros en menos de 15 minutos</strong> mediante streaming reactivo y optimización Oracle SQL, y centralización de facturación para <strong class="text-text-main font-semibold">más de 30 empresas</strong>.
+          Especialista en modernizar arquitecturas críticas: migración de reportería financiera desde Visual Basic a microservicios Jakarta EE procesando <strong class="text-text-main font-semibold">más de 1,000,000 de registros en menos de 15 minutos</strong> mediante streaming reactivo y optimización Oracle SQL, y centralización tributaria para <strong class="text-text-main font-semibold">más de 30 empresas</strong>.
         </p>
 
-        <!-- Botones de Acción -->
-        <div class="flex flex-wrap items-center gap-4 pt-2">
+        <!-- Botones de Acción y Conversión -->
+        <div class="flex flex-wrap items-center gap-3 pt-2">
           <a
             href="/proyectos"
             class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-accent text-bg font-bold text-sm sm:text-base hover:bg-accent-hover transition-all shadow-md focus-visible:outline-accent"
           >
-            Explorar Proyectos y Casos
+            Explorar Arquitecturas & Casos
             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
           </a>
 
           <a
+            href="/sobre-mi"
+            class="inline-flex items-center justify-center px-5 py-3.5 rounded-xl bg-surface border border-border text-text-main font-semibold text-sm sm:text-base hover:bg-surface-hover transition-colors focus-visible:outline-accent"
+          >
+            Perfil & CV
+          </a>
+
+          <a
             href="/contacto"
-            class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-surface border border-border text-text-main font-semibold text-sm sm:text-base hover:bg-surface-hover transition-colors focus-visible:outline-accent"
+            class="inline-flex items-center justify-center px-5 py-3.5 rounded-xl bg-surface-hover text-text-muted hover:text-text-main text-sm font-semibold transition-colors focus-visible:outline-accent"
           >
             Contactar Directamente
           </a>
         </div>
 
         <!-- Chips de tecnologías clave -->
-        <div class="pt-4 flex flex-wrap items-center gap-2 text-xs font-mono text-text-muted">
+        <div class="pt-2 flex flex-wrap items-center gap-2 text-xs font-mono text-text-muted">
           <span class="text-text-main font-bold">Stack Core:</span>
           <span class="px-2.5 py-1 rounded-md bg-surface border border-border">Jakarta EE</span>
           <span class="px-2.5 py-1 rounded-md bg-surface border border-border">Reactive Streams</span>
           <span class="px-2.5 py-1 rounded-md bg-surface border border-border">Oracle SQL</span>
-          <span class="px-2.5 py-1 rounded-md bg-surface border border-border">SUNAT / Facturación</span>
-          <span class="px-2.5 py-1 rounded-md bg-surface border border-border">TypeScript</span>
+          <span class="px-2.5 py-1 rounded-md bg-surface border border-border">SUNAT / UBL 2.1</span>
+          <span class="px-2.5 py-1 rounded-md bg-surface border border-border">Redis / High-Concurrency</span>
         </div>
       </div>
 
-      <!-- Columna Visual Algorítmica (Derecha) -->
-      <div class="lg:col-span-5 h-[360px] sm:h-[420px] lg:h-[480px]">
+      <!-- Columna Visual Algorítmica (Derecha: Pipeline Reactivo) -->
+      <div class="lg:col-span-5 h-[380px] sm:h-[440px] lg:h-[480px]">
         <StreamCanvas />
       </div>
     </div>
   </div>
 </section>
-

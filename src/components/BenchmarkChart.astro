@@ -1,0 +1,67 @@
+---
+// BenchmarkChart.astro: Comparativa visual cuantitativa Antes vs Después
+interface BenchmarkItem {
+  label: string;
+  before: string;
+  after: string;
+  improvement: string;
+}
+
+interface Props {
+  title?: string;
+  benchmarks: BenchmarkItem[];
+  subtitle?: string;
+}
+
+const {
+  title = "Benchmark Técnico: Línea Base vs Resultado Verificado",
+  benchmarks,
+  subtitle = "Medición del impacto de arquitectura con herramientas de telemetría y pruebas de carga"
+} = Astro.props;
+---
+
+<div class="rounded-2xl border border-border bg-surface p-6 sm:p-8 space-y-6 shadow-sm">
+  <div class="space-y-1">
+    <div class="flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
+      <span class="text-xs font-mono font-bold text-accent uppercase">Evidencia Empírica</span>
+    </div>
+    <h3 class="text-xl sm:text-2xl font-bold text-text-main">
+      {title}
+    </h3>
+    <p class="text-xs sm:text-sm text-text-muted">
+      {subtitle}
+    </p>
+  </div>
+
+  <div class="space-y-6 pt-2">
+    {benchmarks.map((b) => (
+      <div class="space-y-2 p-4 rounded-xl bg-surface-hover/60 border border-border">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm font-semibold text-text-main">
+          <span>{b.label}</span>
+          <span class="inline-flex items-center text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-success/15 text-success border border-success/30 self-start sm:self-auto">
+            ⚡ {b.improvement}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs font-mono">
+          <!-- Antes (Línea Base) -->
+          <div class="p-3 rounded-lg bg-bg border border-error/30 space-y-1">
+            <span class="text-error font-bold flex items-center gap-1.5">
+              <span>✕</span> Antes (Monolito Legado)
+            </span>
+            <div class="text-sm font-bold text-text-main">{b.before}</div>
+          </div>
+
+          <!-- Después (Arquitectura Optimizada) -->
+          <div class="p-3 rounded-lg bg-bg border border-success/40 space-y-1">
+            <span class="text-success font-bold flex items-center gap-1.5">
+              <span>✓</span> Después (Microservicios / Streaming)
+            </span>
+            <div class="text-sm font-bold text-text-main">{b.after}</div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>

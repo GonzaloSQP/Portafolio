@@ -1,5 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import BenchmarkChart from '../../components/BenchmarkChart.astro';
+import ArchitectureFlow from '../../components/ArchitectureFlow.astro';
+import LiveApiStatus from '../../components/LiveApiStatus.astro';
 import { portfolioData } from '../../data/portfolioData';
 import type { Project } from '../../schemas/portfolioSchema';
 
@@ -21,10 +24,18 @@ interface Props {
 }
 
 const { project, prev, next } = Astro.props;
+
+const statusColors: Record<string, string> = {
+  'En Producción': 'text-success bg-success/10 border-success/20',
+  'Entregado': 'text-accent bg-accent/10 border-accent/20',
+  'Confidencial (Bajo NDA)': 'text-amber-500 bg-amber-500/10 border-amber-500/20',
+};
+
+const currentStatusColor = statusColors[project.status] || 'text-success bg-success/10 border-success/20';
 ---
 
 <BaseLayout
-  title={`${project.title} | Caso de Estudio - ${portfolioData.name}`}
+  title={`${project.title} | Caso de Estudio & Arquitectura - ${portfolioData.name}`}
   description={project.summary}
   currentPath={`/proyectos/${project.id}`}
 >
@@ -45,9 +56,9 @@ const { project, prev, next } = Astro.props;
           <span class="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-accent/10 text-accent border border-accent/20">
             {project.category}
           </span>
-          <div class="inline-flex items-center gap-1.5 text-xs font-medium text-success px-3 py-1 rounded-full bg-success/10 border border-success/20">
-            <span class="w-2 h-2 rounded-full bg-success"></span>
-            <span class="capitalize">Estado: {project.status}</span>
+          <div class={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border ${currentStatusColor}`}>
+            <span class="w-2 h-2 rounded-full bg-current"></span>
+            <span>{project.statusDetail || project.status}</span>
           </div>
         </div>
 
@@ -80,23 +91,62 @@ const { project, prev, next } = Astro.props;
         )}
       </header>
 
-      <!-- Métricas y Resultados Verificables (Impacto) -->
-      <section class="p-6 sm:p-8 rounded-2xl bg-surface border border-border shadow-sm space-y-4" aria-labelledby="results-title">
-        <h2 id="results-title" class="text-lg font-bold font-mono text-text-main uppercase tracking-wider flex items-center gap-2">
-          <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Resultados Verificables de Rendimiento
-        </h2>
-        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-          {project.results.map((res) => (
-            <li class="p-4 rounded-xl bg-surface-hover/70 border border-border/80 flex items-start gap-3">
-              <span class="w-2 h-2 rounded-full bg-success shrink-0 mt-2"></span>
-              <span class="text-sm font-semibold text-text-main">{res}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <!-- Evidencia Empírica: Línea Base vs Resultado Verificado -->
+      {project.baseline && project.metricOutcome && (
+        <section class="p-6 sm:p-8 rounded-2xl bg-surface border border-accent/40 shadow-sm space-y-4" aria-labelledby="evidence-title">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
+            <h2 id="evidence-title" class="text-lg font-bold font-mono text-text-main uppercase tracking-wider">
+              Respaldo con Evidencia Técnica
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+            <div class="p-4 rounded-xl bg-bg border border-error/30 space-y-1">
+              <span class="text-xs font-mono font-bold text-error flex items-center gap-1.5">
+                <span>✕</span> Línea Base (Sistema Anterior)
+              </span>
+              <p class="text-sm text-text-main leading-relaxed">
+                {project.baseline}
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-bg border border-success/40 space-y-1">
+              <span class="text-xs font-mono font-bold text-success flex items-center gap-1.5">
+                <span>✓</span> Resultado Medido en Producción
+              </span>
+              <p class="text-sm font-semibold text-text-main leading-relaxed">
+                {project.metricOutcome}
+              </p>
+            </div>
+          </div>
+
+          {project.measurementMethod && (
+            <div class="pt-3 border-t border-border/80 flex items-start gap-2 text-xs text-text-muted font-mono">
+              <span class="text-accent font-bold">Instrumentación de Medición:</span>
+              <span>{project.measurementMethod}</span>
+            </div>
+          )}
+        </section>
+      )}
+
+      <!-- Mini Benchmark Visual (Si existe) -->
+      {project.benchmarks && (
+        <BenchmarkChart
+          title={`Benchmark Comparativo: ${project.title}`}
+          benchmarks={project.benchmarks}
+        />
+      )}
+
+      <!-- Flujo de Arquitectura y Topología (Si existe) -->
+      {project.architectureFlow && (
+        <ArchitectureFlow flow={project.architectureFlow} />
+      )}
+
+      <!-- Widget en vivo exclusivo para APIS Cusco -->
+      {project.id === 'apis-cusco-consultas' && (
+        <LiveApiStatus />
+      )}
 
       <!-- Problema Técnico -->
       <section class="space-y-4" aria-labelledby="problem-title">
@@ -140,11 +190,11 @@ const { project, prev, next } = Astro.props;
         </div>
       </section>
 
-      <!-- Stack Tecnológico Empleado -->
+      <!-- Stack Tecnológico Completo (Sin cortes) -->
       <section class="space-y-4" aria-labelledby="stack-title">
         <h2 id="stack-title" class="text-xl sm:text-2xl font-bold text-text-main tracking-tight flex items-center gap-2">
           <span class="w-2.5 h-6 rounded bg-accent inline-block"></span>
-          Stack Tecnológico
+          Stack Tecnológico Empleado
         </h2>
         <div class="flex flex-wrap gap-2">
           {project.technologies.map((tech) => (
@@ -153,6 +203,24 @@ const { project, prev, next } = Astro.props;
             </span>
           ))}
         </div>
+      </section>
+
+      <!-- Resultados Verificables -->
+      <section class="p-6 sm:p-8 rounded-2xl bg-surface border border-border shadow-sm space-y-4" aria-labelledby="results-title">
+        <h2 id="results-title" class="text-lg font-bold font-mono text-text-main uppercase tracking-wider flex items-center gap-2">
+          <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Resultados Verificables de Rendimiento
+        </h2>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          {project.results.map((res) => (
+            <li class="p-4 rounded-xl bg-surface-hover/70 border border-border/80 flex items-start gap-3">
+              <span class="w-2 h-2 rounded-full bg-success shrink-0 mt-2"></span>
+              <span class="text-sm font-semibold text-text-main">{res}</span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <!-- Navegación Entre Proyectos -->
@@ -191,4 +259,3 @@ const { project, prev, next } = Astro.props;
     </div>
   </div>
 </BaseLayout>
-

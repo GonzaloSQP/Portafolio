@@ -7,25 +7,34 @@ interface Props {
 }
 
 const { project, featured = false } = Astro.props;
+
+const statusStyles: Record<string, { bg: string; text: string; dot: string }> = {
+  'En Producción': { bg: 'bg-success/10', text: 'text-success', dot: 'bg-success' },
+  'Entregado': { bg: 'bg-accent/10', text: 'text-accent', dot: 'bg-accent' },
+  'Confidencial (Bajo NDA)': { bg: 'bg-amber-500/10', text: 'text-amber-500', dot: 'bg-amber-500' },
+  'activo': { bg: 'bg-success/10', text: 'text-success', dot: 'bg-success' },
+};
+
+const currentStatus = statusStyles[project.status] || statusStyles['En Producción'];
 ---
 
 <article
-  class={`group relative flex flex-col justify-between rounded-2xl border border-border bg-surface p-6 sm:p-8 hover:border-accent/50 transition-all duration-200 hover:shadow-lg ${
+  class={`group relative flex flex-col justify-between rounded-2xl border border-border bg-surface p-6 sm:p-8 hover:border-accent/50 transition-all duration-200 hover:shadow-xl ${
     featured ? 'lg:col-span-2' : ''
   }`}
   aria-labelledby={`project-title-${project.id}`}
 >
   <div>
-    <!-- Encabezado de la tarjeta: Categoría y Estado -->
+    <!-- Encabezado de la tarjeta: Categoría y Estado Significativo -->
     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
       <span class="text-xs font-mono font-medium px-2.5 py-1 rounded-full bg-accent/10 text-accent border border-accent/20">
         {project.category}
       </span>
 
-      <!-- Estado accesible con icono y texto -->
-      <div class="inline-flex items-center gap-1.5 text-xs font-medium text-success px-2.5 py-0.5 rounded-full bg-success/10 border border-success/20">
-        <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
-        <span class="capitalize">{project.status}</span>
+      <!-- Estado con significado técnico real -->
+      <div class={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-0.5 rounded-full border border-current/20 ${currentStatus.bg} ${currentStatus.text}`}>
+        <span class={`w-1.5 h-1.5 rounded-full ${currentStatus.dot}`}></span>
+        <span>{project.statusDetail || project.status}</span>
       </div>
     </div>
 
@@ -45,10 +54,24 @@ const { project, featured = false } = Astro.props;
       {project.summary}
     </p>
 
+    <!-- Línea Base vs Resultado (Si existe) -->
+    {project.baseline && project.metricOutcome && (
+      <div class="mt-4 p-3.5 rounded-xl bg-bg border border-border/80 text-xs font-mono space-y-1.5">
+        <div class="flex items-start gap-1.5 text-text-muted">
+          <span class="text-error font-bold">Línea base:</span>
+          <span>{project.baseline}</span>
+        </div>
+        <div class="flex items-start gap-1.5 text-text-main font-semibold">
+          <span class="text-success font-bold">Resultado:</span>
+          <span class="text-success">{project.metricOutcome}</span>
+        </div>
+      </div>
+    )}
+
     <!-- Resultados Verificables Destacados -->
-    <div class="mt-4 pt-4 border-t border-border/60">
+    <div class="mt-4 pt-3 border-t border-border/60">
       <h4 class="text-xs font-bold font-mono text-text-main uppercase tracking-wider mb-2">
-        Impacto y Resultados Clave:
+        Evidencia y Métricas Comprobadas:
       </h4>
       <ul class="space-y-1.5 text-xs text-text-muted">
         {project.results.slice(0, 2).map((res) => (
@@ -63,29 +86,20 @@ const { project, featured = false } = Astro.props;
     </div>
   </div>
 
-  <!-- Pie de Tarjeta: Stack y Enlace -->
-  <div class="mt-6 pt-4 border-t border-border flex flex-wrap items-center justify-between gap-3">
+  <!-- Pie de Tarjeta: Stack Completo y CTA con Contexto -->
+  <div class="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <!-- Tecnologías -->
     <div class="flex flex-wrap gap-1.5">
-      {project.technologies.slice(0, 4).map((tech) => (
+      {project.technologies.map((tech) => (
         <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-surface-hover text-text-muted border border-border">
           {tech}
         </span>
       ))}
-      {project.technologies.length > 4 && (
-        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-surface-hover text-text-muted">
-          +{project.technologies.length - 4}
-        </span>
-      )}
     </div>
 
-    <!-- Indicador de navegación -->
-    <span class="inline-flex items-center text-xs font-bold text-accent group-hover:translate-x-1 transition-transform">
-      Ver caso de estudio
-      <svg class="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-      </svg>
+    <!-- Indicador de navegación con contexto específico -->
+    <span class="inline-flex items-center text-xs font-bold text-accent group-hover:translate-x-1 transition-transform shrink-0 self-end sm:self-auto">
+      {project.ctaText || "Ver arquitectura y resultados →"}
     </span>
   </div>
 </article>
-
