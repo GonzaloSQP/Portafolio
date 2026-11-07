@@ -46,9 +46,11 @@ describe('Auditoría Técnica Verificada y Hallazgos Solucionados', () => {
   });
 
   it('cada tarjeta de proyecto contiene un diagrama de arquitectura vectorial', () => {
-    expect(indexHtml).toContain('Topología de Arquitectura');
-    expect(indexHtml).toContain('THROUGHPUT:');
-    expect(indexHtml).toContain('TASA RECHAZO:');
+    expect(indexHtml).toContain('Que tus comprobantes pasen');
+    expect(indexHtml).toContain('Validador en vivo');
+    expect(indexHtml).toContain('3 servicios, con entregable y plazo');
+    expect(indexHtml).toContain('PROBLEMA');
+    expect(indexHtml).toContain('WhatsApp directo');
   });
 
   it('las métricas en la home incluyen contexto de medición (Antes, Ahora, Medición)', () => {

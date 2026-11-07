@@ -2,89 +2,26 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import MetricsStrip from '../components/MetricsStrip.astro';
+import LiveDemo from '../components/LiveDemo.astro';
+import Services from '../components/Services.astro';
+import Cases from '../components/Cases.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import LiveApiStatus from '../components/LiveApiStatus.astro';
 import BenchmarkChart from '../components/BenchmarkChart.astro';
 import { portfolioData } from '../data/portfolioData';
 import { blogData } from '../data/blogData';
 
-const flagshipProjects = portfolioData.projects.slice(0, 2);
-const bankingProject = portfolioData.projects.find((p) => p.id === 'banca-streaming-jakarta');
 ---
 
 <BaseLayout currentPath="/">
   <!-- Hero con Pipeline Reactivo Refinado -->
   <Hero />
+  <LiveDemo />
+  <Services />
 
   <!-- Banda de Telemetría y Métricas Técnicas Cuantitativas -->
   <MetricsStrip />
-
-  <!-- Sección de Casos de Estudio y Arquitectura de Misión Crítica -->
-  <section id="proyectos" class="py-12 sm:py-16" aria-labelledby="featured-projects-title">
-    <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <span class="text-xs font-mono text-accent font-bold tracking-wider uppercase">
-            [ CASOS DE ESTUDIO & ARQUITECTURA ]
-          </span>
-          <h2 id="featured-projects-title" class="text-2xl sm:text-3xl font-black text-text-main tracking-tight mt-1">
-            Arquitecturas y Sistemas de Misión Crítica
-          </h2>
-          <p class="text-xs sm:text-sm text-text-muted mt-1 max-w-2xl leading-relaxed">
-            Sistemas en producción y migraciones complejas con métricas empíricas de rendimiento antes y después de su despliegue.
-          </p>
-        </div>
-        <a
-          href="/proyectos"
-          class="inline-flex items-center text-xs font-mono font-bold text-accent hover:text-accent-hover transition-colors uppercase tracking-wider shrink-0"
-        >
-          Ver todos los proyectos ({portfolioData.projects.length}) →
-        </a>
-      </div>
-
-      <!-- Grid de Proyectos Insignia: Recto y Espacio Eficiente -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {flagshipProjects.map((project) => (
-          <ProjectCard project={project} />
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Sección Novedosa: Telemetría en Vivo & Benchmark Técnico -->
-  <section class="py-12 sm:py-16 border-t border-border bg-surface/20" aria-label="Telemetría y benchmarks en vivo">
-    <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-      <div class="border-b border-border pb-4 text-center sm:text-left">
-        <span class="text-xs font-mono text-accent font-bold uppercase tracking-wider">
-          [ EVIDENCIA TÉCNICA EN TIEMPO REAL ]
-        </span>
-        <h2 class="text-2xl sm:text-3xl font-black text-text-main tracking-tight mt-1">
-          Telemetría en Producción y Benchmark de Migración
-        </h2>
-        <p class="text-xs sm:text-sm text-text-muted mt-1 max-w-2xl leading-relaxed">
-          Demostración tangible de latencia sub-100ms en microservicios e impacto medido de streaming reactivo frente a monolitos legados.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <!-- Widget de Estado en Vivo y Playground de APIs -->
-        <div class="lg:col-span-6">
-          <LiveApiStatus />
-        </div>
-
-        <!-- Mini Benchmark Visual de la Migración Bancaria -->
-        <div class="lg:col-span-6">
-          {bankingProject && bankingProject.benchmarks && (
-            <BenchmarkChart
-              title="Benchmark: Monolito VB vs Jakarta Streaming"
-              subtitle="Medición instrumentada con Oracle SQL Trace, VisualVM Heap Monitor y pruebas de carga"
-              benchmarks={bankingProject.benchmarks}
-            />
-          )}
-        </div>
-      </div>
-    </div>
-  </section>
+  <Cases />
 
   <!-- Sección: Notas de Ingeniería & Arquitectura Destacadas -->
   <section class="py-12 sm:py-16 border-t border-border" aria-label="Notas de ingeniería destacadas">

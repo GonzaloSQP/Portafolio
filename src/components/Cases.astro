@@ -1,0 +1,39 @@
+---
+import { portfolioData } from '../data/portfolioData';
+import StreamCanvas from '../generative/StreamCanvas.astro';
+const cases = portfolioData.projects.slice(0, 3);
+---
+
+<section id="casos" class="py-12 sm:py-16 border-b border-border bg-surface/40" aria-labelledby="cases-title">
+  <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <div class="border-b border-border pb-4">
+      <span class="text-xs font-mono text-accent font-bold uppercase tracking-wider">[ CASOS: PROBLEMA → SOLUCIÓN → RESULTADO ]</span>
+      <h2 id="cases-title" class="text-2xl sm:text-3xl font-black text-text-main tracking-tight mt-1">Sistemas que ya funcionan, no promesas</h2>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div class="lg:col-span-7 space-y-5">
+        {cases.map((c) => (
+          <article class="p-5 rounded-sm bg-surface border border-border space-y-3">
+            <h3 class="text-base font-bold text-text-main">{c.title}</h3>
+            <dl class="text-sm space-y-2">
+              <div><dt class="text-[10px] font-mono font-bold uppercase text-error">Problema</dt><dd class="text-text-muted">{c.problem}</dd></div>
+              <div><dt class="text-[10px] font-mono font-bold uppercase text-accent">Solución</dt><dd class="text-text-muted">{c.contribution}</dd></div>
+              <div><dt class="text-[10px] font-mono font-bold uppercase text-success">Resultado</dt><dd class="text-text-main font-semibold">{c.metricOutcome || c.results[0]}</dd></div>
+            </dl>
+            <details class="text-xs text-text-muted">
+              <summary class="font-mono font-bold text-accent uppercase cursor-pointer">Ver detalle técnico →</summary>
+              <ul class="list-disc list-inside mt-2 space-y-1">{c.results.map((r) => <li>{r}</li>)}</ul>
+              <p class="mt-2 font-mono">{c.technologies.join(' · ')}</p>
+              <a href={`/proyectos/${c.id}`} class="inline-block mt-2 font-mono font-bold text-accent uppercase">Caso completo →</a>
+            </details>
+          </article>
+        ))}
+      </div>
+      <div class="lg:col-span-5 space-y-3">
+        <h3 class="text-sm font-bold text-text-main">Animación firma: registros fluyendo por el pipeline</h3>
+        <p class="text-xs text-text-muted">Muestra el patrón de cursor/streaming que evita cargar todo en memoria. Se pausa fuera de pantalla y respeta <code>prefers-reduced-motion</code>.</p>
+        <StreamCanvas />
+      </div>
+    </div>
+  </div>
+</section>

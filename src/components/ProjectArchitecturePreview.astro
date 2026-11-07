@@ -25,56 +25,56 @@ const diagrams: Record<string, DiagramSpec> = {
     flowDescription: 'Pipeline de streaming reactivo: Oracle DB cursor streaming hacia buffer Jakarta EE y persistencia concurrente en Core Bancario',
     nodes: [
       { label: 'Oracle SQL', sub: 'Cursor Histórico', tag: 'DB' },
-      { label: 'Jakarta EE', sub: 'Reactive Buffer', tag: 'STREAM' },
+      { label: 'Jakarta EE', sub: 'Buffer Reactivo', tag: 'STREAM' },
       { label: 'Batch Chunk', sub: 'Lotes de 2,500', tag: 'BATCH' },
       { label: 'Core Bancario', sub: 'Conciliación OK', tag: 'CORE' }
     ],
-    protocolLabels: ['JDBC Fetch: 2.5k', 'Flow API', 'Idempotente'],
+    protocolLabels: ['JDBC Fetch 2.5k', 'Flow Stream', 'Idempotente'],
     keyMetric: 'THROUGHPUT: >1,200 REG/S · HEAP: 380 MB'
   },
   'centralizador-facturacion-electronica': {
-    flowDescription: 'Arquitectura tributaria multi-tenant: Ingesta de 30+ ERPs, pre-auditoría en memoria, cola Redis y despacho firmado a SUNAT',
+    flowDescription: 'SSP Envíos SUNAT: Ingesta multi-tenant, pre-auditoría XSD en memoria, servidor de workers .NET 8 y conciliación masiva de CDRs',
     nodes: [
       { label: '30+ ERPs', sub: 'Multi-Tenant POS', tag: 'INGEST' },
-      { label: 'Pre-Auditoría', sub: 'UBL 2.1 en Memoria', tag: 'AUDIT' },
-      { label: 'Cola Redis', sub: 'Outbox / Retries', tag: 'QUEUE' },
+      { label: 'Pre-Auditoría', sub: 'Reglas UBL 2.1', tag: 'AUDIT' },
+      { label: 'WorkerServer', sub: '.NET 8 Background', tag: 'WORKER' },
       { label: 'SUNAT SEE', sub: 'Firma X.509 + CDR', tag: 'GOV' }
     ],
-    protocolLabels: ['REST HTTPS', 'In-Memory', 'SOAP / X.509'],
+    protocolLabels: ['REST / XSD', 'Background Queue', 'SOAP / X.509'],
     keyMetric: 'TASA RECHAZO: <1.2% · DESPACHO: 3.2s'
   },
   'apis-cusco-consultas': {
-    flowDescription: 'Microservicios de consulta de alta concurrencia: Anycast Edge, microservicios REST, caché en memoria Redis y conectores gubernamentales',
+    flowDescription: 'APISCUSCO: Anycast Edge, conmutación automática entre 7+ proveedores oficiales, caché en memoria Redis y WhatsApp transaccional',
     nodes: [
-      { label: 'POS & Apps', sub: 'DNI, RUC, Placas', tag: 'CLIENT' },
+      { label: 'Apps & POS', sub: 'DNI, RUC, Placas', tag: 'CLIENT' },
       { label: 'Cloudflare', sub: 'Anycast Edge CDN', tag: 'GATEWAY' },
-      { label: 'Redis Cache', sub: 'TTL Adaptativo', tag: 'CACHE' },
-      { label: 'Upstream Gov', sub: 'RENIEC / SUNAT', tag: 'ORIGIN' }
+      { label: 'Failover Chain', sub: '7+ Proveedores', tag: 'FAILOVER' },
+      { label: 'Redis Cache', sub: 'TTL · Latencia 95ms', tag: 'CACHE' }
     ],
-    protocolLabels: ['TLS 1.3', 'Hit 95ms', 'Miss Fetch'],
+    protocolLabels: ['TLS 1.3', 'Circuit Breaker', 'Redis Sub-100ms'],
     keyMetric: 'LATENCIA: 95 MS · DISPONIBILIDAD: 99.8%'
   },
   'apiscusco-facturacion-gran-escala': {
-    flowDescription: 'Plataforma SaaS de facturación masiva: Ingesta transaccional, worker pool de renderizado vectorial PDF/QR y particionamiento PostgreSQL',
+    flowDescription: 'FacturacionSOLID: Backend Go modular con Clean Architecture, inyección de dependencias con Google Wire y PostgreSQL 16 multi-tenant',
     nodes: [
-      { label: 'Puntos Venta', sub: 'Comercio Masivo', tag: 'STORE' },
-      { label: 'Ingestion API', sub: 'Jakarta EE Core', tag: 'API' },
-      { label: 'Worker Pool', sub: 'Render PDF / QR', tag: 'WORKER' },
-      { label: 'PostgreSQL', sub: 'Partición Mensual', tag: 'SQL' }
+      { label: 'Next.js 15', sub: 'App Router UI', tag: 'FRONTEND' },
+      { label: 'Go Backend', sub: 'Clean Architecture', tag: 'BACKEND' },
+      { label: 'Google Wire', sub: 'Compile-time DI', tag: 'DI' },
+      { label: 'PostgreSQL 16', sub: 'Esquemas Tenant', tag: 'SQL' }
     ],
-    protocolLabels: ['Async Enqueue', 'PDF <180ms', 'Particionado'],
-    keyMetric: 'CAPACIDAD: >150K DOCS/MES · SQL: <250MS'
+    protocolLabels: ['REST HTTPS', 'Wire DI', 'Search_path Tenant'],
+    keyMetric: 'PRECISIÓN DECIMAL · CLEAN ARCHITECTURE'
   },
   'xmusic-web-app': {
-    flowDescription: 'Pipeline de audio web: Eventos de usuario, AudioContext en Web Audio API, buffer PCM de decodificación y salida continua a 60 FPS',
+    flowDescription: 'AuraStream: FastAPI asíncrono, búsqueda acústica vectorial con pgvector HNSW, workers Celery y streaming seguro con Linux memfd',
     nodes: [
-      { label: 'UI Reactiva', sub: 'Gestor de Listas', tag: 'UI' },
-      { label: 'Web Audio', sub: 'AudioContext Graph', tag: 'AUDIO' },
-      { label: 'Stream Buffer', sub: 'Zero-Copy Chunks', tag: 'BUFFER' },
-      { label: 'Salida DAC', sub: 'Hardware Audio', tag: 'OUT' }
+      { label: 'Android & Web', sub: 'Kotlin / SvelteKit', tag: 'CLIENT' },
+      { label: 'FastAPI Engine', sub: 'Async Python 3.12', tag: 'API' },
+      { label: 'pgvector', sub: 'HNSW Cosine Search', tag: 'VECTOR' },
+      { label: 'Celery Worker', sub: 'Linux memfd Audio', tag: 'WORKER' }
     ],
-    protocolLabels: ['DOM Event', 'Web Audio API', 'Latencia <50ms'],
-    keyMetric: 'LATENCIA: <50 MS · RENDIMIENTO: 60 FPS'
+    protocolLabels: ['WebSocket / REST', 'pgvector Distance', 'Zero-Copy memfd'],
+    keyMetric: 'SIMILITUD: <10MS · 60 FPS AUDIO STREAM'
   }
 };
 
@@ -105,7 +105,7 @@ const currentDiagram = diagrams[projectId] || diagrams['banca-streaming-jakarta'
       role="img"
       aria-hidden="true"
     >
-      <!-- Definiciones de Marcadores de Flecha y Gradientes -->
+      <!-- Definiciones de Marcadores de Flecha -->
       <defs>
         <marker
           id={`arrow-${projectId}`}
@@ -184,19 +184,19 @@ const currentDiagram = diagrams[projectId] || diagrams['banca-streaming-jakarta'
             />
             <!-- Tag superior derecho -->
             <rect
-              x="68"
+              x="62"
               y="4"
-              width="32"
+              width="38"
               height="12"
               rx="1"
               class="fill-accent-bg stroke-accent/20"
               stroke-width="0.5"
             />
             <text
-              x="84"
+              x="81"
               y="13"
               text-anchor="middle"
-              class="fill-accent text-[7.5px] font-mono font-bold"
+              class="fill-accent text-[7px] font-mono font-bold"
             >
               {node.tag}
             </text>
