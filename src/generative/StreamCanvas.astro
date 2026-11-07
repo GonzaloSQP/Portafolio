@@ -161,7 +161,7 @@ try (PreparedStatement ps = conn.prepareStatement(SQL_BATCH)) {
   </div>
 
   <!-- Selector Rápido de Fases de Arquitectura (Tabs Accesibles) -->
-  <nav class="grid grid-cols-2 sm:grid-cols-4 border-t border-b border-border bg-surface-hover/30 divide-x divide-border" role="tablist" aria-label="Fases del Pipeline">
+  <nav class="grid grid-cols-2 sm:grid-cols-4 border-t border-b border-border bg-border gap-px" role="tablist" aria-label="Fases del Pipeline">
     {phases.map((p, idx) => (
       <button
         type="button"
@@ -171,10 +171,10 @@ try (PreparedStatement ps = conn.prepareStatement(SQL_BATCH)) {
         aria-controls={`panel-${p.id}`}
         data-phase-index={idx}
         data-node-index={p.nodeIndex}
-        class={`phase-tab-btn px-2 py-2 text-center text-[10px] font-mono font-bold tracking-tight transition-colors focus-visible:outline-accent ${
+        class={`phase-tab-btn px-2 py-2 text-center text-[10px] sm:text-[11px] font-mono font-bold tracking-tight transition-colors focus-visible:outline-accent ${
           idx === 2
-            ? 'bg-accent/15 text-accent border-b-2 border-accent'
-            : 'text-text-muted hover:text-text-main hover:bg-surface-hover'
+            ? 'bg-accent/15 text-accent'
+            : 'bg-surface text-text-muted hover:text-text-main hover:bg-surface-hover'
         }`}
       >
         <span>{p.tabLabel}</span>
@@ -205,12 +205,12 @@ try (PreparedStatement ps = conn.prepareStatement(SQL_BATCH)) {
           {p.description}
         </p>
 
-        <!-- Métricas Específicas de la Fase -->
-        <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-center">
+        <!-- Métricas Específicas de la Fase (Adaptación Móvil y Truncado Seguro) -->
+        <div class="grid grid-cols-3 gap-1.5 sm:gap-2 pt-1 font-mono text-center">
           {p.metrics.map((m) => (
-            <div class="p-1.5 rounded-sm bg-bg border border-border">
-              <span class="block text-[9px] text-text-muted uppercase">{m.label}</span>
-              <strong class="text-[11px] text-text-main font-bold">{m.value}</strong>
+            <div class="p-1 sm:p-1.5 rounded-sm bg-bg border border-border overflow-hidden">
+              <span class="block text-[8px] sm:text-[9px] text-text-muted uppercase truncate">{m.label}</span>
+              <strong class="text-[10px] sm:text-[11px] text-text-main font-bold block truncate">{m.value}</strong>
             </div>
           ))}
         </div>
@@ -313,13 +313,13 @@ try (PreparedStatement ps = conn.prepareStatement(SQL_BATCH)) {
     <!-- Inspector Inferior del Modal -->
     <div class="p-4 bg-surface space-y-4">
       <!-- Pestañas de Fase en Modal -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 border border-border divide-x divide-border rounded-sm overflow-hidden bg-bg">
+      <div class="grid grid-cols-2 sm:grid-cols-4 border border-border bg-border gap-px rounded-sm overflow-hidden">
         {phases.map((p, idx) => (
           <button
             type="button"
             data-modal-phase={idx}
             class={`modal-phase-tab px-3 py-2 text-center text-xs font-mono font-bold transition-colors ${
-              idx === 2 ? 'bg-accent/20 text-accent' : 'text-text-muted hover:text-text-main hover:bg-surface-hover'
+              idx === 2 ? 'bg-accent/20 text-accent' : 'bg-surface text-text-muted hover:text-text-main hover:bg-surface-hover'
             }`}
           >
             {p.tabLabel}
@@ -457,9 +457,9 @@ try (PreparedStatement ps = conn.prepareStatement(SQL_BATCH)) {
         const isSelected = idx === phaseIndex;
         btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
         if (isSelected) {
-          btn.className = 'phase-tab-btn px-2 py-2 text-center text-[10px] font-mono font-bold tracking-tight transition-colors bg-accent/15 text-accent border-b-2 border-accent';
+          btn.className = 'phase-tab-btn px-2 py-2 text-center text-[10px] sm:text-[11px] font-mono font-bold tracking-tight transition-colors bg-accent/15 text-accent';
         } else {
-          btn.className = 'phase-tab-btn px-2 py-2 text-center text-[10px] font-mono font-bold tracking-tight transition-colors text-text-muted hover:text-text-main hover:bg-surface-hover';
+          btn.className = 'phase-tab-btn px-2 py-2 text-center text-[10px] sm:text-[11px] font-mono font-bold tracking-tight transition-colors bg-surface text-text-muted hover:text-text-main hover:bg-surface-hover';
         }
       });
 
@@ -526,7 +526,7 @@ try (PreparedStatement ps = conn.prepareStatement(SQL_BATCH)) {
         if (idx === phaseIndex) {
           tab.className = 'modal-phase-tab px-3 py-2 text-center text-xs font-mono font-bold transition-colors bg-accent/20 text-accent';
         } else {
-          tab.className = 'modal-phase-tab px-3 py-2 text-center text-xs font-mono font-bold transition-colors text-text-muted hover:text-text-main hover:bg-surface-hover';
+          tab.className = 'modal-phase-tab px-3 py-2 text-center text-xs font-mono font-bold transition-colors bg-surface text-text-muted hover:text-text-main hover:bg-surface-hover';
         }
       });
 

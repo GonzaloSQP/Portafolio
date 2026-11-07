@@ -28,7 +28,7 @@ export class StreamAnimation {
   private packetTarget!: Uint8Array;
   private packetProgress!: Float32Array;
 
-  // Estado interactivo
+  // Estado interactivo y responsivo
   private mouseX = -9999;
   private mouseY = -9999;
   private selectedNodeIndex: number | null = 3; // Reactive Engine por defecto
@@ -73,21 +73,32 @@ export class StreamAnimation {
   private setupNodes(): void {
     const w = this.canvas.clientWidth || 600;
     const h = this.canvas.clientHeight || 400;
+    const isMobile = w < 480;
+
+    // Adaptación geométrica responsiva para evitar recortes de texto en pantallas pequeñas
+    const colLeft = isMobile ? w * 0.20 : w * 0.16;
+    const colMid = w * 0.50;
+    const colRight = isMobile ? w * 0.80 : w * 0.84;
+
+    const rSource = isMobile ? 11 : 14;
+    const rWorker = isMobile ? 14 : 18;
+    const rCore = isMobile ? 18 : 22;
+    const rSink = isMobile ? 13 : 16;
 
     // Arquitectura de 3 capas: Ingesta -> Pipeline Reactivo -> Sinks
     this.nodes = [
       // Ingesta (Izquierda)
-      { x: w * 0.15, y: h * 0.28, label: 'Oracle SQL (Cursor)', type: 'source', radius: 14 },
-      { x: w * 0.15, y: h * 0.72, label: 'SUNAT / Fiscal Events', type: 'source', radius: 14 },
+      { x: colLeft, y: h * 0.28, label: isMobile ? 'Oracle Cursor' : 'Oracle SQL (Cursor)', type: 'source', radius: rSource },
+      { x: colLeft, y: h * 0.72, label: isMobile ? 'SUNAT Events' : 'SUNAT / Fiscal Events', type: 'source', radius: rSource },
 
       // Procesamiento Streaming (Centro)
-      { x: w * 0.50, y: h * 0.22, label: 'Jakarta Buffer', type: 'worker', radius: 18 },
-      { x: w * 0.50, y: h * 0.50, label: 'Reactive Engine', type: 'worker', radius: 22 },
-      { x: w * 0.50, y: h * 0.78, label: 'Batch Chunks', type: 'worker', radius: 18 },
+      { x: colMid, y: h * 0.22, label: isMobile ? 'Buffer' : 'Jakarta Buffer', type: 'worker', radius: rWorker },
+      { x: colMid, y: h * 0.50, label: isMobile ? 'Reactive' : 'Reactive Engine', type: 'worker', radius: rCore },
+      { x: colMid, y: h * 0.78, label: isMobile ? 'Chunks' : 'Batch Chunks', type: 'worker', radius: rWorker },
 
       // Sinks & Destinos (Derecha)
-      { x: w * 0.85, y: h * 0.32, label: 'Microservices Core', type: 'sink', radius: 16 },
-      { x: w * 0.85, y: h * 0.68, label: 'DB Bulk Insert', type: 'sink', radius: 16 },
+      { x: colRight, y: h * 0.32, label: isMobile ? 'Microservices' : 'Microservices Core', type: 'sink', radius: rSink },
+      { x: colRight, y: h * 0.68, label: isMobile ? 'DB Bulk' : 'DB Bulk Insert', type: 'sink', radius: rSink },
     ];
   }
 
@@ -142,9 +153,10 @@ export class StreamAnimation {
 
   private setupListeners(): void {
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
-    this.canvas.addEventListener('mousemove', this.handleMouseMove, { passive: true });
-    this.canvas.addEventListener('mouseleave', this.handleMouseLeave, { passive: true });
-    this.canvas.addEventListener('click', this.handleClick);
+    // Pointer Events unificados para mouse, táctil y stylus
+    this.canvas.addEventListener('pointermove', this.handlePointerMove, { passive: true });
+    this.canvas.addEventListener('pointerleave', this.handlePointerLeave, { passive: true });
+    this.canvas.addEventListener('pointerdown', this.handlePointerDown);
   }
 
   private handleVisibilityChange = (): void => {
@@ -153,17 +165,20 @@ export class StreamAnimation {
     else this.stop();
   };
 
-  private handleMouseMove = (e: MouseEvent): void => {
+  private handlePointerMove = (e: PointerEvent): void => {
     const rect = this.canvas.getBoundingClientRect();
     this.mouseX = e.clientX - rect.left;
     this.mouseY = e.clientY - rect.top;
+
+    const isMobile = (this.canvas.clientWidth || 600) < 480;
+    const hitPadding = isMobile ? 14 : 10;
 
     let foundHover: number | null = null;
     for (let i = 0; i < this.nodes.length; i++) {
       const node = this.nodes[i];
       const dx = this.mouseX - node.x;
       const dy = this.mouseY - node.y;
-      if (dx * dx + dy * dy <= (node.radius + 10) * (node.radius + 10)) {
+      if (dx * dx + dy * dy <= (node.radius + hitPadding) * (node.radius + hitPadding)) {
         foundHover = i;
         break;
       }
@@ -173,23 +188,27 @@ export class StreamAnimation {
     this.canvas.style.cursor = foundHover !== null ? 'pointer' : 'default';
   };
 
-  private handleMouseLeave = (): void => {
+  private handlePointerLeave = (): void => {
     this.mouseX = -9999;
     this.mouseY = -9999;
     this.hoveredNodeIndex = null;
     this.canvas.style.cursor = 'default';
   };
 
-  private handleClick = (e: MouseEvent): void => {
+  private handlePointerDown = (e: PointerEvent): void => {
     const rect = this.canvas.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const clickY = e.clientY - rect.top;
+
+    const isMobile = (this.canvas.clientWidth || 600) < 480;
+    const hitPadding = isMobile ? 18 : 12;
 
     for (let i = 0; i < this.nodes.length; i++) {
       const node = this.nodes[i];
       const dx = clickX - node.x;
       const dy = clickY - node.y;
-      if (dx * dx + dy * dy <= (node.radius + 12) * (node.radius + 12)) {
+      const targetR = node.radius + hitPadding;
+      if (dx * dx + dy * dy <= targetR * targetR) {
         this.selectNode(i);
         break;
       }
@@ -305,6 +324,7 @@ export class StreamAnimation {
     if (!this.ctx) return;
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
+    const isMobile = w < 480;
 
     this.ctx.clearRect(0, 0, w, h);
 
@@ -351,7 +371,7 @@ export class StreamAnimation {
         (this.packetSource[i] === this.selectedNodeIndex || this.packetTarget[i] === this.selectedNodeIndex);
 
       const color = isTargetingSelected ? selectedPacketColor : packetColor;
-      const radius = isTargetingSelected ? 3.5 : 2.5;
+      const radius = isTargetingSelected ? (isMobile ? 3 : 3.5) : (isMobile ? 2 : 2.5);
 
       // Brillo del paquete
       this.ctx.fillStyle = packetGlow;
@@ -367,7 +387,6 @@ export class StreamAnimation {
     }
 
     // 3. Nodos de arquitectura con etiquetas
-    this.ctx.font = '10px ui-monospace, SFMono-Regular, Menlo, monospace';
     this.ctx.textAlign = 'center';
 
     for (let i = 0; i < this.nodes.length; i++) {
@@ -406,21 +425,21 @@ export class StreamAnimation {
       // Núcleo del estado del nodo
       this.ctx.fillStyle = isSelected ? '#34d399' : (i === 3 ? '#10b981' : packetColor);
       this.ctx.beginPath();
-      this.ctx.arc(n.x, n.y, isSelected ? 4 : 3, 0, Math.PI * 2);
+      this.ctx.arc(n.x, n.y, isSelected ? 3.5 : 2.5, 0, Math.PI * 2);
       this.ctx.fill();
 
       // Etiqueta del nodo
       this.ctx.fillStyle = isSelected ? (isDark ? '#38bdf8' : '#0284c7') : textColor;
       this.ctx.font = isSelected
-        ? 'bold 11px ui-monospace, SFMono-Regular, Menlo, monospace'
-        : '10px ui-monospace, SFMono-Regular, Menlo, monospace';
-      this.ctx.fillText(n.label, n.x, n.y + n.radius + 15);
+        ? (isMobile ? 'bold 9px ui-monospace, monospace' : 'bold 11px ui-monospace, monospace')
+        : (isMobile ? '8.5px ui-monospace, monospace' : '10px ui-monospace, monospace');
+      this.ctx.fillText(n.label, n.x, n.y + n.radius + (isMobile ? 12 : 15));
 
       // Badge activo si está seleccionado
       if (isSelected) {
         this.ctx.fillStyle = '#34d399';
-        this.ctx.font = 'bold 8px ui-monospace, monospace';
-        this.ctx.fillText('▼ SELECCIONADO', n.x, n.y - n.radius - 5);
+        this.ctx.font = isMobile ? 'bold 7px ui-monospace, monospace' : 'bold 8px ui-monospace, monospace';
+        this.ctx.fillText('▼ ACTIVO', n.x, n.y - n.radius - (isMobile ? 3 : 5));
       }
     }
   }
@@ -430,8 +449,8 @@ export class StreamAnimation {
     if (this.resizeObserver) this.resizeObserver.disconnect();
     if (this.intersectionObserver) this.intersectionObserver.disconnect();
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
-    this.canvas.removeEventListener('mousemove', this.handleMouseMove);
-    this.canvas.removeEventListener('mouseleave', this.handleMouseLeave);
-    this.canvas.removeEventListener('click', this.handleClick);
+    this.canvas.removeEventListener('pointermove', this.handlePointerMove);
+    this.canvas.removeEventListener('pointerleave', this.handlePointerLeave);
+    this.canvas.removeEventListener('pointerdown', this.handlePointerDown);
   }
 }

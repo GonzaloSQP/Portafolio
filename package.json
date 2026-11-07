@@ -14,8 +14,9 @@
     "test:e2e": "tsx scripts/runE2eTests.ts",
     "audit:perf": "tsx scripts/measureWebVitals.ts",
     "check:links": "tsx scripts/checkLinks.ts",
+    "scan:corrupted": "tsx scripts/scanCorruptedChars.ts",
     "audit:deps": "npm audit --audit-level=high",
-    "verify": "npm run validate:data && npm run typecheck && npm run test && npm run build && npm run check:links"
+    "verify": "npm run scan:corrupted && npm run validate:data && npm run typecheck && npm run test && npm run build && npm run check:links"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
