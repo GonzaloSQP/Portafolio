@@ -41,6 +41,10 @@ export class StreamAnimation {
   private resizeObserver: ResizeObserver | null = null;
   private intersectionObserver: IntersectionObserver | null = null;
   private prefersReducedMotion = false;
+  private cachedWidth = 600;
+  private cachedHeight = 400;
+  private isDarkTheme = true;
+  private themeObserver: MutationObserver | null = null;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -54,6 +58,18 @@ export class StreamAnimation {
 
     this.ctx = this.canvas.getContext('2d', { alpha: true });
     if (!this.ctx) return;
+
+    this.cachedWidth = this.canvas.clientWidth || 600;
+    this.cachedHeight = this.canvas.clientHeight || 400;
+    this.updateTheme();
+
+    if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+      this.themeObserver = new MutationObserver(() => this.updateTheme());
+      this.themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+      });
+    }
 
     this.packetX = new Float32Array(this.packetCount);
     this.packetY = new Float32Array(this.packetCount);
@@ -70,9 +86,15 @@ export class StreamAnimation {
     this.start();
   }
 
+  private updateTheme(): void {
+    if (typeof document !== 'undefined') {
+      this.isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
+    }
+  }
+
   private setupNodes(): void {
-    const w = this.canvas.clientWidth || 600;
-    const h = this.canvas.clientHeight || 400;
+    const w = this.cachedWidth;
+    const h = this.cachedHeight;
     const isMobile = w < 480;
 
     // Adaptación geométrica responsiva para evitar recortes de texto en pantallas pequeñas
@@ -126,11 +148,11 @@ export class StreamAnimation {
   public resizeCanvas(): void {
     if (!this.canvas) return;
     const dpr = getSafeDevicePixelRatio(window.devicePixelRatio);
-    const w = this.canvas.clientWidth || 600;
-    const h = this.canvas.clientHeight || 400;
+    this.cachedWidth = this.canvas.clientWidth || 600;
+    this.cachedHeight = this.canvas.clientHeight || 400;
 
-    this.canvas.width = Math.floor(w * dpr);
-    this.canvas.height = Math.floor(h * dpr);
+    this.canvas.width = Math.floor(this.cachedWidth * dpr);
+    this.canvas.height = Math.floor(this.cachedHeight * dpr);
 
     if (this.ctx) {
       this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -170,7 +192,7 @@ export class StreamAnimation {
     this.mouseX = e.clientX - rect.left;
     this.mouseY = e.clientY - rect.top;
 
-    const isMobile = (this.canvas.clientWidth || 600) < 480;
+    const isMobile = this.cachedWidth < 480;
     const hitPadding = isMobile ? 14 : 10;
 
     let foundHover: number | null = null;
@@ -200,7 +222,7 @@ export class StreamAnimation {
     const clickX = e.clientX - rect.left;
     const clickY = e.clientY - rect.top;
 
-    const isMobile = (this.canvas.clientWidth || 600) < 480;
+    const isMobile = this.cachedWidth < 480;
     const hitPadding = isMobile ? 18 : 12;
 
     for (let i = 0; i < this.nodes.length; i++) {
@@ -322,13 +344,13 @@ export class StreamAnimation {
 
   private render(): void {
     if (!this.ctx) return;
-    const w = this.canvas.clientWidth;
-    const h = this.canvas.clientHeight;
+    const w = this.cachedWidth;
+    const h = this.cachedHeight;
     const isMobile = w < 480;
 
     this.ctx.clearRect(0, 0, w, h);
 
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const isDark = this.isDarkTheme;
     const pipeColor = isDark ? 'rgba(56, 189, 248, 0.12)' : 'rgba(2, 132, 199, 0.12)';
     const activePipeColor = isDark ? 'rgba(56, 189, 248, 0.45)' : 'rgba(2, 132, 199, 0.35)';
     const packetColor = isDark ? '#38bdf8' : '#0284c7';
@@ -361,28 +383,54 @@ export class StreamAnimation {
       this.ctx.stroke();
     }
 
-    // 2. Paquetes de datos en tránsito
-    for (let i = 0; i < this.packetCount; i++) {
-      const x = this.packetX[i];
-      const y = this.packetY[i];
+    // 2. Paquetes de datos en tránsito - procesamiento por lotes para 60 FPS estables
+    const glowRadiusOffset = 2;
+    const normalRadius = isMobile ? 2 : 2.5;
+    const selectedRadius = isMobile ? 3 : 3.5;
 
+    // 2.1 Halo/Brillo de todos los paquetes agrupado en una sola operación de dibujo
+    this.ctx.fillStyle = packetGlow;
+    this.ctx.beginPath();
+    for (let i = 0; i < this.packetCount; i++) {
       const isTargetingSelected =
         this.selectedNodeIndex !== null &&
         (this.packetSource[i] === this.selectedNodeIndex || this.packetTarget[i] === this.selectedNodeIndex);
+      const r = (isTargetingSelected ? selectedRadius : normalRadius) + glowRadiusOffset;
+      const x = this.packetX[i];
+      const y = this.packetY[i];
+      this.ctx.moveTo(x + r, y);
+      this.ctx.arc(x, y, r, 0, Math.PI * 2);
+    }
+    this.ctx.fill();
 
-      const color = isTargetingSelected ? selectedPacketColor : packetColor;
-      const radius = isTargetingSelected ? (isMobile ? 3 : 3.5) : (isMobile ? 2 : 2.5);
+    // 2.2 Núcleos de paquetes normales
+    this.ctx.fillStyle = packetColor;
+    this.ctx.beginPath();
+    for (let i = 0; i < this.packetCount; i++) {
+      const isTargetingSelected =
+        this.selectedNodeIndex !== null &&
+        (this.packetSource[i] === this.selectedNodeIndex || this.packetTarget[i] === this.selectedNodeIndex);
+      if (!isTargetingSelected) {
+        const x = this.packetX[i];
+        const y = this.packetY[i];
+        this.ctx.moveTo(x + normalRadius, y);
+        this.ctx.arc(x, y, normalRadius, 0, Math.PI * 2);
+      }
+    }
+    this.ctx.fill();
 
-      // Brillo del paquete
-      this.ctx.fillStyle = packetGlow;
+    // 2.3 Núcleos de paquetes seleccionados / prioritarios
+    if (this.selectedNodeIndex !== null) {
+      this.ctx.fillStyle = selectedPacketColor;
       this.ctx.beginPath();
-      this.ctx.arc(x, y, radius + 2, 0, Math.PI * 2);
-      this.ctx.fill();
-
-      // Centro del paquete
-      this.ctx.fillStyle = color;
-      this.ctx.beginPath();
-      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+      for (let i = 0; i < this.packetCount; i++) {
+        if (this.packetSource[i] === this.selectedNodeIndex || this.packetTarget[i] === this.selectedNodeIndex) {
+          const x = this.packetX[i];
+          const y = this.packetY[i];
+          this.ctx.moveTo(x + selectedRadius, y);
+          this.ctx.arc(x, y, selectedRadius, 0, Math.PI * 2);
+        }
+      }
       this.ctx.fill();
     }
 
@@ -448,6 +496,7 @@ export class StreamAnimation {
     this.stop();
     if (this.resizeObserver) this.resizeObserver.disconnect();
     if (this.intersectionObserver) this.intersectionObserver.disconnect();
+    if (this.themeObserver) this.themeObserver.disconnect();
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     this.canvas.removeEventListener('pointermove', this.handlePointerMove);
     this.canvas.removeEventListener('pointerleave', this.handlePointerLeave);

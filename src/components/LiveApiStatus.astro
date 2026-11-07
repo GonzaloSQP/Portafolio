@@ -41,7 +41,7 @@
       <label class="font-bold text-text-main uppercase tracking-wider">
         Playground de Consulta REST Idempotente:
       </label>
-      <span class="text-accent font-semibold">[ LATENCIA OBJETIVO &lt; 120 MS ]</span>
+      <span class="text-accent font-semibold">[ LATENCIA OBJETIVO &lt; 95 MS ]</span>
     </div>
 
     <!-- Botones de ejemplo -->
@@ -56,9 +56,9 @@
       <button
         type="button"
         class="api-sample-btn px-3 py-1.5 rounded-sm text-xs font-mono font-bold border border-border bg-bg text-text-muted hover:text-text-main hover:border-accent/50 transition-colors"
-        data-type="dni"
+        data-type="tipo-cambio"
       >
-        DNI 72194240 (RENIEC)
+        Tipo de Cambio (SBS / SUNAT)
       </button>
       <button
         type="button"
@@ -105,17 +105,17 @@
         cache: true
       }
     },
-    dni: {
-      status: '● 200 OK · Normalized Schema',
-      time: 'Tiempo de respuesta: 82 ms',
+    'tipo-cambio': {
+      status: '● 200 OK · Dynamic Snapshot (SBS / SUNAT)',
+      time: 'Tiempo de respuesta: 42 ms',
       json: {
-        dni: '72194240',
-        nombres: 'MARCIO GONZALO',
-        apellidoPaterno: 'SEQUEIROS',
-        apellidoMaterno: 'PALOMINO',
-        departamento: 'CUSCO',
-        provincia: 'CUSCO',
-        distrito: 'SANTIAGO'
+        moneda: 'USD',
+        compra: 3.742,
+        venta: 3.755,
+        fecha: '2026-04-12',
+        origen: 'SUPERINTENDENCIA DE BANCA Y SEGUROS',
+        fuenteOficial: 'SUNAT / SBS',
+        cache: true
       }
     },
     soat: {

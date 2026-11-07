@@ -90,7 +90,7 @@ const technicalArticles = [
 
         <div class="space-y-5">
           {technicalArticles.map((art) => (
-            <article class="p-5 sm:p-6 rounded-sm bg-surface border border-border hover:border-accent transition-colors group space-y-3">
+            <article class="group relative p-5 sm:p-6 rounded-sm bg-surface border border-border hover:border-accent transition-colors space-y-3">
               <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-text-muted">
                 <span class="text-accent font-bold uppercase">{art.date} · {art.readTime}</span>
                 <span class="px-2 py-0.5 rounded-sm bg-success/10 text-success border border-success/30 font-bold uppercase text-[11px]">
@@ -100,6 +100,7 @@ const technicalArticles = [
 
               <h3 class="text-lg sm:text-xl font-bold text-text-main group-hover:text-accent transition-colors tracking-tight">
                 <a href={art.href} class="focus-visible:outline-accent">
+                  <span class="absolute inset-0 z-10" aria-hidden="true"></span>
                   {art.title}
                 </a>
               </h3>
@@ -117,12 +118,11 @@ const technicalArticles = [
                   ))}
                 </div>
 
-                <a
-                  href={art.href}
+                <span
                   class="inline-flex items-center gap-1 text-xs font-mono font-bold text-accent group-hover:translate-x-1 transition-transform uppercase"
                 >
                   <span>Leer artículo técnico →</span>
-                </a>
+                </span>
               </div>
             </article>
           ))}
@@ -153,7 +153,7 @@ const technicalArticles = [
 
         <div class="space-y-5">
           {blogData.map((post) => (
-            <article class="p-5 sm:p-6 rounded-sm bg-surface border border-border hover:border-accent transition-colors group space-y-3">
+            <article class="group relative p-5 sm:p-6 rounded-sm bg-surface border border-border hover:border-accent transition-colors space-y-3">
               <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-text-muted">
                 <span class="text-accent font-bold uppercase">{post.date} · {post.readTime}</span>
                 <span class="px-2 py-0.5 rounded-sm bg-accent-bg text-accent border border-accent/25 font-bold uppercase text-[11px]">
@@ -167,6 +167,7 @@ const technicalArticles = [
 
               <h3 class="text-lg sm:text-xl font-bold text-text-main group-hover:text-accent transition-colors tracking-tight">
                 <a href={`/blog/${post.slug}`} class="focus-visible:outline-accent">
+                  <span class="absolute inset-0 z-10" aria-hidden="true"></span>
                   {post.title}
                 </a>
               </h3>
@@ -184,12 +185,11 @@ const technicalArticles = [
                   ))}
                 </div>
 
-                <a
-                  href={`/blog/${post.slug}`}
+                <span
                   class="inline-flex items-center gap-1 text-xs font-mono font-bold text-accent group-hover:translate-x-1 transition-transform uppercase"
                 >
                   <span>Leer bitácora →</span>
-                </a>
+                </span>
               </div>
             </article>
           ))}

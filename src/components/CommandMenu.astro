@@ -55,6 +55,9 @@ const searchableItems = [
 
     <!-- Lista de resultados -->
     <div id="cmd-results-list" class="max-h-80 overflow-y-auto p-2 space-y-1">
+      <div id="cmd-empty-state" class="hidden p-6 text-center text-xs font-mono text-text-muted">
+        No se encontraron resultados para tu búsqueda.
+      </div>
       {searchableItems.map((item) => (
         <a
           href={item.href}
@@ -88,14 +91,32 @@ const searchableItems = [
   function setupCommandMenu() {
     const modal = document.getElementById('command-menu-modal');
     const input = document.getElementById('cmd-search-input') as HTMLInputElement | null;
-    const items = document.querySelectorAll<HTMLAnchorElement>('.cmd-item');
+    const items = Array.from(document.querySelectorAll<HTMLAnchorElement>('.cmd-item'));
+    const emptyState = document.getElementById('cmd-empty-state');
+    let activeIndex = -1;
 
     if (!modal || !input) return;
+
+    function getVisibleItems(): HTMLAnchorElement[] {
+      return items.filter((item) => !item.classList.contains('hidden'));
+    }
+
+    function highlightActive(visible: HTMLAnchorElement[]) {
+      items.forEach((item) => {
+        item.classList.remove('bg-surface-hover', 'text-accent', 'border', 'border-accent/40');
+      });
+      if (activeIndex >= 0 && activeIndex < visible.length) {
+        const current = visible[activeIndex];
+        current.classList.add('bg-surface-hover', 'text-accent', 'border', 'border-accent/40');
+        current.scrollIntoView({ block: 'nearest' });
+      }
+    }
 
     function openModal() {
       modal?.classList.remove('hidden');
       input?.focus();
       document.body.style.overflow = 'hidden';
+      filterItems(input?.value || '');
     }
 
     function closeModal() {
@@ -103,22 +124,52 @@ const searchableItems = [
       if (input) input.value = '';
       filterItems('');
       document.body.style.overflow = '';
+      activeIndex = -1;
     }
 
     function filterItems(query: string) {
       const q = query.toLowerCase().trim();
+      let matchCount = 0;
       items.forEach((item) => {
         const kw = item.getAttribute('data-keywords') || '';
         if (!q || kw.includes(q)) {
           item.classList.remove('hidden');
+          matchCount++;
         } else {
           item.classList.add('hidden');
         }
       });
+
+      if (emptyState) {
+        emptyState.classList.toggle('hidden', matchCount > 0);
+      }
+
+      activeIndex = matchCount > 0 ? 0 : -1;
+      highlightActive(getVisibleItems());
     }
 
     input.addEventListener('input', (e) => {
       filterItems((e.target as HTMLInputElement).value);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      const visible = getVisibleItems();
+      if (visible.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIndex = (activeIndex + 1) % visible.length;
+        highlightActive(visible);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIndex = (activeIndex - 1 + visible.length) % visible.length;
+        highlightActive(visible);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeIndex >= 0 && activeIndex < visible.length) {
+          visible[activeIndex].click();
+        }
+      }
     });
 
     window.addEventListener('keydown', (e) => {

@@ -103,6 +103,22 @@ const currentStatusColor = statusColors[project.status] || 'text-success bg-succ
         )}
       </header>
 
+      <!-- Índice Rápido de Navegación del Caso -->
+      <nav class="flex flex-wrap items-center gap-1.5 text-[11px] font-mono border-y border-border py-2.5" aria-label="Secciones del caso de estudio">
+        <span class="text-text-muted font-bold uppercase mr-1">Ir a:</span>
+        {project.baseline && <a href="#evidence-title" class="px-2 py-0.5 rounded-sm bg-surface border border-border text-text-muted hover:text-accent hover:border-accent/40 transition-colors uppercase">Métricas</a>}
+        <a href="#problem-title" class="px-2 py-0.5 rounded-sm bg-surface border border-border text-text-muted hover:text-accent hover:border-accent/40 transition-colors uppercase">Problema</a>
+        <a href="#contribution-title" class="px-2 py-0.5 rounded-sm bg-surface border border-border text-text-muted hover:text-accent hover:border-accent/40 transition-colors uppercase">Mi Rol</a>
+        <a href="#decisions-title" class="px-2 py-0.5 rounded-sm bg-surface border border-border text-text-muted hover:text-accent hover:border-accent/40 transition-colors uppercase">Decisiones</a>
+        {project.tradeoffs && project.tradeoffs.length > 0 && (
+          <a href="#tradeoffs-title" class="px-2 py-0.5 rounded-sm bg-surface border border-border text-text-muted hover:text-accent hover:border-accent/40 transition-colors uppercase">Trade-offs</a>
+        )}
+        {project.codeSnippet && (
+          <a href="#code-title" class="px-2 py-0.5 rounded-sm bg-surface border border-border text-text-muted hover:text-accent hover:border-accent/40 transition-colors uppercase">Código</a>
+        )}
+        <a href="#results-title" class="px-2 py-0.5 rounded-sm bg-surface border border-border text-text-muted hover:text-accent hover:border-accent/40 transition-colors uppercase">Resultados</a>
+      </nav>
+
       <!-- Evidencia Empírica: Línea Base vs Resultado Verificado -->
       {project.baseline && project.metricOutcome && (
         <section class="p-5 sm:p-6 rounded-sm bg-surface border border-accent/40 shadow-sm space-y-4" aria-labelledby="evidence-title">
@@ -255,7 +271,18 @@ const currentStatusColor = statusColors[project.status] || 'text-success bg-succ
           <div class="rounded-sm border border-border bg-[#0a0f18] overflow-hidden shadow-sm">
             <div class="px-4 py-2 border-b border-border/80 bg-surface/80 flex items-center justify-between text-xs font-mono text-text-muted">
               <span>EVIDENCIA_TÉCNICA // LOGS & SQL TRACE</span>
-              <span class="text-accent uppercase text-[11px] font-bold">VERIFIED</span>
+              <div class="flex items-center gap-2">
+                <span class="text-accent uppercase text-[11px] font-bold hidden sm:inline">VERIFIED</span>
+                <button
+                  type="button"
+                  id="copy-code-btn"
+                  class="px-2 py-0.5 rounded-sm bg-surface hover:bg-surface-hover text-accent border border-border text-[11px] font-mono font-bold uppercase transition-colors inline-flex items-center gap-1"
+                  data-code={project.codeSnippet.code}
+                  aria-label="Copiar código al portapapeles"
+                >
+                  <span id="copy-code-text">Copiar código</span>
+                </button>
+              </div>
             </div>
             <pre class="p-4 sm:p-5 text-xs sm:text-sm font-mono overflow-x-auto text-[#e2e8f0] leading-relaxed"><code>{project.codeSnippet.code}</code></pre>
           </div>
@@ -358,4 +385,23 @@ const currentStatusColor = statusColors[project.status] || 'text-success bg-succ
       </nav>
     </div>
   </div>
+
+  <script>
+    const copyBtn = document.getElementById('copy-code-btn');
+    const copyLabel = document.getElementById('copy-code-text');
+    if (copyBtn && copyLabel) {
+      copyBtn.addEventListener('click', async () => {
+        const code = copyBtn.getAttribute('data-code') || '';
+        try {
+          await navigator.clipboard.writeText(code);
+          copyLabel.textContent = '¡Copiado!';
+          setTimeout(() => {
+            copyLabel.textContent = 'Copiar código';
+          }, 2000);
+        } catch {
+          copyLabel.textContent = 'Error al copiar';
+        }
+      });
+    }
+  </script>
 </BaseLayout>

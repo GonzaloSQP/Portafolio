@@ -88,8 +88,8 @@ export const blogData: BlogPost[] = [
     status: 'en-curso',
     progress: 65,
     sector: 'Facturación electrónica',
-    stack: ['Jakarta EE', 'Microservicios', 'Redis', 'PostgreSQL'],
-    tags: ['SUNAT', 'UBL 2.1', 'Redis', 'Facturación'],
+    stack: ['.NET 8', 'C#', 'SQL Server', 'UBL 2.1', 'XSD'],
+    tags: ['SUNAT', 'UBL 2.1', '.NET 8', 'WorkerServer', 'Facturación'],
     objectives: [
       'Validar aritmética y catálogos en memoria antes de invertir recursos en la firma digital.',
       'Desacoplar el despacho hacia la sede electrónica mediante colas asíncronas con reintentos.',
