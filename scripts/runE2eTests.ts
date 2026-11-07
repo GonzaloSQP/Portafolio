@@ -140,7 +140,6 @@ async function runE2ETests() {
       '/blog/bitacora-migracion-bancaria-streaming/',
       '/blog/bitacora-preauditoria-facturacion-sunat/',
       '/blog/bitacora-microservicios-de-consulta/',
-      '/blog/bitacora-publicacion-de-este-portafolio/',
       '/sobre-mi/',
       '/contacto/',
       '/cv/',

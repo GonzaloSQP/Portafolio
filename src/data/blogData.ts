@@ -148,37 +148,4 @@ export const blogData: BlogPost[] = [
     ],
     relatedProjectId: 'apis-cusco-consultas',
   },
-  {
-    slug: 'bitacora-publicacion-de-este-portafolio',
-    title: 'Bitácora: publicación y mantenimiento de este portafolio',
-    summary:
-      'Registro transparente del trabajo en curso sobre este mismo sitio: publicación en GitHub, verificación automática de datos y enlaces, y evolución del blog censurado. Sin credenciales ni datos de despliegue.',
-    date: 'Noviembre 2026',
-    readTime: '3 min de lectura',
-    status: 'publicable',
-    progress: 90,
-    sector: 'Sitio personal',
-    stack: ['Astro', 'TypeScript', 'Tailwind CSS'],
-    tags: ['Astro', 'SSG', 'WCAG', 'GitHub'],
-    objectives: [
-      'Mantener el sitio como generación estática con cero JavaScript innecesario.',
-      'Bloquear la publicación si quedan datos pendientes o enlaces rotos.',
-      'Documentar cada cambio relevante en esta bitácora con datos censurados.',
-    ],
-    decisions: [
-      'Validación tipada con esquemas en compilación antes de cada despliegue.',
-      'Verificación integral de datos, tipos, pruebas, build y enlaces en un solo comando.',
-      'Blog separado de las Notas de Ingeniería: la bitácora refleja trabajo en curso; las notas, casos cerrados.',
-    ],
-    censoredNotes: [
-      'Credenciales de despliegue, tokens y configuración de infraestructura: nunca se publican.',
-      'Datos personales distintos de los canales de contacto públicos: censurados.',
-      'Métricas internas de tráfico y analítica: no se publican.',
-    ],
-    nextSteps: [
-      'Añadir nuevas entradas a esta bitácora a medida que avance el trabajo.',
-      'Revisar la política de censura cada vez que se incorpore una entrada nueva.',
-      'Mantener la verificación automática en verde antes de cada publicación.',
-    ],
-  },
 ];
