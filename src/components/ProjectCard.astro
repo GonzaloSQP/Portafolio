@@ -32,7 +32,7 @@ const currentStatus = statusStyles[project.status] || statusStyles['En Producci�
         {project.category}
       </span>
 
-      <!-- Estado Técnico Recto y Diferenciado -->
+      <!-- Estado Técnico Recto y Diferenciado (Sin 'activo' genérico) -->
       <div class={`inline-flex items-center gap-1.5 text-[11px] font-mono font-bold px-2 py-0.5 rounded-sm border ${currentStatus.bg} ${currentStatus.text} ${currentStatus.border}`}>
         <span class="w-1.5 h-1.5 bg-current"></span>
         <span class="uppercase">{project.statusDetail || project.status}</span>
@@ -51,8 +51,8 @@ const currentStatus = statusStyles[project.status] || statusStyles['En Producci�
         </a>
       </h3>
 
-      <!-- Resumen legible -->
-      <p class="mt-2 text-sm text-text-muted leading-relaxed font-sans">
+      <!-- Resumen breve y directo -->
+      <p class="mt-2 text-xs sm:text-sm text-text-muted leading-relaxed font-sans line-clamp-2">
         {project.summary}
       </p>
     </div>
@@ -60,55 +60,40 @@ const currentStatus = statusStyles[project.status] || statusStyles['En Producci�
     <!-- Diagrama Esquemático de Arquitectura e Ingesta de Datos -->
     <ProjectArchitecturePreview projectId={project.id} projectTitle={project.title} />
 
-    <!-- Evidencia Cuantitativa: Línea Base vs Resultado Verificado -->
+    <!-- Evidencia Cuantitativa Única: Línea Base vs Resultado Verificado -->
     {project.baseline && project.metricOutcome && (
-      <div class="p-3 rounded-sm bg-bg border border-border/80 text-xs font-mono space-y-1.5">
+      <div class="p-3 rounded-sm bg-bg border border-border/80 text-xs font-mono space-y-1">
         <div class="flex items-start gap-1.5 text-text-muted">
           <span class="text-error font-bold shrink-0">[ANTES]:</span>
-          <span class="line-clamp-2">{project.baseline}</span>
+          <span class="line-clamp-1">{project.baseline}</span>
         </div>
         <div class="flex items-start gap-1.5 text-text-main font-semibold">
           <span class="text-success font-bold shrink-0">[AHORA]:</span>
-          <span class="text-success">{project.metricOutcome}</span>
+          <span class="text-success line-clamp-1">{project.metricOutcome}</span>
         </div>
       </div>
     )}
-
-    <!-- Resultados Verificados Destacados -->
-    <div class="pt-2">
-      <div class="text-[11px] font-mono font-bold text-text-main uppercase tracking-wider mb-2">
-        Métricas de Producción:
-      </div>
-      <ul class="space-y-1.5 text-xs text-text-muted font-sans">
-        {project.results.slice(0, 2).map((res) => (
-          <li class="flex items-start gap-2">
-            <span class="text-accent font-bold mt-0.5 shrink-0">›</span>
-            <span class="leading-relaxed">{res}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
   </div>
 
   <!-- Pie de Tarjeta: Stack y CTA (CTA como span informativo, enlace único en título) -->
   <div class="mt-5 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-    <!-- Tecnologías con chips rectangulares -->
+    <!-- Tecnologías con chips rectangulares concisos -->
     <div class="flex flex-wrap gap-1">
-      {project.technologies.slice(0, 5).map((tech) => (
+      {project.technologies.slice(0, 4).map((tech) => (
         <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-surface-hover text-text-muted border border-border">
           {tech}
         </span>
       ))}
-      {project.technologies.length > 5 && (
+      {project.technologies.length > 4 && (
         <span class="text-[10px] font-mono px-1 py-0.5 text-text-dim">
-          +{project.technologies.length - 5}
+          +{project.technologies.length - 4}
         </span>
       )}
     </div>
 
     <!-- Indicador de acción técnico sin duplicación de enlace -->
     <span class="inline-flex items-center text-xs font-mono font-bold text-accent group-hover:text-accent-hover group-hover:translate-x-1 transition-all shrink-0 self-end sm:self-auto uppercase">
-      {project.ctaText || "Ver arquitectura →"}
+      {project.ctaText || "Ver arquitectura completa →"}
     </span>
   </div>
 </article>

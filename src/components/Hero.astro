@@ -20,7 +20,7 @@ const coreStack = [
       <!-- Columna Izquierda: Información de Arquitectura -->
       <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
         <div class="space-y-4">
-          <!-- Tag Técnico Recto -->
+          <!-- Tag Técnico Unificado -->
           <div class="flex flex-wrap items-center gap-2">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-accent-bg border border-accent/30 text-accent text-xs font-mono font-bold tracking-wider uppercase">
               <span class="w-1.5 h-1.5 bg-accent"></span>
@@ -31,45 +31,46 @@ const coreStack = [
             </span>
           </div>
 
-          <!-- Titular Principal con Tipografía Precisa -->
+          <!-- Titular Orientado a Resultados Concretos -->
           <h1
             id="hero-title"
-            class="text-3xl sm:text-5xl lg:text-[52px] font-black tracking-tight text-text-main leading-[1.12]"
+            class="text-3xl sm:text-5xl lg:text-[50px] font-black tracking-tight text-text-main leading-[1.12]"
           >
-            Sistemas distribuidos, <span class="text-accent">streaming masivo</span> y arquitecturas de misión crítica.
+            Sistemas de facturación y datos masivos que <span class="text-accent">no se caen</span> ante millones de registros.
           </h1>
 
-          <!-- Resumen de Valor Técnico con Métricas Reales -->
+          <!-- Resumen Conciso y Directo -->
           <p class="text-sm sm:text-base text-text-muted leading-relaxed max-w-2xl font-sans">
-            Arquitecto Backend & Especialista en Rendimiento. Modernización de plataformas bancarias monolíticas a microservicios Jakarta EE con procesamiento reactivo de <strong class="text-text-main font-semibold">más de 1,000,000 de registros en menos de 15 minutos</strong> mediante streaming por cursores y optimización Oracle SQL, centralización tributaria SUNAT para <strong class="text-text-main font-semibold">más de 30 empresas</strong> en .NET 8, y plataformas modulares en Go bajo Clean Architecture.
+            Arquitecto de software especializado en modernización de plataformas críticas: streaming reactivo con Oracle SQL y Jakarta EE (<strong class="text-text-main font-semibold">+1M registros en &lt;15 min</strong>), centralización tributaria SUNAT para <strong class="text-text-main font-semibold">+30 empresas</strong> en .NET 8, y microservicios modulares en Go con Clean Architecture.
           </p>
         </div>
 
-        <!-- Acciones Directas y Botones Rectos -->
+        <!-- Acciones Directas con CTA Primario Claro y WhatsApp de Alta Conversión -->
         <div class="space-y-4 pt-1">
-          <div class="flex flex-wrap items-center gap-2.5">
+          <div class="flex flex-wrap items-center gap-3">
             <a
               href="/proyectos"
-              class="px-5 py-2.5 rounded-sm bg-accent text-bg font-mono text-xs font-black uppercase tracking-wider hover:bg-accent-hover transition-colors inline-flex items-center gap-2 focus-visible:outline-accent"
+              class="px-5 py-2.5 rounded-sm bg-accent text-bg font-mono text-xs font-black uppercase tracking-wider hover:bg-accent-hover transition-colors inline-flex items-center gap-2 focus-visible:outline-accent shadow-sm"
             >
-              <span>Ver Arquitecturas</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              <span>Ver Arquitecturas en Producción →</span>
             </a>
 
             <a
-              href="/sobre-mi"
-              class="px-5 py-2.5 rounded-sm bg-surface border border-border text-text-main font-mono text-xs font-bold uppercase tracking-wider hover:bg-surface-hover hover:border-accent/40 transition-colors focus-visible:outline-accent"
+              href={`https://wa.me/51929803589?text=${encodeURIComponent('Hola Marcio, vi tu portafolio de arquitectura y me gustaría conversar sobre un proyecto.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-4 py-2.5 rounded-sm bg-surface border border-border text-text-main font-mono text-xs font-bold uppercase tracking-wider hover:border-success hover:text-success transition-colors inline-flex items-center gap-2 focus-visible:outline-accent"
             >
-              Trayectoria & CV
+              <span class="w-2 h-2 rounded-full bg-success"></span>
+              <span>WhatsApp Directo</span>
             </a>
 
             <a
-              href="/contacto"
-              class="px-4 py-2.5 rounded-sm text-text-muted hover:text-text-main font-mono text-xs font-semibold uppercase tracking-wider hover:bg-surface-hover/50 transition-colors focus-visible:outline-accent"
+              href="/cv"
+              class="px-3.5 py-2.5 rounded-sm text-text-muted hover:text-text-main font-mono text-xs font-semibold uppercase tracking-wider hover:bg-surface-hover/50 transition-colors focus-visible:outline-accent inline-flex items-center gap-1.5"
             >
-              Contactar Directo →
+              <span>Currículum (PDF)</span>
+              <span class="text-accent">↗</span>
             </a>
           </div>
 
