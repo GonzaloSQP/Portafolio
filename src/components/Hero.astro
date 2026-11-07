@@ -1,19 +1,94 @@
 ---
 import { portfolioData } from '../data/portfolioData';
-import { WHATSAPP_NUMBER } from '../data/services';
+import StreamCanvas from '../generative/StreamCanvas.astro';
+
+const coreStack = [
+  'Go',
+  'Jakarta EE',
+  'Python / FastAPI',
+  '.NET 8 / C#',
+  'PostgreSQL / pgvector',
+  'Oracle SQL',
+  'Redis',
+  'Docker'
+];
 ---
 
-<section class="relative py-12 lg:py-20 border-b border-border bg-bg" aria-labelledby="hero-title">
+<section class="relative py-10 lg:py-14 border-b border-border bg-bg" aria-labelledby="hero-title">
   <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl space-y-5">
-      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-accent-bg border border-accent/30 text-accent text-xs font-mono font-bold tracking-wider uppercase"><span class="w-1.5 h-1.5 bg-accent"></span>Consultoría técnica · {portfolioData.location}</span>
-      <h1 id="hero-title" class="text-4xl sm:text-6xl font-black tracking-tight text-text-main leading-[1.05]">Que tus comprobantes pasen <span class="text-accent">SUNAT</span> a la primera.</h1>
-      <p class="text-base sm:text-lg text-text-muted max-w-2xl">Integración de facturación electrónica, modernización de sistemas legados y APIs de alto volumen. Pruébalo abajo en 10 segundos, sin registrarte.</p>
-      <div class="flex flex-wrap gap-3 pt-1">
-        <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola Marcio, necesito que mis comprobantes pasen SUNAT a la primera. Te cuento mi caso:')}`} target="_blank" rel="noopener noreferrer" class="px-5 py-3 rounded-sm bg-accent text-bg font-mono text-xs font-black uppercase tracking-wider hover:bg-accent-hover transition-colors focus-visible:outline-accent">WhatsApp directo →</a>
-        <a href="#demo" class="px-5 py-3 rounded-sm bg-surface border border-border text-text-main font-mono text-xs font-bold uppercase tracking-wider hover:border-accent/40 transition-colors focus-visible:outline-accent">Probar la demo</a>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
+      <!-- Columna Izquierda: Información de Arquitectura -->
+      <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <!-- Tag Técnico Recto -->
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-accent-bg border border-accent/30 text-accent text-xs font-mono font-bold tracking-wider uppercase">
+              <span class="w-1.5 h-1.5 bg-accent"></span>
+              <span>{portfolioData.title}</span>
+            </span>
+            <span class="text-xs font-mono text-text-muted hidden sm:inline">
+              // CUSCO, PERÚ · DISPONIBILIDAD INMEDIATA
+            </span>
+          </div>
+
+          <!-- Titular Principal con Tipografía Precisa -->
+          <h1
+            id="hero-title"
+            class="text-3xl sm:text-5xl lg:text-[52px] font-black tracking-tight text-text-main leading-[1.12]"
+          >
+            Sistemas distribuidos, <span class="text-accent">streaming masivo</span> y arquitecturas de misión crítica.
+          </h1>
+
+          <!-- Resumen de Valor Técnico con Métricas Reales -->
+          <p class="text-sm sm:text-base text-text-muted leading-relaxed max-w-2xl font-sans">
+            Arquitecto Backend & Especialista en Rendimiento. Modernización de plataformas bancarias monolíticas a microservicios Jakarta EE con procesamiento reactivo de <strong class="text-text-main font-semibold">más de 1,000,000 de registros en menos de 15 minutos</strong> mediante streaming por cursores y optimización Oracle SQL, centralización tributaria SUNAT para <strong class="text-text-main font-semibold">más de 30 empresas</strong> en .NET 8, y plataformas modulares en Go bajo Clean Architecture.
+          </p>
+        </div>
+
+        <!-- Acciones Directas y Botones Rectos -->
+        <div class="space-y-4 pt-1">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <a
+              href="/proyectos"
+              class="px-5 py-2.5 rounded-sm bg-accent text-bg font-mono text-xs font-black uppercase tracking-wider hover:bg-accent-hover transition-colors inline-flex items-center gap-2 focus-visible:outline-accent"
+            >
+              <span>Ver Arquitecturas</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+
+            <a
+              href="/sobre-mi"
+              class="px-5 py-2.5 rounded-sm bg-surface border border-border text-text-main font-mono text-xs font-bold uppercase tracking-wider hover:bg-surface-hover hover:border-accent/40 transition-colors focus-visible:outline-accent"
+            >
+              Trayectoria & CV
+            </a>
+
+            <a
+              href="/contacto"
+              class="px-4 py-2.5 rounded-sm text-text-muted hover:text-text-main font-mono text-xs font-semibold uppercase tracking-wider hover:bg-surface-hover/50 transition-colors focus-visible:outline-accent"
+            >
+              Contactar Directo →
+            </a>
+          </div>
+
+          <!-- Stack Core con Chips Rectangulares -->
+          <div class="pt-2 border-t border-border/60 flex flex-wrap items-center gap-1.5 text-xs font-mono">
+            <span class="text-text-main font-bold uppercase text-[11px] mr-1">Stack:</span>
+            {coreStack.map((tech) => (
+              <span class="px-2 py-0.5 rounded-sm bg-surface border border-border text-text-muted font-mono text-[11px]">
+                {tech}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
-      <p class="text-xs font-mono text-text-muted">Marcio Sequeiros · +4 años en SSPSAC y Cooperativa Los Andes · Respuesta en 24h laborables</p>
+
+      <!-- Columna Derecha: Panel de Telemetría y Pipeline Visual Interactivo -->
+      <div class="lg:col-span-5 flex flex-col justify-start">
+        <StreamCanvas />
+      </div>
     </div>
   </div>
 </section>

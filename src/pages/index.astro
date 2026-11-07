@@ -2,26 +2,89 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import MetricsStrip from '../components/MetricsStrip.astro';
-import LiveDemo from '../components/LiveDemo.astro';
-import Services from '../components/Services.astro';
-import Cases from '../components/Cases.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import LiveApiStatus from '../components/LiveApiStatus.astro';
 import BenchmarkChart from '../components/BenchmarkChart.astro';
 import { portfolioData } from '../data/portfolioData';
 import { blogData } from '../data/blogData';
 
+const flagshipProjects = portfolioData.projects.slice(0, 2);
+const bankingProject = portfolioData.projects.find((p) => p.id === 'banca-streaming-jakarta');
 ---
 
 <BaseLayout currentPath="/">
-  <!-- Hero con Pipeline Reactivo Refinado -->
+  <!-- Hero con Pipeline Reactivo y Stack Políglota -->
   <Hero />
-  <LiveDemo />
-  <Services />
 
   <!-- Banda de Telemetría y Métricas Técnicas Cuantitativas -->
   <MetricsStrip />
-  <Cases />
+
+  <!-- Sección de Casos de Estudio y Arquitectura de Misión Crítica -->
+  <section id="proyectos" class="py-12 sm:py-16" aria-labelledby="featured-projects-title">
+    <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-4">
+        <div>
+          <span class="text-xs font-mono text-accent font-bold tracking-wider uppercase">
+            [ CASOS DE ESTUDIO & ARQUITECTURA ]
+          </span>
+          <h2 id="featured-projects-title" class="text-2xl sm:text-3xl font-black text-text-main tracking-tight mt-1">
+            Arquitecturas y Sistemas de Misión Crítica
+          </h2>
+          <p class="text-xs sm:text-sm text-text-muted mt-1 max-w-2xl leading-relaxed">
+            Sistemas en producción y migraciones complejas con métricas empíricas de rendimiento antes y después de su despliegue.
+          </p>
+        </div>
+        <a
+          href="/proyectos"
+          class="inline-flex items-center text-xs font-mono font-bold text-accent hover:text-accent-hover transition-colors uppercase tracking-wider shrink-0"
+        >
+          Ver todos los proyectos ({portfolioData.projects.length}) →
+        </a>
+      </div>
+
+      <!-- Grid de Proyectos Insignia: Recto y Espacio Eficiente -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {flagshipProjects.map((project) => (
+          <ProjectCard project={project} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Sección: Telemetría en Vivo & Benchmark Técnico -->
+  <section class="py-12 sm:py-16 border-t border-border bg-surface/20" aria-label="Telemetría y benchmarks en vivo">
+    <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div class="border-b border-border pb-4 text-center sm:text-left">
+        <span class="text-xs font-mono text-accent font-bold uppercase tracking-wider">
+          [ EVIDENCIA TÉCNICA EN TIEMPO REAL ]
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-text-main tracking-tight mt-1">
+          Telemetría en Producción y Benchmark de Migración
+        </h2>
+        <p class="text-xs sm:text-sm text-text-muted mt-1 max-w-2xl leading-relaxed">
+          Demostración tangible de latencia sub-100ms en microservicios e impacto medido de streaming reactivo frente a monolitos legados.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Widget de Estado en Vivo y Playground de APIs -->
+        <div class="lg:col-span-6">
+          <LiveApiStatus />
+        </div>
+
+        <!-- Mini Benchmark Visual de la Migración Bancaria -->
+        <div class="lg:col-span-6">
+          {bankingProject && bankingProject.benchmarks && (
+            <BenchmarkChart
+              title="Benchmark: Monolito VB vs Jakarta Streaming"
+              subtitle="Medición instrumentada con Oracle SQL Trace, VisualVM Heap Monitor y pruebas de carga"
+              benchmarks={bankingProject.benchmarks}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Sección: Notas de Ingeniería & Arquitectura Destacadas -->
   <section class="py-12 sm:py-16 border-t border-border" aria-label="Notas de ingeniería destacadas">
@@ -40,19 +103,19 @@ import { blogData } from '../data/blogData';
         </div>
         <a
           href="/blog"
-          class="shrink-0 px-4 py-2 rounded-sm bg-surface border border-border hover:border-accent text-accent font-mono text-xs font-bold uppercase transition-colors inline-flex items-center gap-1.5"
+          class="inline-flex items-center text-xs font-mono font-bold text-accent hover:text-accent-hover transition-colors uppercase tracking-wider shrink-0"
         >
-          <span>Ver Blog & Notas ({blogData.length + 3}) →</span>
+          Ver todas las notas ({blogData.length}) →
         </a>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <a
           href="/notas/resiliencia-caidas-sunat-contingencia-normativas"
           class="p-5 rounded-sm bg-surface border border-border hover:border-accent transition-colors flex flex-col justify-between group space-y-3"
         >
           <div class="space-y-2">
-            <span class="text-[11px] font-mono text-accent font-bold uppercase">NORMATIVAS SUNAT · 7 MIN</span>
+            <span class="text-[11px] font-mono text-accent font-bold uppercase">NORMATIVAS & CONTINGENCIA · 8 MIN</span>
             <h3 class="text-base font-bold text-text-main group-hover:text-accent transition-colors tracking-tight leading-snug">
               Resiliencia ante caídas del SEE de SUNAT: Outbox Pattern y plazos legales
             </h3>
@@ -109,15 +172,15 @@ import { blogData } from '../data/blogData';
     <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
       <div class="p-6 sm:p-8 rounded-sm bg-surface border border-border shadow-sm text-center max-w-3xl mx-auto space-y-5">
         <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-sm bg-accent-bg text-accent text-xs font-mono font-bold tracking-wider uppercase border border-accent/25">
-          DISPONIBLE PARA ARQUITECTURA & CONSULTORÍA TÉCNICA
+          DISPONIBLE PARA ARQUITECTURA & INGENIERÍA BACKEND SENIOR
         </div>
 
         <h2 class="text-xl sm:text-3xl font-black text-text-main tracking-tight">
-          ¿Tienes un reto de ingeniería, streaming de datos o integración fiscal?
+          ¿Tienes un reto de sistemas distribuidos, streaming de datos o arquitectura tributaria?
         </h2>
 
-        <p class="text-xs sm:text-sm text-text-muted leading-relaxed max-w-xl mx-auto">
-          Especializado en modernización de sistemas críticos, optimización de consultas masivas en Oracle SQL, pipelines de streaming reactivo y arquitecturas de microservicios con alta disponibilidad.
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed max-w-xl mx-auto font-sans">
+          Especializado en modernización de sistemas críticos, optimización de consultas masivas en Oracle SQL, pipelines de streaming reactivo en Jakarta EE, Clean Architecture en Go y plataformas de alta concurrencia.
         </p>
 
         <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
@@ -130,7 +193,7 @@ import { blogData } from '../data/blogData';
           </a>
           <!--/email_off-->
           <a
-            href={`https://wa.me/51929803589?text=Hola%20Marcio,%20vi%20tu%20portafolio%20de%20arquitectura%20y%20me%20gustar%C3%ADa%20conversar.`}
+            href={`https://wa.me/51929803589?text=${encodeURIComponent('Hola Marcio, vi tu portafolio de arquitectura y me gustaría conversar.')}`}
             target="_blank"
             rel="noopener noreferrer"
             class="px-5 py-2.5 rounded-sm bg-bg border border-border text-text-main font-mono text-xs font-bold uppercase tracking-wider hover:bg-surface-hover hover:border-accent/40 transition-colors focus-visible:outline-accent inline-flex items-center gap-2"
