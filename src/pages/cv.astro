@@ -1,0 +1,189 @@
+---
+import { portfolioData } from '../data/portfolioData';
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Curriculum Vitae | {portfolioData.name}</title>
+  <meta name="description" content={`Currículum Vitae profesional de ${portfolioData.name}, ${portfolioData.title}.`} />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    @page {
+      size: A4;
+      margin: 1.5cm;
+    }
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
+  <script is:inline>
+    // Soporte para impresión automática si se llama con ?print=true
+    if (new URLSearchParams(window.location.search).get('print') === 'true') {
+      window.addEventListener('DOMContentLoaded', () => window.print());
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans p-4 sm:p-8 antialiased selection:bg-sky-200">
+  <!-- Barra Superior de Control (Solo pantalla) -->
+  <aside class="no-print max-w-4xl mx-auto mb-6 flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-slate-200" aria-label="Controles de documento">
+    <a href="/sobre-mi" class="text-sm font-semibold text-sky-600 hover:underline inline-flex items-center gap-1.5">
+      ← Volver al sitio web
+    </a>
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        onclick="window.print()"
+        class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-2 shadow-sm"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        Guardar como PDF / Imprimir
+      </button>
+    </div>
+  </aside>
+
+  <!-- Hoja de Currículum Estilo Editorial -->
+  <main class="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-2xl shadow-md border border-slate-200 space-y-8">
+    <!-- Encabezado del CV -->
+    <header class="border-b border-slate-200 pb-6 flex flex-col sm:flex-row justify-between items-start gap-4">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          {portfolioData.name}
+        </h1>
+        <p class="text-base sm:text-lg font-bold text-sky-700 mt-0.5">
+          {portfolioData.title}
+        </p>
+        <p class="text-xs text-slate-500 mt-1">
+          {portfolioData.location} · 27 años
+        </p>
+      </div>
+
+      <div class="text-xs text-slate-600 font-mono space-y-1 sm:text-right">
+        <div>Email: <a href={`mailto:${portfolioData.contact.email}`} class="text-sky-700 font-semibold">{portfolioData.contact.email}</a></div>
+        <div>Móvil: <span class="font-semibold">{portfolioData.contact.phone}</span></div>
+        <div>LinkedIn: <a href={portfolioData.contact.linkedin} class="text-sky-700">linkedin.com/in/marciosequeiros</a></div>
+        <div>Portafolio: <a href="https://dev.apiscusco.com" class="text-sky-700 font-semibold">dev.apiscusco.com</a></div>
+      </div>
+    </header>
+
+    <!-- Resumen Profesional -->
+    <section class="space-y-2">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 pb-1">
+        Perfil Profesional
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-700 leading-relaxed text-justify">
+        {portfolioData.summary}
+      </p>
+    </section>
+
+    <!-- Especialidades Técnicas Core -->
+    <section class="space-y-2">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 pb-1">
+        Competencias Técnicas y Arquitectura
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700">
+        <div><strong>Lenguajes & Frameworks:</strong> Java, Jakarta EE, C# (ASP.NET), Visual Basic, TypeScript, Node.js.</div>
+        <div><strong>Bases de Datos & Streaming:</strong> Oracle SQL masivo, Reactive Streams, PostgreSQL, Redis.</div>
+        <div><strong>Integración Fiscal:</strong> Facturación SUNAT UBL 2.1, Firmas digitales X.509, CDRs, APIs REST.</div>
+        <div><strong>Infraestructura & DevOps:</strong> Docker, microservicios distribuidos, Cloudflare Edge, Git.</div>
+      </div>
+    </section>
+
+    <!-- Experiencia Laboral -->
+    <section class="space-y-6">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 pb-1">
+        Experiencia Profesional
+      </h2>
+
+      {portfolioData.experience.map((exp) => (
+        <div class="space-y-2">
+          <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+            <div>
+              <span class="text-sm font-bold text-slate-900">{exp.role}</span>
+              <span class="text-xs font-semibold text-sky-700 sm:ml-2">· {exp.company}</span>
+            </div>
+            <span class="text-xs font-mono text-slate-500">{exp.period} | {exp.location}</span>
+          </div>
+
+          <ul class="list-disc list-outside ml-4 space-y-1 text-xs text-slate-700 leading-relaxed">
+            {exp.highlights.map((h) => (
+              <li>{h}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+
+    <!-- Casos de Impacto y Logros Técnicos Verificables -->
+    <section class="space-y-4">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 pb-1">
+        Casos de Estudio Técnicos & Métricas Clave
+      </h2>
+
+      <div class="space-y-3 text-xs text-slate-700">
+        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+          <div class="font-bold text-slate-900">Migración de Reporteador Bancario & Streaming de Datos (COOPAC Los Andes):</div>
+          <p class="mt-1">
+            Modernización de monolito Visual Basic a microservicios Jakarta EE. Se resolvió la degradación por consultas Oracle SQL complejas, logrando procesar <strong>más de 1,000,000 de registros en 14m 20s</strong> (reducción del 94.4% frente a la línea base de > 4 horas) con consumo acotado a 380 MB Heap JVM.
+          </p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+          <div class="font-bold text-slate-900">Centralizador de Comprobantes Electrónicos & Pre-Auditoría SUNAT (Soluciones de Software SAC):</div>
+          <p class="mt-1">
+            Motor multi-tenant de validación previa UBL 2.1 y despacho asíncrono para más de 30 empresas. Reducción comprobada del <strong>95% en comprobantes observados/rechazados</strong> por SUNAT, acelerando el despacho por lote a 3.2 segundos.
+          </p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+          <div class="font-bold text-slate-900">Suite de Microservicios APIS Cusco (apis.apiscusco.com):</div>
+          <p class="mt-1">
+            Microservicios REST para consulta de alta concurrencia de DNI, RUC, Placas y SOAT con capa de persistencia en memoria Redis, alcanzando <strong>latencias sub-95 ms</strong> y 99.8% de disponibilidad.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Formación y Educación -->
+    <section class="space-y-3">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 pb-1">
+        Formación Académica
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-700">
+        {portfolioData.education?.map((edu) => (
+          <div>
+            <div class="font-bold text-slate-900">{edu.degree}</div>
+            <div class="text-sky-700 font-semibold">{edu.institution}</div>
+            <div class="text-slate-500 font-mono text-[11px]">{edu.period}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Certificación Discreta -->
+    <section class="border-t border-slate-200 pt-4 flex flex-col sm:flex-row justify-between text-xs text-slate-500">
+      <div>
+        <strong>Acreditación Metodológica:</strong> {portfolioData.certifications[0].name} ({portfolioData.certifications[0].issuer})
+      </div>
+      <div class="font-mono text-[11px]">
+        Licencia: {portfolioData.certifications[0].credentialId} (verify.certiport.com)
+      </div>
+    </section>
+  </main>
+</body>
+</html>
