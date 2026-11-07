@@ -1,0 +1,330 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { portfolioData } from '../../data/portfolioData';
+
+const circuitBreakerCode = `// Worker de despacho con Circuit Breaker y Reintento con Jitter
+export class SunatDispatchWorker {
+  private circuitState: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+  private consecutiveFailures = 0;
+  private readonly FAILURE_THRESHOLD = 5;
+  private readonly COOLDOWN_MS = 180_000; // 3 minutos de enfriamiento
+  private lastStateChange = Date.now();
+
+  async dispatchInvoice(invoice: OutboxInvoice): Promise<DispatchResult> {
+    if (this.circuitState === 'OPEN') {
+      if (Date.now() - this.lastStateChange > this.COOLDOWN_MS) {
+        this.circuitState = 'HALF_OPEN';
+      } else {
+        // Circuito abierto: encolar y respetar el backoff sin saturar SUNAT
+        return { status: 'DEFERRED_CIRCUIT_OPEN', retryAfterMs: this.calculateJitter(invoice.attempts) };
+      }
+    }
+
+    try {
+      const cdr = await this.soapClient.sendBill({
+        fileName: invoice.fileName,
+        contentZipBase64: invoice.zipBase64
+      });
+
+      this.consecutiveFailures = 0;
+      this.circuitState = 'CLOSED';
+      return { status: 'ACCEPTED', cdrZip: cdr };
+    } catch (error: any) {
+      if (this.isNetworkOrGatewayTimeout(error)) {
+        this.consecutiveFailures++;
+        if (this.consecutiveFailures >= this.FAILURE_THRESHOLD) {
+          this.circuitState = 'OPEN';
+          this.lastStateChange = Date.now();
+        }
+        // Ante timeout ambiguo: registrar estado IN_DOUBT para consulta de validez previa
+        return { status: 'IN_DOUBT_VERIFY_FIRST', nextCheckMs: this.calculateJitter(invoice.attempts) };
+      }
+      throw error;
+    }
+  }
+
+  // Backoff exponencial con Jitter: evita el 'Thundering Herd' al revivir SUNAT
+  private calculateJitter(attempt: number): number {
+    const baseMs = 5000; // 5 segundos base
+    const maxMs = 300_000; // 5 minutos máximo
+    const exponential = Math.min(maxMs, baseMs * Math.pow(2, attempt));
+    const jitter = Math.floor(Math.random() * 2000); // 0 a 2000 ms aleatorio
+    return exponential + jitter;
+  }
+}`;
+
+const ambiguityResolutionCode = `// Resolución idempotente de comprobantes en estado 'en duda' (Post-Timeout)
+export async function resolveInDoubtInvoice(invoice: OutboxInvoice): Promise<InvoiceStatus> {
+  // 1. Consultar la API REST de Validez Integrada de SUNAT o getStatusCdr
+  const validationResult = await sunatQueryApi.consultarComprobante({
+    numRuc: invoice.emisorRuc,
+    codComp: invoice.tipoComprobante, // '01' Factura, '03' Boleta
+    numeroSerie: invoice.serie,
+    numero: invoice.correlativo,
+    fechaEmision: invoice.fechaEmision,
+    monto: invoice.totalVenta
+  });
+
+  if (validationResult.estadoComprobante === '1') {
+    // El comprobante ya fue procesado y ACEPTADO por SUNAT durante el timeout
+    const cdr = await sunatSoapClient.getStatusCdr({
+      rucComprobante: invoice.emisorRuc,
+      tipoComprobante: invoice.tipoComprobante,
+      serieComprobante: invoice.serie,
+      numeroComprobante: invoice.correlativo
+    });
+    await invoiceRepository.markAccepted(invoice.id, cdr);
+    return 'ACCEPTED';
+  }
+
+  if (validationResult.estadoComprobante === '0') {
+    // No existe en los registros de SUNAT: reenvío seguro con idéntico XML y firma
+    return 'READY_FOR_RETRY';
+  }
+
+  return 'RETRY_LATER';
+}`;
+---
+
+<BaseLayout
+  title={`Resiliencia ante caídas del SEE de SUNAT & Nuevas Normativas | Notas de ${portfolioData.name}`}
+  description="Estrategias de arquitectura para contingencia en facturación electrónica SUNAT: patrón Outbox, mitigación de caídas masivas de endpoints SOAP, plazos de envío reducidos y resolución de comprobantes en limbo."
+  currentPath="/notas/resiliencia-caidas-sunat-contingencia-normativas"
+>
+  <article class="py-10 sm:py-14">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <!-- Breadcrumb Recto -->
+      <nav class="flex items-center gap-2 text-xs font-mono text-text-muted" aria-label="Migas de pan">
+        <a href="/" class="hover:text-accent transition-colors">INICIO</a>
+        <span>/</span>
+        <a href="/blog" class="hover:text-accent transition-colors">BLOG</a>
+        <span>/</span>
+        <span class="text-text-main font-bold truncate">RESILIENCIA_CAIDAS_SUNAT</span>
+      </nav>
+
+      <!-- Cabecera del Artículo -->
+      <header class="space-y-3 border-b border-border pb-6">
+        <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+          <span class="px-2 py-0.5 rounded-sm bg-accent-bg text-accent border border-accent/30 font-bold uppercase">
+            [ FACTURACIÓN ELECTRÓNICA CRÍTICA & NORMATIVAS ]
+          </span>
+          <span class="text-text-muted">7 MIN DE LECTURA · NOVIEMBRE 2026</span>
+        </div>
+
+        <h1 class="text-2xl sm:text-4xl font-black text-text-main tracking-tight leading-tight">
+          Resiliencia ante caídas del SEE de SUNAT: Arquitectura de contingencia, Outbox Pattern y nuevas normativas de envío
+        </h1>
+
+        <p class="text-base text-text-muted leading-relaxed font-sans">
+          Cómo diseñar plataformas de facturación masiva capaces de absorber caídas de endpoints SOAP de SUNAT/OSE, responder en menos de 120 ms al punto de venta y cumplir con la reducción del plazo de envío a 3 días o 24 horas sin perder comprobantes.
+        </p>
+      </header>
+
+      <!-- Cuerpo del Artículo -->
+      <div class="space-y-8 text-sm sm:text-base text-text-main leading-relaxed font-sans">
+        <!-- 1. El Escenario Real de Caídas -->
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
+            1. La realidad operativa: Caídas recurrentes del servicio SOAP y OSEs
+          </h2>
+          <p class="text-text-muted leading-relaxed">
+            En el ecosistema tributario peruano, el servicio web de recepción de comprobantes electrónicos de SUNAT (<code class="text-xs font-mono text-accent bg-surface px-1 py-0.5 rounded-sm">billService</code>) y los Operadores de Servicios Electrónicos (OSE) sufren degradaciones frecuentes, especialmente entre los días 10 y 20 de cada mes durante las fechas límite de declaración.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <div class="p-3.5 rounded-sm bg-surface border border-border">
+              <span class="text-xs font-mono font-bold text-error uppercase">HTTP 502 / 503 / 504</span>
+              <p class="text-xs text-text-muted mt-1">Saturación de gateways de balanceo en la sede electrónica de SUNAT.</p>
+            </div>
+            <div class="p-3.5 rounded-sm bg-surface border border-border">
+              <span class="text-xs font-mono font-bold text-error uppercase">Socket Read Timeout</span>
+              <p class="text-xs text-text-muted mt-1">La petición SOAP fue enviada pero la conexión cae antes de recibir la Constancia de Recepción (CDR).</p>
+            </div>
+            <div class="p-3.5 rounded-sm bg-surface border border-border">
+              <span class="text-xs font-mono font-bold text-error uppercase">Caídas de Clave SOL</span>
+              <p class="text-xs text-text-muted mt-1">Fallas de autenticación LDAP/OAuth central de SUNAT que rechazan credenciales válidas.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Nuevas Normativas SUNAT: Plazos Estrictos -->
+        <section class="space-y-3 p-5 rounded-sm bg-surface border border-border">
+          <div class="flex items-center gap-2 text-xs font-mono font-bold text-accent uppercase">
+            <span>[ NORMATIVA TRIBUTARIA VIGENTE ]</span>
+          </div>
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main">
+            2. El impacto crítico de la reducción de plazos de envío (R.S. 000150-2021 y R.S. 000003-2023)
+          </h2>
+          <p class="text-text-muted leading-relaxed text-sm sm:text-base">
+            Históricamente, los emisores contaban con hasta <strong class="text-text-main">7 días calendario</strong> para remitir las facturas electrónicas a SUNAT. Con las resoluciones de superintendencia emitidas por SUNAT:
+          </p>
+          <ul class="list-disc list-inside space-y-2 text-sm text-text-muted pl-2">
+            <li>
+              <strong class="text-text-main">Plazo límite de remisión:</strong> Se redujo drásticamente a <strong class="text-accent">hasta el día calendario siguiente</strong> al de emisión (o hasta un máximo de 3 días calendario en periodos de adecuación según perfil de contribuyente).
+            </li>
+            <li>
+              <strong class="text-text-main">Rechazo automático e irreparable:</strong> Todo comprobante remitido con posterioridad al plazo legal es catalogado automáticamente como <strong class="text-error font-bold">RECHAZADO</strong> (código de error 2324 o rechazo definitivo).
+            </li>
+            <li>
+              <strong class="text-text-main">Consecuencia fiscal severa:</strong> Una factura rechazada por envío extemporáneo <strong class="text-error">no tiene ninguna validez tributaria</strong>: el receptor no puede deducir crédito fiscal ni sustentar costo/gasto, y el emisor no puede reutilizar la serie y correlativo.
+            </li>
+          </ul>
+          <p class="text-xs font-mono text-accent border-t border-border pt-3">
+            REGLA DE ORO DE ARQUITECTURA: El sistema no puede pausar los envíos a la espera de intervención manual. El pipeline de reintentos debe ser autónomo, idempotente y garantizar el envío dentro de la ventana reglamentaria.
+          </p>
+        </section>
+
+        <!-- 3. Patrón Outbox Transaccional y Circuit Breaker -->
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
+            3. Patrón Transaccional Outbox: Desacoplar el Punto de Venta
+          </h2>
+          <p class="text-text-muted leading-relaxed">
+            El mayor error en sistemas de facturación principiantes es acoplar la llamada SOAP a SUNAT dentro del ciclo sincrónico de venta del cliente en caja. Si SUNAT demora 15 segundos o se cae, la cola de personas en caja se detiene.
+          </p>
+          <p class="text-text-muted leading-relaxed">
+            Nuestra arquitectura utiliza el <strong class="text-text-main">Patrón Outbox</strong>:
+          </p>
+          <ol class="list-decimal list-inside space-y-2 text-text-muted text-sm pl-2">
+            <li>El POS/ERP solicita la factura. En menos de <strong class="text-success font-bold">90 ms</strong>, el microservicio calcula impuestos, genera el XML UBL 2.1, lo firma con el certificado digital X.509 (XAdES-BES) y guarda el registro con estado <code class="text-xs font-mono text-accent">PENDIENTE_DESPACHO</code> en la tabla Outbox.</li>
+            <li>El cliente recibe su ticket impreso o PDF con su <strong class="text-text-main">DigestValue (código hash)</strong> y código QR normativo, lo cual cumple la exigencia legal de entrega inmediata.</li>
+            <li>Un pool de workers asíncronos procesa la tabla Outbox mediante un <strong class="text-accent font-bold">Circuit Breaker</strong>:</li>
+          </ol>
+
+          <!-- Código del Circuit Breaker -->
+          <div class="mt-4 p-4 rounded-sm bg-[#0a0f18] border border-border text-xs font-mono overflow-x-auto text-[#e2e8f0]">
+            <pre><code>{circuitBreakerCode}</code></pre>
+          </div>
+        </section>
+
+        <!-- 4. Backoff Exponencial con Jitter -->
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
+            4. Reintentos con Backoff Exponencial y Jitter (Evitar el Thundering Herd)
+          </h2>
+          <p class="text-text-muted leading-relaxed">
+            Cuando la plataforma de SUNAT se restablece tras una caída de 40 minutos, millones de servidores de empresas peruanas intentan reenviar simultáneamente sus comprobantes acumulados. Esto genera una nueva caída inmediata por saturación ("efecto avalancha" o <em>Thundering Herd</em>).
+          </p>
+          <p class="text-text-muted leading-relaxed">
+            Para mitigar esto, cada reintento aplica un retardo exponencial con dispersión aleatoria:
+          </p>
+          <div class="p-4 rounded-sm bg-surface border border-border font-mono text-xs text-text-main">
+            t_espera = min(t_maximo, t_base * 2^intento) + aleatorio(0, 2000 ms)
+          </div>
+          <p class="text-text-muted text-sm">
+            Esta fluctuación dispersa la carga en el tiempo de forma homogénea, garantizando que el 100% de los comprobantes pendientes ingresen a la sede electrónica sin recibir códigos 503 por saturación.
+          </p>
+        </section>
+
+        <!-- 5. Comprobantes en "Limbo" y Desambiguación Idempotente -->
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
+            5. El problema del "Comprobante en Limbo" (Socket Timeout)
+          </h2>
+          <p class="text-text-muted leading-relaxed">
+            ¿Qué ocurre si el microservicio envía el ZIP con el comprobante a SUNAT, la llamada tarda 60 segundos y el socket se cierra por timeout?
+          </p>
+          <div class="p-4 rounded-sm bg-error/10 border border-error/30 text-xs sm:text-sm text-text-main space-y-1 font-mono">
+            <p class="font-bold text-error">PELIGRO: REENVÍO CIEGO</p>
+            <p class="text-text-muted">Si reenvías inmediatamente <code class="text-accent">sendBill</code>, y SUNAT ya había procesado el XML en su base de datos, responderá con error de duplicidad o rechazo inconsistente.</p>
+          </div>
+          <p class="text-text-muted leading-relaxed">
+            La solución arquitectónica es la <strong class="text-text-main">desambiguación previa</strong> mediante la API de Consulta Integrada o <code class="text-xs font-mono text-accent">getStatusCdr</code>:
+          </p>
+
+          <!-- Código de resolución de ambigüedad -->
+          <div class="p-4 rounded-sm bg-[#0a0f18] border border-border text-xs font-mono overflow-x-auto text-[#e2e8f0]">
+            <pre><code>{ambiguityResolutionCode}</code></pre>
+          </div>
+        </section>
+
+        <!-- 6. Pre-auditoría local obligatoria -->
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
+            6. Pre-Auditoría en Memoria: Cero comprobantes inválidos en cola
+          </h2>
+          <p class="text-text-muted leading-relaxed">
+            Bajo el nuevo plazo legal estricto de envío, <strong class="text-error font-bold">no hay margen para errores de cálculo o de catálogos</strong>. Si un comprobante mal formado se queda en la cola de contingencia durante una caída de SUNAT, al momento de restablecerse el servicio el comprobante será rechazado irrevocablemente fuera de plazo.
+          </p>
+          <div class="space-y-2">
+            <div class="p-3 rounded-sm bg-surface border border-border text-xs font-mono flex items-start gap-2">
+              <span class="text-accent font-bold">›</span>
+              <div>
+                <strong class="text-text-main uppercase">Validación Schematron y XSD local:</strong> Se compilan los esquemas XML oficiales de UBL 2.1 en memoria para validar la sintaxis antes del despacho.
+              </div>
+            </div>
+            <div class="p-3 rounded-sm bg-surface border border-border text-xs font-mono flex items-start gap-2">
+              <span class="text-accent font-bold">›</span>
+              <div>
+                <strong class="text-text-main uppercase">Consistencia de Catálogo 07 (Afectación IGV):</strong> Se verifica que códigos gravados (10), exonerados (20), inafectos (30) o exportación (40) coincidan matemáticamente con la suma de bases imponibles y el impuesto general a las ventas.
+              </div>
+            </div>
+            <div class="p-3 rounded-sm bg-surface border border-border text-xs font-mono flex items-start gap-2">
+              <span class="text-accent font-bold">›</span>
+              <div>
+                <strong class="text-text-main uppercase">Redondeo y bolsas plásticas (ICBPER):</strong> Precisión bancaria a dos decimales y suma exacta de impuestos a las bolsas plásticas por ítem conforme a la ley vigente.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. Modo de Contingencia Normada -->
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
+            7. Modo de Contingencia Normada por SUNAT (Caídas Prolongadas)
+          </h2>
+          <p class="text-text-muted leading-relaxed">
+            Cuando la contingencia no es una degradación de red momentánea sino una falla generalizada del sistema (corte de energía prolongado o indisponibilidad total declarada por SUNAT):
+          </p>
+          <ul class="list-disc list-inside space-y-1.5 text-text-muted text-sm pl-2">
+            <li>
+              <strong class="text-text-main">Emisión física de contingencia:</strong> Se emiten comprobantes impresos por imprenta autorizada que llevan impresa de fábrica la frase <em class="text-accent">"Comprobante de Pago emitido en contingencia"</em>.
+            </li>
+            <li>
+              <strong class="text-text-main">Regularización mediante Resumen de Contingencia:</strong> Una vez restablecido el sistema, se remite a SUNAT el <strong class="text-text-main">Resumen de Comprobantes Impresos en Contingencia</strong> mediante el método SOAP <code class="text-xs font-mono text-accent">sendSummary</code>, obteniendo un ticket asíncrono para verificar su aceptación.
+            </li>
+          </ul>
+        </section>
+
+        <!-- 8. Conclusiones y Resultados -->
+        <section class="p-6 rounded-sm bg-surface border border-border space-y-3">
+          <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-accent">
+            [ CONCLUSIONES DE PRODUCCIÓN PARA MÁS DE 30 EMPRESAS ]
+          </h2>
+          <p class="text-sm text-text-muted leading-relaxed">
+            La implementación conjunta de este patrón Outbox con Circuit Breaker, pre-auditoría en memoria y desambiguación idempotente permitió:
+          </p>
+          <ul class="space-y-1.5 text-xs sm:text-sm text-text-main font-mono">
+            <li class="flex items-center gap-2 text-success">
+              <span>✔</span>
+              <span>0% de facturas bloqueadas o perdidas por caídas de SUNAT.</span>
+            </li>
+            <li class="flex items-center gap-2 text-success">
+              <span>✔</span>
+              <span>100% de cumplimiento del plazo legal de remisión de 24 a 72 horas.</span>
+            </li>
+            <li class="flex items-center gap-2 text-success">
+              <span>✔</span>
+              <span>Tiempo de respuesta constante en punto de venta &lt; 100 ms independientemente del estado de SUNAT.</span>
+            </li>
+          </ul>
+        </section>
+      </div>
+
+      <!-- Pie del Artículo -->
+      <footer class="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+        <a href="/blog" class="text-xs font-mono font-bold text-accent uppercase hover:underline">
+          ← Volver al blog & notas
+        </a>
+        <a href="/proyectos/centralizador-facturacion-electronica" class="text-xs font-mono font-bold text-text-main uppercase hover:text-accent">
+          Ver caso: Centralizador de Facturación →
+        </a>
+      </footer>
+    </div>
+  </article>
+</BaseLayout>

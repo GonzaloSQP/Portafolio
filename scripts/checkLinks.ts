@@ -18,6 +18,7 @@ async function checkLinks() {
       path.join('notas', 'index.html'),
       path.join('notas', 'streaming-reactivo-oracle-jakarta', 'index.html'),
       path.join('notas', 'pre-auditoria-ubl-sunat', 'index.html'),
+      path.join('notas', 'resiliencia-caidas-sunat-contingencia-normativas', 'index.html'),
       path.join('blog', 'index.html'),
       ...blogData.map((post) => path.join('blog', post.slug, 'index.html')),
       path.join('proyectos', 'index.html'),

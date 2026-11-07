@@ -61,7 +61,14 @@ const currentYear = new Date().getFullYear();
     </div>
 
     <div class="mt-6 pt-5 border-t border-border flex flex-col sm:flex-row items-center justify-between text-xs text-text-muted gap-3">
-      <p>© {currentYear} Marcio Gonzalo Sequeiros Palomino. Todos los derechos reservados.</p>
+      <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-mono">
+        <a href="/" class="hover:text-accent transition-colors">Inicio</a>
+        <a href="/proyectos" class="hover:text-accent transition-colors">Proyectos</a>
+        <a href="/blog" class="hover:text-accent transition-colors">Blog & Notas</a>
+        <a href="/sobre-mi" class="hover:text-accent transition-colors">Sobre Mí</a>
+        <a href="/contacto" class="hover:text-accent transition-colors">Contacto</a>
+        <a href="/cv" class="hover:text-accent transition-colors">CV</a>
+      </div>
       <p class="font-mono text-accent">Sitio estático · Cloudflare Edge · CDN global</p>
     </div>
   </div>

@@ -9,6 +9,41 @@ export const REDACTION_POLICY = [
 
 export const blogData: BlogPost[] = [
   {
+    slug: 'bitacora-contingencia-caidas-sunat',
+    title: 'Bitácora: resiliencia ante caídas del SEE de SUNAT y nuevas normativas de envío',
+    summary:
+      'Estrategias de arquitectura ante la indisponibilidad de los servicios SOAP de SUNAT: patrón Outbox, reintentos con backoff exponencial con jitter y cumplimiento del nuevo plazo reglamentario de envío.',
+    date: 'Noviembre 2026',
+    readTime: '5 min de lectura',
+    status: 'publicable',
+    progress: 95,
+    sector: 'Facturación electrónica masiva',
+    stack: ['TypeScript', 'Jakarta EE', 'PostgreSQL', 'Redis', 'UBL 2.1'],
+    tags: ['SUNAT', 'Contingencia', 'Outbox Pattern', 'Circuit Breaker', 'Normativas'],
+    objectives: [
+      'Absorber caídas y timeouts de los endpoints SOAP de la sede electrónica de SUNAT sin bloquear el punto de venta.',
+      'Garantizar el envío dentro de los nuevos plazos legales estrictos (hasta el día siguiente o máximo 3 días).',
+      'Resolver comprobantes en estado ambiguo mediante consultas de validez antes de cualquier reintento.',
+    ],
+    decisions: [
+      'Patrón Outbox con colas transaccionales: la firma y entrega al cliente son sincrónicas; el despacho a la sede electrónica es asíncrono.',
+      'Circuit Breaker y backoff exponencial con jitter: protege la conexión y evita saturar la red al restaurarse el servicio.',
+      'Consulta previa de CDR o validez de comprobante ante timeouts para garantizar idempotencia y evitar el error 2324.',
+    ],
+    censoredNotes: [
+      'Identidad de los emisores electrónicos y razones sociales: censuradas.',
+      'Clave SOL, certificados digitales y accesos de autenticación: nunca se publican.',
+      'Endpoints privados y topología de red de los clientes: censurados.',
+      'Cifras de facturación de las empresas: expresadas solo en órdenes de magnitud.',
+    ],
+    nextSteps: [
+      'Consolidar la auditoría continua de plazos de caducidad de certificados digitales.',
+      'Automatizar la conciliación de resúmenes de contingencia con los libros electrónicos.',
+      'Publicar el análisis de patrones de falla en Notas de Ingeniería.',
+    ],
+    relatedProjectId: 'centralizador-facturacion-electronica',
+  },
+  {
     slug: 'bitacora-migracion-bancaria-streaming',
     title: 'Bitácora: migración de un reporteador bancario a streaming reactivo',
     summary:

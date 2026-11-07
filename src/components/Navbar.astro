@@ -11,7 +11,7 @@ const { currentPath = '/' } = Astro.props;
 const navLinks = [
   { href: '/', label: 'Inicio' },
   { href: '/proyectos', label: 'Proyectos & Arquitectura' },
-  { href: '/notas', label: 'Notas de Ingeniería' },
+  { href: '/blog', label: 'Blog & Notas' },
   { href: '/sobre-mi', label: 'Sobre Mí' },
   { href: '/contacto', label: 'Contacto' },
 ];
@@ -37,7 +37,10 @@ const navLinks = [
     <!-- Navegación de Escritorio Recta y de Alto Contraste -->
     <nav class="hidden md:flex items-center gap-1" aria-label="Navegación principal">
       {navLinks.map((link) => {
-        const isActive = currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href));
+        const isActive =
+          currentPath === link.href ||
+          (link.href === '/blog' && (currentPath.startsWith('/blog') || currentPath.startsWith('/notas'))) ||
+          (link.href !== '/' && link.href !== '/blog' && currentPath.startsWith(link.href));
         return (
           <a
             href={link.href}
@@ -99,7 +102,10 @@ const navLinks = [
     aria-label="Menú de navegación móvil"
   >
     {navLinks.map((link) => {
-      const isActive = currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href));
+      const isActive =
+        currentPath === link.href ||
+        (link.href === '/blog' && (currentPath.startsWith('/blog') || currentPath.startsWith('/notas'))) ||
+        (link.href !== '/' && link.href !== '/blog' && currentPath.startsWith(link.href));
       return (
         <a
           href={link.href}

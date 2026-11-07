@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { portfolioData } from '../data/portfolioData';
 
+// Endpoint seguro FormSubmit AJAX hacia el correo directo del propietario
 const PUBLIC_CONTACT_FORM_ENDPOINT = `https://formsubmit.co/ajax/${portfolioData.contact.email}`;
 ---
 
@@ -118,6 +119,7 @@ const PUBLIC_CONTACT_FORM_ENDPOINT = `https://formsubmit.co/ajax/${portfolioData
           <form id="contact-form" class="space-y-4" data-endpoint={PUBLIC_CONTACT_FORM_ENDPOINT}>
             <!-- Honeypot anti-bots -->
             <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" />
+            <input type="hidden" name="_replyto" value={portfolioData.contact.email} />
             <input type="hidden" name="_captcha" value="false" />
             <input type="hidden" name="_template" value="table" />
 
@@ -206,16 +208,15 @@ const PUBLIC_CONTACT_FORM_ENDPOINT = `https://formsubmit.co/ajax/${portfolioData
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const endpoint = form.getAttribute('data-endpoint') || 'https://formsubmit.co/ajax/chalot_6@hotmail.com';
+      const endpoint = form.getAttribute('data-endpoint') || '/api/contact';
       const formData = new FormData(form);
 
       // Verificación honeypot
       if (formData.get('_honey')) return;
 
-      // Reply-To debe ser el correo del visitante, no el del propietario
       const visitorEmail = String(formData.get('email') || '');
       if (visitorEmail) formData.set('_replyto', visitorEmail);
-      formData.set('_subject', `[Portafolio] Consulta de ${String(formData.get('name') || 'visitante')}`);
+      formData.set('_subject', `[Portafolio] Mensaje de ${String(formData.get('name') || 'visitante')}`);
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Enviando...';
@@ -232,7 +233,8 @@ const PUBLIC_CONTACT_FORM_ENDPOINT = `https://formsubmit.co/ajax/${portfolioData
           }
         });
 
-        if (response.ok) {
+        const payload = await response.json().catch(() => null);
+        if (response.ok && payload && payload.success) {
           statusBox.className = 'text-xs font-mono font-bold p-3 rounded-sm bg-success/15 text-success border border-success/30';
           statusBox.textContent = '✓ Mensaje recibido correctamente. Me pondré en contacto en menos de 24 horas.';
           form.reset();

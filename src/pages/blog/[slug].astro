@@ -12,6 +12,21 @@ const { post } = Astro.props;
 const related = post.relatedProjectId
   ? portfolioData.projects.find((p) => p.id === post.relatedProjectId)
   : undefined;
+
+const relatedTechnicalNote: Record<string, { href: string; title: string }> = {
+  'bitacora-contingencia-caidas-sunat': {
+    href: '/notas/resiliencia-caidas-sunat-contingencia-normativas',
+    title: 'Resiliencia ante caídas del SEE de SUNAT: Arquitectura de contingencia y normativas de envío',
+  },
+  'bitacora-preauditoria-facturacion-sunat': {
+    href: '/notas/pre-auditoria-ubl-sunat',
+    title: 'Arquitectura de pre-auditoría UBL 2.1: Reducción del 95% de rechazos fiscales',
+  },
+  'bitacora-migracion-bancaria-streaming': {
+    href: '/notas/streaming-reactivo-oracle-jakarta',
+    title: 'Streaming reactivo con Oracle SQL y Jakarta EE: Procesamiento de 1M de registros',
+  },
+};
 ---
 
 <BaseLayout
@@ -124,6 +139,21 @@ const related = post.relatedProjectId
               class="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-accent uppercase hover:underline"
             >
               Ver {related.title} →
+            </a>
+          </section>
+        )}
+
+        {relatedTechnicalNote[post.slug] && (
+          <section class="p-5 rounded-sm bg-surface border border-accent/40 space-y-2">
+            <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-accent">[ NOTA TÉCNICA DETALLADA DISPONIBLE ]</h2>
+            <p class="text-sm text-text-muted">
+              Puedes consultar el desglose completo de arquitectura, código y normativas en el artículo técnico:
+            </p>
+            <a
+              href={relatedTechnicalNote[post.slug].href}
+              class="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-accent uppercase hover:underline"
+            >
+              Leer {relatedTechnicalNote[post.slug].title} →
             </a>
           </section>
         )}

@@ -6,6 +6,7 @@ import ProjectCard from '../components/ProjectCard.astro';
 import LiveApiStatus from '../components/LiveApiStatus.astro';
 import BenchmarkChart from '../components/BenchmarkChart.astro';
 import { portfolioData } from '../data/portfolioData';
+import { blogData } from '../data/blogData';
 
 const flagshipProjects = portfolioData.projects.slice(0, 2);
 const bankingProject = portfolioData.projects.find((p) => p.id === 'banca-streaming-jakarta');
@@ -81,6 +82,87 @@ const bankingProject = portfolioData.projects.find((p) => p.id === 'banca-stream
             />
           )}
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sección: Notas de Ingeniería & Arquitectura Destacadas -->
+  <section class="py-12 sm:py-16 border-t border-border" aria-label="Notas de ingeniería destacadas">
+    <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
+        <div>
+          <span class="text-xs font-mono text-accent font-bold uppercase tracking-wider">
+            [ PUBLICACIONES DE ARQUITECTURA ]
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-text-main tracking-tight mt-1">
+            Notas de Ingeniería & Normativas SUNAT
+          </h2>
+          <p class="text-xs sm:text-sm text-text-muted mt-1 max-w-2xl leading-relaxed">
+            Artículos en profundidad sobre resiliencia ante caídas de la sede electrónica de SUNAT, streaming reactivo y validaciones UBL 2.1.
+          </p>
+        </div>
+        <a
+          href="/blog"
+          class="shrink-0 px-4 py-2 rounded-sm bg-surface border border-border hover:border-accent text-accent font-mono text-xs font-bold uppercase transition-colors inline-flex items-center gap-1.5"
+        >
+          <span>Ver Blog & Notas ({blogData.length + 3}) →</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <a
+          href="/notas/resiliencia-caidas-sunat-contingencia-normativas"
+          class="p-5 rounded-sm bg-surface border border-border hover:border-accent transition-colors flex flex-col justify-between group space-y-3"
+        >
+          <div class="space-y-2">
+            <span class="text-[11px] font-mono text-accent font-bold uppercase">NORMATIVAS SUNAT · 7 MIN</span>
+            <h3 class="text-base font-bold text-text-main group-hover:text-accent transition-colors tracking-tight leading-snug">
+              Resiliencia ante caídas del SEE de SUNAT: Outbox Pattern y plazos legales
+            </h3>
+            <p class="text-xs text-text-muted leading-relaxed line-clamp-3">
+              Manejo de timeouts SOAP, reducción del plazo de envío a 24-72h y resolución idempotente de comprobantes en limbo.
+            </p>
+          </div>
+          <span class="text-xs font-mono font-bold text-accent group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+            Leer nota técnica →
+          </span>
+        </a>
+
+        <a
+          href="/notas/pre-auditoria-ubl-sunat"
+          class="p-5 rounded-sm bg-surface border border-border hover:border-accent transition-colors flex flex-col justify-between group space-y-3"
+        >
+          <div class="space-y-2">
+            <span class="text-[11px] font-mono text-accent font-bold uppercase">FACTURACIÓN UBL 2.1 · 5 MIN</span>
+            <h3 class="text-base font-bold text-text-main group-hover:text-accent transition-colors tracking-tight leading-snug">
+              Pre-auditoría UBL 2.1: -95% de rechazos antes de la firma digital
+            </h3>
+            <p class="text-xs text-text-muted leading-relaxed line-clamp-3">
+              Validación en memoria de catálogos y aritmética, aislamiento X.509 y desacoplamiento con colas Redis para más de 30 empresas.
+            </p>
+          </div>
+          <span class="text-xs font-mono font-bold text-accent group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+            Leer nota técnica →
+          </span>
+        </a>
+
+        <a
+          href="/notas/streaming-reactivo-oracle-jakarta"
+          class="p-5 rounded-sm bg-surface border border-border hover:border-accent transition-colors flex flex-col justify-between group space-y-3"
+        >
+          <div class="space-y-2">
+            <span class="text-[11px] font-mono text-accent font-bold uppercase">STREAMING REACTIVO · 6 MIN</span>
+            <h3 class="text-base font-bold text-text-main group-hover:text-accent transition-colors tracking-tight leading-snug">
+              Streaming reactivo con Oracle SQL y Jakarta EE: 1M de registros
+            </h3>
+            <p class="text-xs text-text-muted leading-relaxed line-clamp-3">
+              De 4h 15m a 14m 20s con 90% menos memoria JVM mediante optimización de FetchSize y procesamiento por ventanas.
+            </p>
+          </div>
+          <span class="text-xs font-mono font-bold text-accent group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+            Leer nota técnica →
+          </span>
+        </a>
       </div>
     </div>
   </section>

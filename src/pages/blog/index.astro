@@ -3,81 +3,198 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { portfolioData } from '../../data/portfolioData';
 import { blogData, REDACTION_POLICY } from '../../data/blogData';
 import { BLOG_STATUS_LABELS } from '../../schemas/blogSchema';
+
+const technicalArticles = [
+  {
+    slug: 'resiliencia-caidas-sunat-contingencia-normativas',
+    title: 'Resiliencia ante caídas del SEE de SUNAT: Arquitectura de contingencia, Outbox Pattern y nuevas normativas de envío',
+    description: 'Estrategias de arquitectura para contingencia en facturación electrónica SUNAT: patrón Outbox, mitigación de caídas de endpoints SOAP, plazos de envío reducidos a 24-72h y resolución de comprobantes en limbo.',
+    date: 'NOVIEMBRE 2026',
+    readTime: '7 MIN DE LECTURA',
+    tags: ['SUNAT SEE', 'UBL 2.1', 'Outbox Pattern', 'Circuit Breaker', 'Normativas'],
+    impact: '0 COMPROBANTES PERDIDOS · 100% CUMPLIMIENTO LEGAL',
+    href: '/notas/resiliencia-caidas-sunat-contingencia-normativas'
+  },
+  {
+    slug: 'pre-auditoria-ubl-sunat',
+    title: 'Arquitectura de pre-auditoría UBL 2.1: Reducción del 95% de rechazos fiscales antes de la firma digital',
+    description: 'Estrategia de validación en memoria para comprobantes electrónicos SUNAT, aislamiento de firmas X.509 y desacoplamiento con colas Redis para más de 30 empresas.',
+    date: 'OCTUBRE 2025',
+    readTime: '5 MIN DE LECTURA',
+    tags: ['UBL 2.1', 'SUNAT API', 'Microservicios', 'Redis', 'Seguridad X.509'],
+    impact: 'TASA DE ERROR REDUCIDA DE 24.8% A <1.2%',
+    href: '/notas/pre-auditoria-ubl-sunat'
+  },
+  {
+    slug: 'streaming-reactivo-oracle-jakarta',
+    title: 'Streaming reactivo con Oracle SQL y Jakarta EE: Cómo procesar 1M de registros sin agotar el Heap',
+    description: 'Análisis detallado de la migración de un reporteador bancario: optimización de cursores JDBC, sintonización de FetchSize y procesamiento reactivo por chunks concurrentes.',
+    date: 'NOVIEMBRE 2025',
+    readTime: '6 MIN DE LECTURA',
+    tags: ['Jakarta EE', 'Oracle SQL', 'Reactive Streams', 'Heap Tuning', 'Banca'],
+    impact: 'DE 4H 15M A 14M 20S · 90% MENOS MEMORIA JVM',
+    href: '/notas/streaming-reactivo-oracle-jakarta'
+  }
+];
 ---
 
 <BaseLayout
-  title={`Blog y bitácora de trabajo | ${portfolioData.name}`}
-  description="Bitácora de trabajo en curso con datos censurados: decisiones de arquitectura, objetivos y próximos pasos, sin exponer clientes, credenciales ni datos internos."
+  title={`Blog de Ingeniería & Notas Técnicas | ${portfolioData.name}`}
+  description="Artículos técnicos de arquitectura, resiliencia fiscal ante caídas de SUNAT y bitácora de desarrollo con datos censurados."
   currentPath="/blog"
 >
   <div class="py-10 sm:py-14">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <!-- Encabezado Principal Recto y Técnico -->
       <header class="space-y-3 border-b border-border pb-6">
-        <span class="text-xs font-mono text-accent font-bold tracking-wider uppercase">
-          [ BITÁCORA DE TRABAJO EN CURSO // DATOS CENSURADOS ]
-        </span>
+        <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+          <span class="text-accent font-bold tracking-wider uppercase">
+            [ HUB TÉCNICO // ARTÍCULOS DE ARQUITECTURA & BITÁCORA ]
+          </span>
+        </div>
         <h1 class="text-2xl sm:text-4xl lg:text-[40px] font-black text-text-main tracking-tight leading-tight">
-          Blog de Ingeniería
+          Blog & Notas de Ingeniería
         </h1>
         <p class="text-sm sm:text-base text-text-muted leading-relaxed font-sans">
-          Lo que se está trabajando ahora: objetivos, decisiones y próximos pasos.
-          Todo lo sensible —clientes, credenciales, datos internos y métricas exactas—
-          se publica censurado. Los casos cerrados viven en Notas de Ingeniería.
+          Publicaciones técnicas de arquitectura, diseño de sistemas tolerantes a fallos, normativas fiscales de SUNAT y bitácora de proyectos en curso.
         </p>
+
+        <!-- Selector / Filtro Rápido en Línea -->
+        <div class="flex flex-wrap items-center gap-2 pt-3">
+          <a
+            href="#articulos-tecnicos"
+            class="px-3 py-1 text-xs font-mono font-bold rounded-sm bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition-colors uppercase"
+          >
+            ↓ Artículos Técnicos ({technicalArticles.length})
+          </a>
+          <a
+            href="#bitacora-en-curso"
+            class="px-3 py-1 text-xs font-mono font-bold rounded-sm bg-surface text-text-muted border border-border hover:text-text-main hover:border-accent/40 transition-colors uppercase"
+          >
+            ↓ Bitácoras en Curso ({blogData.length})
+          </a>
+        </div>
       </header>
 
-      <section class="p-5 rounded-sm bg-surface border border-border space-y-2.5" aria-label="Política de censura">
-        <h2 class="text-xs font-bold font-mono uppercase tracking-wider text-accent">[ QUÉ SE CENSURA Y POR QUÉ ]</h2>
-        <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm text-text-muted font-sans">
-          {REDACTION_POLICY.map((item) => (
-            <li>{item}</li>
-          ))}
-        </ul>
-      </section>
-
-      <div class="space-y-6">
-        {blogData.map((post) => (
-          <article class="p-5 sm:p-6 rounded-sm bg-surface border border-border hover:border-accent transition-colors group space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-text-muted">
-              <span class="text-accent font-bold uppercase">{post.date} · {post.readTime}</span>
-              <span class="px-2 py-0.5 rounded-sm bg-accent-bg text-accent border border-accent/25 font-bold uppercase text-[11px]">
-                {BLOG_STATUS_LABELS[post.status]} · {post.progress}%
-              </span>
-            </div>
-
-            <div class="h-1 rounded-none bg-surface-hover overflow-hidden" role="progressbar" aria-valuenow={post.progress} aria-valuemin="0" aria-valuemax="100" aria-label={`Avance de ${post.title}`}>
-              <div class="h-full bg-accent rounded-none" style={`width: ${post.progress}%`}></div>
-            </div>
-
-            <h2 class="text-lg sm:text-xl font-bold text-text-main group-hover:text-accent transition-colors tracking-tight">
-              <a href={`/blog/${post.slug}`} class="focus-visible:outline-accent">
-                {post.title}
-              </a>
+      <!-- SECCIÓN 1: ARTÍCULOS TÉCNICOS & NOTAS DE INGENIERÍA -->
+      <section id="articulos-tecnicos" class="space-y-6">
+        <div class="flex items-center justify-between border-b border-border pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-4 bg-accent"></span>
+            <h2 class="text-lg sm:text-xl font-bold text-text-main tracking-tight uppercase font-mono">
+              Artículos Técnicos de Ingeniería
             </h2>
+          </div>
+          <span class="text-xs font-mono text-accent font-bold">CASOS COMPLETOS & ARQUITECTURA</span>
+        </div>
 
-            <p class="text-sm text-text-muted leading-relaxed font-sans">
-              {post.summary}
-            </p>
-
-            <div class="pt-3 border-t border-border flex flex-wrap items-center justify-between gap-3">
-              <div class="flex flex-wrap gap-1">
-                {post.tags.map((tag) => (
-                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-bg border border-border text-text-muted">
-                    {tag}
-                  </span>
-                ))}
+        <div class="space-y-5">
+          {technicalArticles.map((art) => (
+            <article class="p-5 sm:p-6 rounded-sm bg-surface border border-border hover:border-accent transition-colors group space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-text-muted">
+                <span class="text-accent font-bold uppercase">{art.date} · {art.readTime}</span>
+                <span class="px-2 py-0.5 rounded-sm bg-success/10 text-success border border-success/30 font-bold uppercase text-[11px]">
+                  {art.impact}
+                </span>
               </div>
 
-              <a
-                href={`/blog/${post.slug}`}
-                class="inline-flex items-center gap-1 text-xs font-mono font-bold text-accent group-hover:translate-x-1 transition-transform uppercase"
-              >
-                <span>Leer bitácora →</span>
-              </a>
-            </div>
-          </article>
-        ))}
-      </div>
+              <h3 class="text-lg sm:text-xl font-bold text-text-main group-hover:text-accent transition-colors tracking-tight">
+                <a href={art.href} class="focus-visible:outline-accent">
+                  {art.title}
+                </a>
+              </h3>
+
+              <p class="text-sm text-text-muted leading-relaxed font-sans">
+                {art.description}
+              </p>
+
+              <div class="pt-3 border-t border-border flex flex-wrap items-center justify-between gap-3">
+                <div class="flex flex-wrap gap-1">
+                  {art.tags.map((tag) => (
+                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-bg border border-border text-text-muted">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <a
+                  href={art.href}
+                  class="inline-flex items-center gap-1 text-xs font-mono font-bold text-accent group-hover:translate-x-1 transition-transform uppercase"
+                >
+                  <span>Leer artículo técnico →</span>
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <!-- SECCIÓN 2: BITÁCORAS DE TRABAJO EN CURSO -->
+      <section id="bitacora-en-curso" class="space-y-6 pt-4">
+        <div class="flex items-center justify-between border-b border-border pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-4 bg-accent"></span>
+            <h2 class="text-lg sm:text-xl font-bold text-text-main tracking-tight uppercase font-mono">
+              Bitácora de Desarrollo en Curso
+            </h2>
+          </div>
+          <span class="text-xs font-mono text-text-muted font-bold">DATOS SENSIBLES CENSURADOS</span>
+        </div>
+
+        <!-- Política de Censura Recta -->
+        <div class="p-5 rounded-sm bg-surface border border-border space-y-2.5">
+          <h3 class="text-xs font-bold font-mono uppercase tracking-wider text-accent">[ QUÉ SE CENSURA Y POR QUÉ ]</h3>
+          <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm text-text-muted font-sans">
+            {REDACTION_POLICY.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="space-y-5">
+          {blogData.map((post) => (
+            <article class="p-5 sm:p-6 rounded-sm bg-surface border border-border hover:border-accent transition-colors group space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-text-muted">
+                <span class="text-accent font-bold uppercase">{post.date} · {post.readTime}</span>
+                <span class="px-2 py-0.5 rounded-sm bg-accent-bg text-accent border border-accent/25 font-bold uppercase text-[11px]">
+                  {BLOG_STATUS_LABELS[post.status]} · {post.progress}%
+                </span>
+              </div>
+
+              <div class="h-1 rounded-none bg-surface-hover overflow-hidden" role="progressbar" aria-valuenow={post.progress} aria-valuemin="0" aria-valuemax="100" aria-label={`Avance de ${post.title}`}>
+                <div class="h-full bg-accent rounded-none" style={`width: ${post.progress}%`}></div>
+              </div>
+
+              <h3 class="text-lg sm:text-xl font-bold text-text-main group-hover:text-accent transition-colors tracking-tight">
+                <a href={`/blog/${post.slug}`} class="focus-visible:outline-accent">
+                  {post.title}
+                </a>
+              </h3>
+
+              <p class="text-sm text-text-muted leading-relaxed font-sans">
+                {post.summary}
+              </p>
+
+              <div class="pt-3 border-t border-border flex flex-wrap items-center justify-between gap-3">
+                <div class="flex flex-wrap gap-1">
+                  {post.tags.map((tag) => (
+                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-bg border border-border text-text-muted">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <a
+                  href={`/blog/${post.slug}`}
+                  class="inline-flex items-center gap-1 text-xs font-mono font-bold text-accent group-hover:translate-x-1 transition-transform uppercase"
+                >
+                  <span>Leer bitácora →</span>
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
     </div>
   </div>
 </BaseLayout>
