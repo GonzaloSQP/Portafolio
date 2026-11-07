@@ -3,15 +3,18 @@
 @tailwind utilities;
 
 :root {
-  /* Tema Claro (Por defecto si light o si sistema está en claro) */
+  /* Tema Claro (Contraste alto, legibilidad óptima) */
   --color-bg: #f8fafc;
   --color-surface: #ffffff;
   --color-surface-hover: #f1f5f9;
   --color-border: #cbd5e1;
+  --color-border-bright: #94a3b8;
   --color-text: #0f172a;
-  --color-text-muted: #475569;
+  --color-text-muted: #334155;
+  --color-text-dim: #64748b;
   --color-accent: #0284c7;
   --color-accent-hover: #0369a1;
+  --color-accent-bg: #e0f2fe;
   --color-success: #059669;
   --color-error: #dc2626;
   --color-focus: #0284c7;
@@ -21,15 +24,18 @@
 }
 
 [data-theme="dark"] {
-  /* Tema Oscuro */
-  --color-bg: #080c14;
-  --color-surface: #0f172a;
-  --color-surface-hover: #1e293b;
-  --color-border: #334155;
+  /* Tema Oscuro (Refinado, paleta técnica slate profunda, alto contraste) */
+  --color-bg: #090d16;
+  --color-surface: #0f1624;
+  --color-surface-hover: #162034;
+  --color-border: #1e293b;
+  --color-border-bright: #334155;
   --color-text: #f8fafc;
-  --color-text-muted: #94a3b8;
+  --color-text-muted: #cbd5e1;
+  --color-text-dim: #94a3b8;
   --color-accent: #38bdf8;
-  --color-accent-hover: #60a5fa;
+  --color-accent-hover: #0ea5e9;
+  --color-accent-bg: rgba(56, 189, 248, 0.08);
   --color-success: #34d399;
   --color-error: #f87171;
   --color-focus: #38bdf8;

@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { portfolioData } from '../../data/portfolioData';
+import { blogData, REDACTION_POLICY } from '../../data/blogData';
+import { BLOG_STATUS_LABELS } from '../../schemas/blogSchema';
+---
+
+<BaseLayout
+  title={`Blog y bitácora de trabajo | ${portfolioData.name}`}
+  description="Bitácora de trabajo en curso con datos censurados: decisiones de arquitectura, objetivos y próximos pasos, sin exponer clientes, credenciales ni datos internos."
+  currentPath="/blog"
+>
+  <div class="py-10 sm:py-14">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <header class="space-y-3 border-b border-border pb-6">
+        <span class="text-xs font-mono text-accent font-bold tracking-wider uppercase">
+          [ BITÁCORA DE TRABAJO EN CURSO // DATOS CENSURADOS ]
+        </span>
+        <h1 class="text-2xl sm:text-4xl lg:text-[40px] font-black text-text-main tracking-tight leading-tight">
+          Blog de Ingeniería
+        </h1>
+        <p class="text-sm sm:text-base text-text-muted leading-relaxed font-sans">
+          Lo que se está trabajando ahora: objetivos, decisiones y próximos pasos.
+          Todo lo sensible —clientes, credenciales, datos internos y métricas exactas—
+          se publica censurado. Los casos cerrados viven en Notas de Ingeniería.
+        </p>
+      </header>
+
+      <section class="p-5 rounded-sm bg-surface border border-border space-y-2.5" aria-label="Política de censura">
+        <h2 class="text-xs font-bold font-mono uppercase tracking-wider text-accent">[ QUÉ SE CENSURA Y POR QUÉ ]</h2>
+        <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm text-text-muted font-sans">
+          {REDACTION_POLICY.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </section>
+
+      <div class="space-y-6">
+        {blogData.map((post) => (
+          <article class="p-5 sm:p-6 rounded-sm bg-surface border border-border hover:border-accent transition-colors group space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-text-muted">
+              <span class="text-accent font-bold uppercase">{post.date} · {post.readTime}</span>
+              <span class="px-2 py-0.5 rounded-sm bg-accent-bg text-accent border border-accent/25 font-bold uppercase text-[11px]">
+                {BLOG_STATUS_LABELS[post.status]} · {post.progress}%
+              </span>
+            </div>
+
+            <div class="h-1 rounded-none bg-surface-hover overflow-hidden" role="progressbar" aria-valuenow={post.progress} aria-valuemin="0" aria-valuemax="100" aria-label={`Avance de ${post.title}`}>
+              <div class="h-full bg-accent rounded-none" style={`width: ${post.progress}%`}></div>
+            </div>
+
+            <h2 class="text-lg sm:text-xl font-bold text-text-main group-hover:text-accent transition-colors tracking-tight">
+              <a href={`/blog/${post.slug}`} class="focus-visible:outline-accent">
+                {post.title}
+              </a>
+            </h2>
+
+            <p class="text-sm text-text-muted leading-relaxed font-sans">
+              {post.summary}
+            </p>
+
+            <div class="pt-3 border-t border-border flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap gap-1">
+                {post.tags.map((tag) => (
+                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-bg border border-border text-text-muted">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              <a
+                href={`/blog/${post.slug}`}
+                class="inline-flex items-center gap-1 text-xs font-mono font-bold text-accent group-hover:translate-x-1 transition-transform uppercase"
+              >
+                <span>Leer bitácora →</span>
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>

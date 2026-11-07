@@ -1,0 +1,142 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { portfolioData } from '../../data/portfolioData';
+import { blogData } from '../../data/blogData';
+import { BLOG_STATUS_LABELS } from '../../schemas/blogSchema';
+
+export function getStaticPaths() {
+  return blogData.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const related = post.relatedProjectId
+  ? portfolioData.projects.find((p) => p.id === post.relatedProjectId)
+  : undefined;
+---
+
+<BaseLayout
+  title={`${post.title} | Blog de ${portfolioData.name}`}
+  description={post.summary}
+  currentPath={`/blog/${post.slug}`}
+>
+  <article class="py-10 sm:py-14">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <nav class="flex items-center gap-2 text-xs font-mono text-text-muted" aria-label="Migas de pan">
+        <a href="/" class="hover:text-accent transition-colors">INICIO</a>
+        <span>/</span>
+        <a href="/blog" class="hover:text-accent transition-colors">BLOG</a>
+        <span>/</span>
+        <span class="text-text-main font-bold truncate">{post.slug.toUpperCase()}</span>
+      </nav>
+
+      <header class="space-y-3 border-b border-border pb-6">
+        <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+          <span class="px-2 py-0.5 rounded-sm bg-accent-bg text-accent border border-accent/25 font-bold uppercase">
+            {BLOG_STATUS_LABELS[post.status]} · {post.progress}%
+          </span>
+          <span class="px-2 py-0.5 rounded-sm bg-surface text-text-muted border border-border uppercase">
+            {post.sector}
+          </span>
+          <span class="text-text-muted">{post.readTime} · {post.date}</span>
+        </div>
+
+        <h1 class="text-2xl sm:text-4xl font-black text-text-main tracking-tight leading-tight">
+          {post.title}
+        </h1>
+
+        <p class="text-base text-text-muted leading-relaxed font-sans">
+          {post.summary}
+        </p>
+
+        <div class="h-1 rounded-none bg-surface-hover overflow-hidden" role="progressbar" aria-valuenow={post.progress} aria-valuemin="0" aria-valuemax="100" aria-label="Avance del trabajo">
+          <div class="h-full bg-accent rounded-none" style={`width: ${post.progress}%`}></div>
+        </div>
+
+        <div class="flex flex-wrap gap-1 pt-1">
+          {post.stack.map((tech) => (
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-surface border border-border text-text-muted">
+              {tech}
+            </span>
+          ))}
+        </div>
+      </header>
+
+      <div class="space-y-6 text-sm sm:text-base text-text-main leading-relaxed font-sans">
+        <section class="space-y-2.5">
+          <h2 class="text-base sm:text-lg font-bold text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-4 bg-accent inline-block"></span>
+            Objetivos Técnicos
+          </h2>
+          <ul class="list-disc list-inside space-y-1.5 text-text-muted">
+            {post.objectives.map((obj) => (
+              <li>{obj}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section class="space-y-2.5">
+          <h2 class="text-base sm:text-lg font-bold text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-4 bg-accent inline-block"></span>
+            Decisiones de Arquitectura Tomadas
+          </h2>
+          <ul class="space-y-2 text-text-muted">
+            {post.decisions.map((dec) => (
+              <li class="p-3.5 rounded-sm bg-surface border border-border flex items-start gap-2.5 text-xs sm:text-sm">
+                <span class="text-accent font-bold mt-0.5">›</span>
+                <span class="leading-relaxed">{dec}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section class="p-5 rounded-sm bg-surface border border-border space-y-2.5">
+          <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-accent">[ REGISTRO DE CENSURA Y PROTECCIÓN DE DATOS ]</h2>
+          <ul class="space-y-1 text-xs text-text-muted font-mono">
+            {post.censoredNotes.map((note) => (
+              <li class="flex items-start gap-1.5">
+                <span class="text-error font-bold">✕</span>
+                <span>{note}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section class="space-y-2.5">
+          <h2 class="text-base sm:text-lg font-bold text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-4 bg-accent inline-block"></span>
+            Próximos Pasos
+          </h2>
+          <ul class="list-disc list-inside space-y-1.5 text-text-muted">
+            {post.nextSteps.map((step) => (
+              <li>{step}</li>
+            ))}
+          </ul>
+        </section>
+
+        {related && (
+          <section class="p-5 rounded-sm bg-accent-bg border border-accent/30 space-y-2">
+            <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-accent">Proyecto Relacionado</h2>
+            <p class="text-sm text-text-muted">
+              Existe un caso de estudio publicado sobre este proyecto:
+            </p>
+            <a
+              href={`/proyectos/${related.id}`}
+              class="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-accent uppercase hover:underline"
+            >
+              Ver {related.title} →
+            </a>
+          </section>
+        )}
+      </div>
+
+      <footer class="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+        <a href="/blog" class="text-xs font-mono font-bold text-accent uppercase hover:underline">
+          ← Volver al blog
+        </a>
+        <a href="/notas" class="text-xs font-mono font-bold text-text-main uppercase hover:text-accent">
+          Ver notas de ingeniería →
+        </a>
+      </footer>
+    </div>
+  </article>
+</BaseLayout>

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { portfolioData } from '../src/data/portfolioData';
+import { blogData } from '../src/data/blogData';
 
 async function checkLinks() {
   console.log('🔗 [check:links] Verificando integridad de rutas y enlaces...');
@@ -17,6 +18,8 @@ async function checkLinks() {
       path.join('notas', 'index.html'),
       path.join('notas', 'streaming-reactivo-oracle-jakarta', 'index.html'),
       path.join('notas', 'pre-auditoria-ubl-sunat', 'index.html'),
+      path.join('blog', 'index.html'),
+      ...blogData.map((post) => path.join('blog', post.slug, 'index.html')),
       path.join('proyectos', 'index.html'),
       ...portfolioData.projects.map((p) => path.join('proyectos', p.id, 'index.html')),
     ];

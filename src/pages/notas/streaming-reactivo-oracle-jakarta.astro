@@ -18,126 +18,122 @@ try (Stream<MovimientoDTO> stream = resultSetMapper.stream(resultSet)) {
   description="Cómo procesar más de un millón de registros bancarios en menos de 15 minutos sin agotar el Heap de la JVM mediante cursores JDBC y reactividad."
   currentPath="/notas/streaming-reactivo-oracle-jakarta"
 >
-  <article class="py-12 sm:py-16">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-      <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-xs sm:text-sm text-text-muted" aria-label="Migas de pan">
-        <a href="/" class="hover:text-accent transition-colors">Inicio</a>
+  <article class="py-10 sm:py-14">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <!-- Breadcrumb Recto -->
+      <nav class="flex items-center gap-2 text-xs font-mono text-text-muted" aria-label="Migas de pan">
+        <a href="/" class="hover:text-accent transition-colors">INICIO</a>
         <span>/</span>
-        <a href="/notas" class="hover:text-accent transition-colors">Notas</a>
+        <a href="/notas" class="hover:text-accent transition-colors">NOTAS</a>
         <span>/</span>
-        <span class="text-text-main font-semibold truncate">Streaming Reactivo con Oracle & Jakarta</span>
+        <span class="text-text-main font-bold truncate">STREAMING_REACTIVO_ORACLE</span>
       </nav>
 
       <!-- Cabecera del Artículo -->
-      <header class="space-y-4 border-b border-border pb-8">
+      <header class="space-y-3 border-b border-border pb-6">
         <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
-          <span class="px-2.5 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20 font-bold">
-            Arquitectura de Streaming
+          <span class="px-2 py-0.5 rounded-sm bg-accent-bg text-accent border border-accent/30 font-bold uppercase">
+            [ ARQUITECTURA DE STREAMING ]
           </span>
-          <span class="text-text-muted">6 min de lectura · Noviembre 2025</span>
+          <span class="text-text-muted">6 MIN DE LECTURA · NOVIEMBRE 2025</span>
         </div>
 
-        <h1 class="text-3xl sm:text-5xl font-black text-text-main tracking-tight leading-tight">
+        <h1 class="text-2xl sm:text-4xl font-black text-text-main tracking-tight leading-tight">
           Streaming reactivo con Oracle SQL y Jakarta EE: Cómo procesar 1M de registros sin agotar el Heap
         </h1>
 
-        <p class="text-lg text-text-muted leading-relaxed">
+        <p class="text-base text-text-muted leading-relaxed font-sans">
           En sistemas bancarios con bases de datos heredadas, migrar procesos monolíticos batch a microservicios requiere replantear tanto el acceso a datos como la concurrencia en la máquina virtual Java.
         </p>
       </header>
 
-      <!-- Cuerpo del Artículo -->
-      <div class="prose prose-invert max-w-none space-y-8 text-base text-text-main leading-relaxed">
-        <section class="space-y-4">
-          <h2 class="text-2xl font-bold tracking-tight text-text-main">
+      <!-- Cuerpo del Artículo con Tipografía Cómoda y Alto Contraste -->
+      <div class="space-y-6 text-sm sm:text-base text-text-main leading-relaxed font-sans">
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
             1. El problema: el reporteador en Visual Basic y el cuello de botella
           </h2>
-          <p class="text-text-muted">
+          <p class="text-text-muted leading-relaxed">
             En COOPAC Los Andes, el reporteador financiero operaba sobre una aplicación monolítica en Visual Basic. El proceso ejecutaba consultas SQL de más de 300 líneas con múltiples JOINs y agregaciones complejas sobre tablas con millones de registros de cuentas y transacciones.
           </p>
-          <p class="text-text-muted">
-            Los síntomas eran críticos:
-          </p>
-          <ul class="list-disc list-inside space-y-2 text-text-muted pl-4">
+          <ul class="list-disc list-inside space-y-1.5 text-text-muted pl-2">
             <li>Tiempos de ejecución superiores a <strong class="text-text-main">4 horas y 15 minutos</strong>.</li>
             <li>Bloqueos de filas y contención en la base de datos Oracle durante horas hábiles.</li>
-            <li>Caídas intempestivas por desborde de memoria (<code class="text-accent font-mono">OutOfMemoryError</code>) cuando el volumen superaba los 800,000 registros.</li>
+            <li>Caídas intempestivas por desborde de memoria (<code class="text-accent font-mono text-xs">OutOfMemoryError</code>) cuando el volumen superaba los 800,000 registros.</li>
           </ul>
         </section>
 
-        <section class="space-y-4">
-          <h2 class="text-2xl font-bold tracking-tight text-text-main">
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
             2. Por qué la paginación con OFFSET falla catastróficamente
           </h2>
-          <p class="text-text-muted">
-            La primera alternativa que muchos desarrolladores consideran es la paginación tradicional vía <code class="text-text-main font-mono">OFFSET / FETCH FIRST n ROWS ONLY</code>. Sin embargo, en bases de datos relacionales, <code class="text-text-main font-mono">OFFSET n</code> tiene complejidad algorítmica <strong class="text-text-main">$O(n)$</strong>:
+          <p class="text-text-muted leading-relaxed">
+            La primera alternativa que muchos desarrolladores consideran es la paginación tradicional vía <code class="text-text-main font-mono text-xs">OFFSET / FETCH FIRST n ROWS ONLY</code>. Sin embargo, en bases de datos relacionales, <code class="text-text-main font-mono text-xs">OFFSET n</code> tiene complejidad algorítmica <strong class="text-text-main">$O(n)$</strong>:
           </p>
-          <blockquote class="p-4 rounded-xl bg-surface border-l-4 border-error text-text-muted italic">
+          <blockquote class="p-3.5 rounded-sm bg-surface border-l-2 border-error text-xs sm:text-sm text-text-muted italic">
             Para saltarse 900,000 filas en una página posterior, el motor de Oracle debe leer 900,000 bloques lógicos del disco y descartarlos. Conforme avanza la paginación, el tiempo por página se degrada exponencialmente.
           </blockquote>
-          <p class="text-text-muted">
-            La paginación por keyset (Seek Method) era inviable debido a los ordenamientos dinámicos por múltiples columnas y fechas requeridas por el área de finanzas. La única solución escalable era el <strong class="text-text-main">cursor streaming con un único puntero de lectura continuo</strong>.
+          <p class="text-text-muted leading-relaxed">
+            La única solución escalable con memoria constante era el <strong class="text-text-main">cursor streaming con un único puntero de lectura continuo</strong>.
           </p>
         </section>
 
-        <section class="space-y-4">
-          <h2 class="text-2xl font-bold tracking-tight text-text-main">
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
             3. La solución: Sintonización de JDBC FetchSize y Reactive Streams
           </h2>
-          <p class="text-text-muted">
-            Por defecto, el driver JDBC de Oracle utiliza un <code class="text-accent font-mono">defaultRowPrefetch</code> de tan solo 10 filas. Para 1,000,000 de registros, esto representa <strong class="text-text-main">100,000 viajes de ida y vuelta por red (roundtrips)</strong> entre la base de datos y el servidor de aplicaciones Jakarta EE.
+          <p class="text-text-muted leading-relaxed">
+            Por defecto, el driver JDBC de Oracle utiliza un <code class="text-accent font-mono text-xs">defaultRowPrefetch</code> de tan solo 10 filas. Para 1,000,000 de registros, esto representa <strong class="text-text-main">100,000 viajes de red (roundtrips)</strong> entre la base de datos y el servidor de aplicaciones Jakarta EE.
           </p>
-          <p class="text-text-muted">
-            Configurando adecuadamente la conexión JDBC:
-          </p>
-          <div class="p-4 rounded-xl bg-[#0a0f18] border border-border text-xs font-mono overflow-x-auto text-[#e2e8f0]">
-<pre><code>{codeSample}</code></pre>
+          <div class="p-4 rounded-sm bg-[#0a0f18] border border-border text-xs font-mono overflow-x-auto text-[#e2e8f0]">
+            <pre><code>{codeSample}</code></pre>
           </div>
-          <p class="text-text-muted">
-            Al elevar el <code class="text-text-main font-mono">FetchSize</code> a 2,500 filas, los roundtrips de red se redujeron de 100,000 a tan solo <strong class="text-text-main">400</strong>. Al mismo tiempo, el búfer de 2,500 objetos DTO en la memoria de la JVM ocupaba menos de 25 MB en cualquier instante, manteniendo el Heap en un régimen perfectamente estable de <strong class="text-text-main">380 MB</strong>.
+          <p class="text-text-muted leading-relaxed">
+            Al elevar el <code class="text-text-main font-mono text-xs">FetchSize</code> a 2,500 filas, los roundtrips de red se redujeron de 100,000 a tan solo <strong class="text-text-main">400</strong>. Al mismo tiempo, el búfer de 2,500 objetos DTO en la memoria de la JVM ocupaba menos de 25 MB en cualquier instante, manteniendo el Heap en un régimen perfectamente estable de <strong class="text-text-main">380 MB</strong>.
           </p>
         </section>
 
-        <section class="space-y-4">
-          <h2 class="text-2xl font-bold tracking-tight text-text-main">
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
             4. Optimización de Oracle SQL: de Cost 42,850 a Cost 124
           </h2>
-          <p class="text-text-muted">
-            La consulta original carecía de índices compuestos apropiados, forzando un <code class="text-error font-mono">TABLE ACCESS FULL</code> sobre una tabla histórica particionada. Mediante el análisis de trazas AWR y SQL Plan Baselines:
+          <p class="text-text-muted leading-relaxed">
+            La consulta original carecía de índices compuestos apropiados, forzando un <code class="text-error font-mono text-xs">TABLE ACCESS FULL</code>. Mediante trazas AWR y SQL Plan Baselines:
           </p>
-          <ul class="list-disc list-inside space-y-2 text-text-muted pl-4">
-            <li>Se introdujo el índice compuesto <code class="text-accent font-mono">IDX_MOV_FECHA_ESTADO (FECHA_CORTE, ESTADO_CONCIL)</code>.</li>
-            <li>Se forzó el acceso por <code class="text-success font-mono">INDEX RANGE SCAN</code> limitando las lecturas lógicas de 1,840,200 bloques a solo 2,500 por lote.</li>
+          <ul class="list-disc list-inside space-y-1.5 text-text-muted pl-2">
+            <li>Se introdujo el índice compuesto <code class="text-accent font-mono text-xs">IDX_MOV_FECHA_ESTADO (FECHA_CORTE, ESTADO_CONCIL)</code>.</li>
+            <li>Se forzó el acceso por <code class="text-success font-mono text-xs">INDEX RANGE SCAN</code> limitando las lecturas lógicas de 1,840,200 bloques a solo 2,500 por lote.</li>
             <li>El costo del optimizador de Oracle CBO disminuyó en un <strong class="text-text-main">99.7%</strong>.</li>
           </ul>
         </section>
 
-        <section class="space-y-4">
-          <h2 class="text-2xl font-bold tracking-tight text-text-main">
+        <section class="space-y-3">
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-text-main flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-accent inline-block"></span>
             5. Resultados medidos y conclusiones
           </h2>
-          <div class="p-6 rounded-2xl bg-surface border border-accent/40 space-y-3">
-            <h3 class="text-base font-bold font-mono text-accent uppercase">Métricas de Producción Verificadas:</h3>
-            <ul class="space-y-2 text-sm text-text-main">
+          <div class="p-4 sm:p-5 rounded-sm bg-surface border border-accent/40 space-y-2">
+            <h3 class="text-xs font-mono font-bold text-accent uppercase tracking-wider">[ MÉTRICAS DE PRODUCCIÓN VERIFICADAS ]</h3>
+            <ul class="space-y-1.5 text-xs sm:text-sm text-text-main font-sans">
               <li>⏱️ <strong>Tiempo total:</strong> De 4h 15m a 14m 20s (94.4% de reducción).</li>
-              <li>🧠 <strong>Memoria Heap:</strong> De 3.8 GB (al borde de OOM) a 380 MB estables.</li>
+              <li>🧠 <strong>Memoria Heap:</strong> De 3.8 GB a 380 MB estables.</li>
               <li>🚀 <strong>Throughput:</strong> De ~65 registros/segundo a >1,200 registros/segundo.</li>
             </ul>
           </div>
-          <p class="text-text-muted">
-            La lección clave de esta arquitectura es que la concurrencia masiva no requiere clusters enormes ni millones de gigabytes de RAM: requiere comprender a fondo el protocolo de red del driver de base de datos, respetar la contrapresión (backpressure) y evitar la asignación desmedida de objetos efímeros en la memoria de la JVM.
-          </p>
         </section>
       </div>
 
-      <!-- Pie del Artículo -->
-      <footer class="pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-        <a href="/notas" class="text-sm font-semibold text-accent hover:underline">
-          ← Volver a todas las notas de ingeniería
+      <!-- Pie del Artículo Recto -->
+      <footer class="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+        <a href="/notas" class="text-xs font-mono font-bold text-accent uppercase hover:underline">
+          ← Volver a notas de ingeniería
         </a>
-        <a href="/proyectos/banca-streaming-jakarta" class="text-sm font-semibold text-text-main hover:text-accent">
-          Ver caso de estudio de la migración bancaria →
+        <a href="/proyectos/banca-streaming-jakarta" class="text-xs font-mono font-bold text-text-main uppercase hover:text-accent">
+          Ver caso de estudio bancario →
         </a>
       </footer>
     </div>

@@ -76,6 +76,13 @@ npm run verify
 
 ---
 
+## ✍️ Blog de trabajo (censurado)
+
+- **Blog / bitácora en curso**: [`/blog`](src/pages/blog/index.astro) — objetivos, decisiones y próximos pasos con clientes, credenciales y datos internos censurados. Política y guía de nuevas entradas: [docs/BLOG.md](docs/BLOG.md).
+- **Notas de Ingeniería**: [`/notas`](src/pages/notas/index.astro) — casos ya cerrados con evidencia completa.
+
+---
+
 ## 📚 Documentación Técnica Detallada
 
 - [Control de Calidad y Registro de Evidencias (QA.md)](docs/QA.md)
@@ -84,5 +91,6 @@ npm run verify
 - [Estrategia y Matriz de Despliegue (DEPLOYMENT.md)](docs/DEPLOYMENT.md)
 - [Guía de Mantenimiento y Extensión (MAINTENANCE.md)](docs/MAINTENANCE.md)
 - [Bitácora de Progreso y Fases (PROGRESS.md)](docs/PROGRESS.md)
+- [Blog y política de censura (BLOG.md)](docs/BLOG.md)
 - [Registro de Decisiones de Arquitectura (ADRs)](docs/decisions/)
 

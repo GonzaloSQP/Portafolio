@@ -1,5 +1,16 @@
 import { portfolioData } from '../src/data/portfolioData';
 import { ProfileSchema } from '../src/schemas/portfolioSchema';
+import { blogData } from '../src/data/blogData';
+import { BlogPostSchema } from '../src/schemas/blogSchema';
+
+const FORBIDDEN_BLOG_PATTERNS = [
+  /PENDIENTE:/,
+  /@/,
+  /https?:\/\//,
+  /\b(?:password|passwd|secret|token|credencial|clave privada|private key)\b/i,
+  /\b(?:192\.168\.|10\.\d+\.|172\.(?:1[6-9]|2\d|3[01])\.)/,
+  /COOPAC|SSP\s?S\.?A\.?C\.?|Los Andes|Soluciones de Software/i,
+];
 
 function checkForPending(obj: unknown, path = ''): string[] {
   const issues: string[] = [];
@@ -65,6 +76,34 @@ function runValidation() {
       process.exit(1);
     }
   }
+
+  // 5. Validar blog censurado: esquema, slugs únicos y ausencia de datos sensibles
+  const blogSlugs = new Set<string>();
+  for (const post of blogData) {
+    const blogResult = BlogPostSchema.safeParse(post);
+    if (!blogResult.success) {
+      console.error(`❌ [validate:data] Entrada de blog inválida "${post.slug}":`);
+      blogResult.error.issues.forEach((issue) => console.error(`  - En ${issue.path.join('.')}: ${issue.message}`));
+      process.exit(1);
+    }
+    if (blogSlugs.has(post.slug)) {
+      console.error(`❌ [validate:data] Slug de blog duplicado: "${post.slug}"`);
+      process.exit(1);
+    }
+    blogSlugs.add(post.slug);
+    const serialized = JSON.stringify(post);
+    for (const pattern of FORBIDDEN_BLOG_PATTERNS) {
+      if (pattern.test(serialized)) {
+        console.error(`❌ [validate:data] La entrada de blog "${post.slug}" contiene datos prohibidos (${pattern}). El blog solo admite contenido censurado.`);
+        process.exit(1);
+      }
+    }
+    if (post.relatedProjectId && !portfolioData.projects.some((p) => p.id === post.relatedProjectId)) {
+      console.error(`❌ [validate:data] La entrada de blog "${post.slug}" enlaza un proyecto inexistente: "${post.relatedProjectId}"`);
+      process.exit(1);
+    }
+  }
+  console.log(`✅ [validate:data] Blog censurado válido. ${blogData.length} entradas validadas.`);
 
   console.log(`✅ [validate:data] Validación exitosa. ${portfolioData.projects.length} proyectos validados.`);
 }

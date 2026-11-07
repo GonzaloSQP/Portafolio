@@ -14,55 +14,56 @@ interface Props {
 }
 
 const {
-  title = "Benchmark Técnico: Línea Base vs Resultado Verificado",
+  title = "Benchmark Técnico: Monolito vs Streaming",
   benchmarks,
-  subtitle = "Medición del impacto de arquitectura con herramientas de telemetría y pruebas de carga"
+  subtitle = "Medición instrumentada con Oracle AWR, VisualVM Heap Monitor y pruebas de carga"
 } = Astro.props;
 ---
 
-<div class="rounded-2xl border border-border bg-surface p-6 sm:p-8 space-y-6 shadow-sm">
-  <div class="space-y-1">
+<div class="rounded-sm border border-border bg-surface p-5 sm:p-6 space-y-5 shadow-sm">
+  <div class="space-y-1.5 border-b border-border pb-4">
     <div class="flex items-center gap-2">
-      <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
-      <span class="text-xs font-mono font-bold text-accent uppercase">Evidencia Empírica</span>
+      <span class="w-1.5 h-1.5 bg-accent"></span>
+      <span class="text-xs font-mono font-bold text-accent uppercase tracking-wider">
+        [ TELEMETRÍA & BENCHMARK ]
+      </span>
     </div>
-    <h3 class="text-xl sm:text-2xl font-bold text-text-main">
+    <h3 class="text-lg sm:text-xl font-bold tracking-tight text-text-main">
       {title}
     </h3>
-    <p class="text-xs sm:text-sm text-text-muted">
+    <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
       {subtitle}
     </p>
   </div>
 
-  <div class="space-y-6 pt-2">
+  <div class="space-y-4">
     {benchmarks.map((b) => (
-      <div class="space-y-2 p-4 rounded-xl bg-surface-hover/60 border border-border">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm font-semibold text-text-main">
+      <div class="p-4 rounded-sm bg-bg border border-border space-y-2.5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs sm:text-sm font-semibold text-text-main">
           <span>{b.label}</span>
-          <span class="inline-flex items-center text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-success/15 text-success border border-success/30 self-start sm:self-auto">
+          <span class="inline-flex items-center text-xs font-mono font-bold px-2 py-0.5 rounded-sm bg-success/15 text-success border border-success/30 self-start sm:self-auto uppercase">
             ⚡ {b.improvement}
           </span>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs font-mono">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs font-mono">
           <!-- Antes (Línea Base) -->
-          <div class="p-3 rounded-lg bg-bg border border-error/30 space-y-1">
-            <span class="text-error font-bold flex items-center gap-1.5">
-              <span>✕</span> Antes (Monolito Legado)
+          <div class="p-3 rounded-sm bg-surface border border-error/30 space-y-1">
+            <span class="text-error font-bold flex items-center gap-1.5 uppercase text-[11px]">
+              <span>✕</span> Línea Base (Sistema Legado)
             </span>
-            <div class="text-sm font-bold text-text-main">{b.before}</div>
+            <div class="text-sm sm:text-base font-bold text-text-main">{b.before}</div>
           </div>
 
           <!-- Después (Arquitectura Optimizada) -->
-          <div class="p-3 rounded-lg bg-bg border border-success/40 space-y-1">
-            <span class="text-success font-bold flex items-center gap-1.5">
-              <span>✓</span> Después (Microservicios / Streaming)
+          <div class="p-3 rounded-sm bg-surface border border-success/40 space-y-1">
+            <span class="text-success font-bold flex items-center gap-1.5 uppercase text-[11px]">
+              <span>✓</span> Arquitectura Jakarta Streaming
             </span>
-            <div class="text-sm font-bold text-text-main">{b.after}</div>
+            <div class="text-sm sm:text-base font-bold text-success">{b.after}</div>
           </div>
         </div>
       </div>
     ))}
   </div>
 </div>
-

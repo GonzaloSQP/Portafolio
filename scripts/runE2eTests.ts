@@ -130,8 +130,17 @@ async function runE2ETests() {
       '/proyectos/apis-cusco-consultas/',
       '/proyectos/apiscusco-facturacion-gran-escala/',
       '/proyectos/xmusic-web-app/',
+      '/notas/',
+      '/notas/streaming-reactivo-oracle-jakarta/',
+      '/notas/pre-auditoria-ubl-sunat/',
+      '/blog/',
+      '/blog/bitacora-migracion-bancaria-streaming/',
+      '/blog/bitacora-preauditoria-facturacion-sunat/',
+      '/blog/bitacora-microservicios-de-consulta/',
+      '/blog/bitacora-publicacion-de-este-portafolio/',
       '/sobre-mi/',
       '/contacto/',
+      '/cv/',
       '/404.html',
     ];
 

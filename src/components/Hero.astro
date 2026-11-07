@@ -3,71 +3,98 @@ import { portfolioData } from '../data/portfolioData';
 import StreamCanvas from '../generative/StreamCanvas.astro';
 ---
 
-<section class="relative pt-10 pb-16 lg:pt-16 lg:pb-24 overflow-hidden" aria-labelledby="hero-title">
+<section class="relative py-10 lg:py-14 border-b border-border bg-bg" aria-labelledby="hero-title">
   <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-      <!-- Columna de Contenido (Izquierda) -->
-      <div class="lg:col-span-7 space-y-6">
-        <!-- Badge de especialidad técnica -->
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs sm:text-sm font-medium">
-          <span class="w-2 h-2 rounded-full bg-accent animate-ping"></span>
-          <span>{portfolioData.title}</span>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
+      <!-- Columna Izquierda: Información de Arquitectura -->
+      <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <!-- Tag Técnico Recto -->
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-accent-bg border border-accent/30 text-accent text-xs font-mono font-bold tracking-wider uppercase">
+              <span class="w-1.5 h-1.5 bg-accent"></span>
+              <span>{portfolioData.title}</span>
+            </span>
+            <span class="text-xs font-mono text-text-muted hidden sm:inline">
+              // CUSCO, PERÚ · DISPONIBILIDAD INMEDIATA
+            </span>
+          </div>
+
+          <!-- Titular Principal con Tipografía Precisa -->
+          <h1
+            id="hero-title"
+            class="text-3xl sm:text-5xl lg:text-[54px] font-black tracking-tight text-text-main leading-[1.12]"
+          >
+            Sistemas distribuidos, <span class="text-accent">streaming masivo</span> y arquitecturas de misión crítica.
+          </h1>
+
+          <!-- Resumen de Valor con Alto Contraste y Tipografía Cómoda -->
+          <p class="text-sm sm:text-base text-text-muted leading-relaxed max-w-2xl">
+            Modernización de plataformas complejas: migración de reportería financiera monolítica a microservicios Jakarta EE con procesamiento reactivo de <strong class="text-text-main font-semibold">más de 1,000,000 de registros en menos de 15 minutos</strong> mediante streaming por cursores y optimización Oracle SQL, y centralización tributaria SUNAT para <strong class="text-text-main font-semibold">más de 30 empresas</strong>.
+          </p>
         </div>
 
-        <!-- H1 Principal -->
-        <h1
-          id="hero-title"
-          class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-text-main leading-[1.12]"
-        >
-          Sistemas distribuidos, <span class="text-accent">streaming masivo</span> y facturación de alta escala.
-        </h1>
+        <!-- Acciones Directas y Botones Rectos -->
+        <div class="space-y-4 pt-1">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <a
+              href="/proyectos"
+              class="px-5 py-2.5 rounded-sm bg-accent text-bg font-mono text-xs font-black uppercase tracking-wider hover:bg-accent-hover transition-colors inline-flex items-center gap-2 focus-visible:outline-accent"
+            >
+              <span>Ver Arquitecturas</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
 
-        <!-- Párrafo de propuesta de valor con contexto empírico -->
-        <p class="text-base sm:text-lg text-text-muted leading-relaxed max-w-2xl">
-          Especialista en modernizar arquitecturas críticas: migración de reportería financiera desde Visual Basic a microservicios Jakarta EE procesando <strong class="text-text-main font-semibold">más de 1,000,000 de registros en menos de 15 minutos</strong> mediante streaming reactivo y optimización Oracle SQL, y centralización tributaria para <strong class="text-text-main font-semibold">más de 30 empresas</strong>.
-        </p>
+            <a
+              href="/sobre-mi"
+              class="px-5 py-2.5 rounded-sm bg-surface border border-border text-text-main font-mono text-xs font-bold uppercase tracking-wider hover:bg-surface-hover hover:border-accent/40 transition-colors focus-visible:outline-accent"
+            >
+              Trayectoria & CV
+            </a>
 
-        <!-- Botones de Acción y Conversión -->
-        <div class="flex flex-wrap items-center gap-3 pt-2">
-          <a
-            href="/proyectos"
-            class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-accent text-bg font-bold text-sm sm:text-base hover:bg-accent-hover transition-all shadow-md focus-visible:outline-accent"
-          >
-            Explorar Arquitecturas & Casos
-            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </a>
+            <a
+              href="/contacto"
+              class="px-4 py-2.5 rounded-sm text-text-muted hover:text-text-main font-mono text-xs font-semibold uppercase tracking-wider hover:bg-surface-hover/50 transition-colors focus-visible:outline-accent"
+            >
+              Contactar Directo →
+            </a>
+          </div>
 
-          <a
-            href="/sobre-mi"
-            class="inline-flex items-center justify-center px-5 py-3.5 rounded-xl bg-surface border border-border text-text-main font-semibold text-sm sm:text-base hover:bg-surface-hover transition-colors focus-visible:outline-accent"
-          >
-            Perfil & CV
-          </a>
-
-          <a
-            href="/contacto"
-            class="inline-flex items-center justify-center px-5 py-3.5 rounded-xl bg-surface-hover text-text-muted hover:text-text-main text-sm font-semibold transition-colors focus-visible:outline-accent"
-          >
-            Contactar Directamente
-          </a>
-        </div>
-
-        <!-- Chips de tecnologías clave -->
-        <div class="pt-2 flex flex-wrap items-center gap-2 text-xs font-mono text-text-muted">
-          <span class="text-text-main font-bold">Stack Core:</span>
-          <span class="px-2.5 py-1 rounded-md bg-surface border border-border">Jakarta EE</span>
-          <span class="px-2.5 py-1 rounded-md bg-surface border border-border">Reactive Streams</span>
-          <span class="px-2.5 py-1 rounded-md bg-surface border border-border">Oracle SQL</span>
-          <span class="px-2.5 py-1 rounded-md bg-surface border border-border">SUNAT / UBL 2.1</span>
-          <span class="px-2.5 py-1 rounded-md bg-surface border border-border">Redis / High-Concurrency</span>
+          <!-- Stack Core con Chips Rectangulares -->
+          <div class="pt-2 border-t border-border/60 flex flex-wrap items-center gap-1.5 text-xs font-mono">
+            <span class="text-text-main font-bold uppercase text-[11px] mr-1">Stack:</span>
+            {['Jakarta EE', 'Oracle SQL', 'Reactive Streams', 'UBL 2.1 / SUNAT', 'Redis', 'Docker'].map((tech) => (
+              <span class="px-2 py-0.5 rounded-sm bg-surface border border-border text-text-muted font-mono text-[11px]">
+                {tech}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
-      <!-- Columna Visual Algorítmica (Derecha: Pipeline Reactivo) -->
-      <div class="lg:col-span-5 h-[380px] sm:h-[440px] lg:h-[480px]">
-        <StreamCanvas />
+      <!-- Columna Derecha: Panel de Telemetría y Pipeline Visual -->
+      <div class="lg:col-span-5 flex flex-col rounded-sm border border-border bg-surface overflow-hidden shadow-sm">
+        <!-- Barra de Estado del Panel -->
+        <div class="px-3 py-2 border-b border-border bg-surface-hover/50 flex items-center justify-between text-xs font-mono text-text-muted">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-none bg-accent animate-pulse"></span>
+            <span class="font-bold text-text-main text-[11px]">TELEMETRY_PIPELINE</span>
+          </div>
+          <span class="text-[10px] text-accent font-semibold uppercase">ACTIVE // STREAMING</span>
+        </div>
+
+        <!-- Canvas del Pipeline -->
+        <div class="flex-1 min-h-[300px] sm:min-h-[340px] relative bg-bg">
+          <StreamCanvas />
+        </div>
+
+        <!-- Barra Inferior de Métricas del Pipeline -->
+        <div class="px-3 py-1.5 border-t border-border bg-surface-hover/30 flex items-center justify-between text-[11px] font-mono text-text-muted">
+          <span>BATCH: <strong class="text-text-main">2,500 ROWS</strong></span>
+          <span>HEAP: <strong class="text-success">380 MB STABLE</strong></span>
+        </div>
       </div>
     </div>
   </div>

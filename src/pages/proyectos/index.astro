@@ -13,45 +13,43 @@ const productionProjects = portfolioData.projects.slice(2);
   description="Catálogo de proyectos de arquitectura de software, migración a microservicios con streaming y plataformas tributarias a gran escala."
   currentPath="/proyectos"
 >
-  <div class="py-12 sm:py-16">
-    <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-      <!-- Encabezado de página -->
-      <div class="max-w-3xl">
-        <span class="text-xs font-mono text-accent font-semibold tracking-wider uppercase">
-          Portafolio de Ingeniería & Arquitectura
+  <div class="py-10 sm:py-14">
+    <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <!-- Encabezado de página recto -->
+      <div class="max-w-3xl space-y-2 border-b border-border pb-6">
+        <span class="text-xs font-mono text-accent font-bold tracking-wider uppercase">
+          [ PORTAFOLIO DE INGENIERÍA & ARQUITECTURA ]
         </span>
-        <h1 class="text-3xl sm:text-5xl font-black text-text-main tracking-tight mt-1">
+        <h1 class="text-2xl sm:text-4xl lg:text-[40px] font-black text-text-main tracking-tight leading-tight">
           Proyectos & Sistemas Críticos
         </h1>
-        <p class="mt-4 text-base sm:text-lg text-text-muted leading-relaxed">
+        <p class="text-sm sm:text-base text-text-muted leading-relaxed font-sans pt-1">
           Sistemas en producción, migraciones críticas de bases de datos masivas y microservicios de alta concurrencia desarrollados con estándares rigurosos de fiabilidad y rendimiento.
         </p>
       </div>
 
       <!-- Sección 1: Casos de Estudio Insignia (Top 2) -->
-      <section class="space-y-6" aria-labelledby="flagship-title">
-        <div class="flex items-center gap-2 border-b border-border pb-3">
-          <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
-          <h2 id="flagship-title" class="text-lg sm:text-xl font-bold font-mono text-text-main uppercase tracking-wider">
-            Casos de Estudio Principales & Arquitecturas Complejas
+      <section class="space-y-4" aria-labelledby="flagship-title">
+        <div class="flex items-center gap-2 border-b border-border pb-2.5">
+          <span class="w-1.5 h-1.5 bg-accent"></span>
+          <h2 id="flagship-title" class="text-xs font-mono font-bold text-accent uppercase tracking-wider">
+            [ CASOS DE ESTUDIO PRINCIPALES // ALTA COMPLEJIDAD ]
           </h2>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {flagshipProjects.map((project) => (
-            <div class="relative">
-              <ProjectCard project={project} />
-            </div>
+            <ProjectCard project={project} />
           ))}
         </div>
       </section>
 
       <!-- Sección 2: Servicios y Productos en Producción -->
-      <section class="space-y-6 pt-4" aria-labelledby="production-title">
-        <div class="flex items-center gap-2 border-b border-border pb-3">
-          <span class="w-2.5 h-2.5 rounded-full bg-success"></span>
-          <h2 id="production-title" class="text-lg sm:text-xl font-bold font-mono text-text-main uppercase tracking-wider">
-            Sistemas Activos & Plataformas Web en Producción
+      <section class="space-y-4 pt-4" aria-labelledby="production-title">
+        <div class="flex items-center gap-2 border-b border-border pb-2.5">
+          <span class="w-1.5 h-1.5 bg-success"></span>
+          <h2 id="production-title" class="text-xs font-mono font-bold text-success uppercase tracking-wider">
+            [ SERVICIOS ACTIVOS & PLATAFORMAS EN PRODUCCIÓN ]
           </h2>
         </div>
 

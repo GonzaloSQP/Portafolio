@@ -1,50 +1,65 @@
 ---
-// MetricsStrip.astro: Banda de métricas técnicas comprobadas y logros cuantitativos
+// MetricsStrip.astro: Rail de telemetría de ingeniería de alta precisión y métricas verificadas
 const metrics = [
   {
-    value: '> 1M Registros',
-    subtext: 'Procesados en <15 min',
-    desc: 'Streaming reactivo Jakarta EE & Oracle SQL masivo',
-    badge: 'Big Data / Streaming'
+    value: '> 1,000,000',
+    unit: 'registros',
+    subtext: 'En menos de 15 minutos',
+    desc: 'Streaming reactivo Jakarta EE por cursores y optimización de índices Oracle SQL.',
+    badge: 'SYS_01 · STREAMING'
   },
   {
-    value: '30+ Empresas',
+    value: '30+',
+    unit: 'empresas',
     subtext: 'Facturación Centralizada',
-    desc: 'Gestión tributaria, auditoría XML y envíos a SUNAT',
-    badge: 'Misión Crítica'
+    desc: 'Gestión fiscal multi-tenant, pre-auditoría UBL 2.1 y despacho asíncrono con Redis.',
+    badge: 'SYS_02 · FISCAL'
   },
   {
     value: '< 120 ms',
-    subtext: 'Latencia de Consulta',
-    desc: 'Microservicios APIS Cusco (DNI, RUC, Placas, SOAT)',
-    badge: 'Alta Concurrencia'
+    unit: 'latencia',
+    subtext: 'Consultas Idempotentes',
+    desc: 'Microservicios REST de DNI, RUC, Placas y SOAT con persistencia en caché en memoria.',
+    badge: 'SYS_03 · CONCURRENCY'
   },
   {
-    value: '< 1.2% Error',
-    subtext: 'Pre-Auditoría UBL 2.1',
-    desc: 'Reducción de rechazos SUNAT de 25% a <1.2% en 30+ empresas',
-    badge: 'Compliance Fiscal'
+    value: '< 1.2%',
+    unit: 'tasa error',
+    subtext: 'Pre-Auditoría SUNAT',
+    desc: 'Reducción de rechazos de CDRs de 24.8% a <1.2% antes de la firma digital X.509.',
+    badge: 'SYS_04 · COMPLIANCE'
   }
 ];
 ---
 
-<section class="py-10 border-y border-border bg-surface/30" aria-label="Métricas técnicas comprobadas">
-  <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<section class="border-y border-border bg-surface" aria-label="Métricas técnicas comprobadas">
+  <div class="max-w-content mx-auto">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
       {metrics.map((m) => (
-        <div class="p-5 rounded-xl bg-surface border border-border shadow-sm flex flex-col justify-between">
+        <div class="p-4 sm:p-5 flex flex-col justify-between hover:bg-surface-hover/30 transition-colors">
           <div>
-            <span class="inline-block text-[11px] font-mono px-2 py-0.5 rounded-full bg-accent/10 text-accent mb-2">
-              {m.badge}
-            </span>
-            <div class="text-2xl sm:text-3xl font-black font-mono tracking-tight text-text-main">
-              {m.value}
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-sm bg-accent-bg text-accent border border-accent/20">
+                {m.badge}
+              </span>
+              <span class="w-1.5 h-1.5 rounded-none bg-accent/60"></span>
             </div>
-            <div class="text-sm font-semibold text-text-main mt-0.5">
+
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-2xl sm:text-3xl font-black font-mono tracking-tight text-text-main">
+                {m.value}
+              </span>
+              <span class="text-xs font-mono font-bold text-accent uppercase">
+                {m.unit}
+              </span>
+            </div>
+
+            <div class="text-xs font-bold text-text-main mt-0.5 uppercase tracking-wide">
               {m.subtext}
             </div>
           </div>
-          <p class="text-xs text-text-muted mt-3">
+
+          <p class="text-xs text-text-muted mt-3 leading-relaxed border-t border-border/50 pt-2 font-sans">
             {m.desc}
           </p>
         </div>
@@ -52,4 +67,3 @@ const metrics = [
     </div>
   </div>
 </section>
-

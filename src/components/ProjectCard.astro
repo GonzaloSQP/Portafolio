@@ -8,98 +8,103 @@ interface Props {
 
 const { project, featured = false } = Astro.props;
 
-const statusStyles: Record<string, { bg: string; text: string; dot: string }> = {
-  'En Producción': { bg: 'bg-success/10', text: 'text-success', dot: 'bg-success' },
-  'Entregado': { bg: 'bg-accent/10', text: 'text-accent', dot: 'bg-accent' },
-  'Confidencial (Bajo NDA)': { bg: 'bg-amber-500/10', text: 'text-amber-500', dot: 'bg-amber-500' },
-  'activo': { bg: 'bg-success/10', text: 'text-success', dot: 'bg-success' },
+const statusStyles: Record<string, { bg: string; text: string; border: string }> = {
+  'En Producción': { bg: 'bg-success/10', text: 'text-success', border: 'border-success/30' },
+  'Entregado': { bg: 'bg-accent/10', text: 'text-accent', border: 'border-accent/30' },
+  'Confidencial (Bajo NDA)': { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/30' },
+  'activo': { bg: 'bg-success/10', text: 'text-success', border: 'border-success/30' },
 };
 
 const currentStatus = statusStyles[project.status] || statusStyles['En Producción'];
 ---
 
 <article
-  class={`group relative flex flex-col justify-between rounded-2xl border border-border bg-surface p-6 sm:p-8 hover:border-accent/50 transition-all duration-200 hover:shadow-xl ${
+  class={`group relative flex flex-col justify-between rounded-sm border border-border bg-surface p-5 sm:p-6 hover:border-accent transition-all duration-150 ${
     featured ? 'lg:col-span-2' : ''
   }`}
   aria-labelledby={`project-title-${project.id}`}
 >
-  <div>
-    <!-- Encabezado de la tarjeta: Categoría y Estado Significativo -->
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <span class="text-xs font-mono font-medium px-2.5 py-1 rounded-full bg-accent/10 text-accent border border-accent/20">
+  <div class="space-y-4">
+    <!-- Encabezado Técnico de Tarjeta: Recto y Modular -->
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border/70 pb-3">
+      <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-sm bg-accent-bg text-accent border border-accent/25 uppercase">
         {project.category}
       </span>
 
-      <!-- Estado con significado técnico real -->
-      <div class={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-0.5 rounded-full border border-current/20 ${currentStatus.bg} ${currentStatus.text}`}>
-        <span class={`w-1.5 h-1.5 rounded-full ${currentStatus.dot}`}></span>
-        <span>{project.statusDetail || project.status}</span>
+      <!-- Estado Técnico Recto -->
+      <div class={`inline-flex items-center gap-1.5 text-[11px] font-mono font-bold px-2 py-0.5 rounded-sm border ${currentStatus.bg} ${currentStatus.text} ${currentStatus.border}`}>
+        <span class="w-1.5 h-1.5 bg-current"></span>
+        <span class="uppercase">{project.statusDetail || project.status}</span>
       </div>
     </div>
 
-    <!-- Título con enlace principal único -->
-    <h3
-      id={`project-title-${project.id}`}
-      class="text-xl sm:text-2xl font-bold tracking-tight text-text-main group-hover:text-accent transition-colors"
-    >
-      <a href={`/proyectos/${project.id}`} class="focus-visible:outline-accent">
-        <span class="absolute inset-0 z-10" aria-hidden="true"></span>
-        {project.title}
-      </a>
-    </h3>
+    <!-- Título con enlace absoluto -->
+    <div>
+      <h3
+        id={`project-title-${project.id}`}
+        class="text-lg sm:text-xl font-bold tracking-tight text-text-main group-hover:text-accent transition-colors"
+      >
+        <a href={`/proyectos/${project.id}`} class="focus-visible:outline-accent">
+          <span class="absolute inset-0 z-10" aria-hidden="true"></span>
+          {project.title}
+        </a>
+      </h3>
 
-    <!-- Resumen -->
-    <p class="mt-3 text-sm sm:text-base text-text-muted leading-relaxed">
-      {project.summary}
-    </p>
+      <!-- Resumen legible -->
+      <p class="mt-2 text-sm text-text-muted leading-relaxed font-sans">
+        {project.summary}
+      </p>
+    </div>
 
-    <!-- Línea Base vs Resultado (Si existe) -->
+    <!-- Evidencia Cuantitativa: Línea Base vs Resultado (Si existe) -->
     {project.baseline && project.metricOutcome && (
-      <div class="mt-4 p-3.5 rounded-xl bg-bg border border-border/80 text-xs font-mono space-y-1.5">
+      <div class="p-3 rounded-sm bg-bg border border-border/80 text-xs font-mono space-y-1.5">
         <div class="flex items-start gap-1.5 text-text-muted">
-          <span class="text-error font-bold">Línea base:</span>
-          <span>{project.baseline}</span>
+          <span class="text-error font-bold shrink-0">[ANTES]:</span>
+          <span class="line-clamp-2">{project.baseline}</span>
         </div>
         <div class="flex items-start gap-1.5 text-text-main font-semibold">
-          <span class="text-success font-bold">Resultado:</span>
+          <span class="text-success font-bold shrink-0">[AHORA]:</span>
           <span class="text-success">{project.metricOutcome}</span>
         </div>
       </div>
     )}
 
-    <!-- Resultados Verificables Destacados -->
-    <div class="mt-4 pt-3 border-t border-border/60">
-      <h4 class="text-xs font-bold font-mono text-text-main uppercase tracking-wider mb-2">
-        Evidencia y Métricas Comprobadas:
-      </h4>
-      <ul class="space-y-1.5 text-xs text-text-muted">
+    <!-- Resultados Verificados Destacados -->
+    <div class="pt-2">
+      <div class="text-[11px] font-mono font-bold text-text-main uppercase tracking-wider mb-2">
+        Métricas de Producción:
+      </div>
+      <ul class="space-y-1.5 text-xs text-text-muted font-sans">
         {project.results.slice(0, 2).map((res) => (
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-accent shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span>{res}</span>
+            <span class="text-accent font-bold mt-0.5 shrink-0">›</span>
+            <span class="leading-relaxed">{res}</span>
           </li>
         ))}
       </ul>
     </div>
   </div>
 
-  <!-- Pie de Tarjeta: Stack Completo y CTA con Contexto -->
-  <div class="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <!-- Tecnologías -->
-    <div class="flex flex-wrap gap-1.5">
-      {project.technologies.map((tech) => (
-        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-surface-hover text-text-muted border border-border">
+  <!-- Pie de Tarjeta: Stack y CTA -->
+  <div class="mt-5 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <!-- Tecnologías con chips rectangulares -->
+    <div class="flex flex-wrap gap-1">
+      {project.technologies.slice(0, 5).map((tech) => (
+        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-surface-hover text-text-muted border border-border">
           {tech}
         </span>
       ))}
+      {project.technologies.length > 5 && (
+        <span class="text-[10px] font-mono px-1 py-0.5 text-text-dim">
+          +{project.technologies.length - 5}
+        </span>
+      )}
     </div>
 
-    <!-- Indicador de navegación con contexto específico -->
-    <span class="inline-flex items-center text-xs font-bold text-accent group-hover:translate-x-1 transition-transform shrink-0 self-end sm:self-auto">
-      {project.ctaText || "Ver arquitectura y resultados →"}
+    <!-- Indicador de acción técnico -->
+    <span class="inline-flex items-center text-xs font-mono font-bold text-accent group-hover:text-accent-hover group-hover:translate-x-1 transition-all shrink-0 self-end sm:self-auto uppercase">
+      {project.ctaText || "Ver arquitectura →"}
     </span>
   </div>
 </article>
