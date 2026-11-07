@@ -1,64 +1,55 @@
 # Nivel de Despliegue y Matriz de Hosting
 
-Fecha de consulta y elaboración: 2026-11-06
+Fecha de verificación y despliegue final: 2026-11-06
 
 ---
 
-## 1. Matriz Ponderada de Opciones de Hosting (Fase A3)
+## 1. Despliegue en Producción Verificado
 
-| Criterio | Peso | Cloudflare Pages | GitHub Pages | Vercel (Hobby) |
-| --- | --- | --- | --- | --- |
-| **Costo y riesgo de superar cuotas** (solicitudes, ancho de banda, almacenamiento) | 25 | **5** (Ancho de banda ilimitado, 500 builds/mes, $0/mes) | **4** (100 GB ancho de banda/mes, 1 GB soft storage limit, $0/mes) | **3** (100 GB ancho de banda, riesgo de cobros o suspensión por picos en plan Hobby) |
-| **Rutas, assets estáticos, página 404 real y rutas profundas** | 20 | **5** (`_routes.json`, soporte nativo de `404.html` con status 404 real, cabeceras `_headers`) | **4** (`404.html` nativo, sin configuración granular de cabeceras de seguridad) | **4** (Excelente soporte estático, `vercel.json`) |
-| **Facilidad de despliegue y previsualización** | 15 | **5** (Git integration, Wrangler CLI para deploy directo desde terminal, previews automáticas) | **4** (GitHub Actions, sin URLs de preview independientes por rama nativas sin config extra) | **5** (CLI `vercel`, previews por PR) |
-| **Dominio personalizado y HTTPS** | 10 | **5** (SSL automático, proxy Anycast global, DNS gratis) | **5** (SSL Let's Encrypt automático, CNAME) | **5** (SSL automático, gestión DNS) |
-| **Facilidad de migración y dependencia del proveedor** | 10 | **5** (Archivos estáticos 100% estándar HTML/CSS/JS, sin vendor lock-in) | **5** (Archivos estáticos puros) | **4** (Orientado a ecosistema Vercel) |
-| **Latencia y distribución (CDN)** | 10 | **5** (Red Anycast en >330 ciudades a nivel mundial) | **4** (Fastly CDN de GitHub) | **4** (Edge network global) |
-| **Soporte de funciones edge (si se requieren en el futuro)** | 10 | **5** (Cloudflare Workers nativos con capa gratuita de 100k req/día) | **1** (Solo estático) | **4** (Serverless/Edge con límites de tiempo de ejecución en Hobby) |
-| **TOTAL PONDERADO (/500)** | **100** | **495 / 500** | **405 / 500** | **410 / 500** |
-
-### Fuente oficial consultada:
-- Cloudflare Pages Pricing & Limits: `https://developers.cloudflare.com/pages/platform/limits/` (Consultado: Noviembre 2026).
-  - Bandwidth: Ilimitado.
-  - Builds: 500/mes gratuitos.
-  - Almacenamiento: 20,000 archivos por proyecto, 25 MiB por archivo.
-- GitHub Pages Limits: `https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#limits-on-use-of-github-pages` (Consultado: Noviembre 2026).
-  - Límite de ancho de banda: 100 GB/mes.
-  - Repositorio recomendado: ≤ 1 GB.
-- Vercel Fair Use Guidelines: `https://vercel.com/docs/limits/overview` (Consultado: Noviembre 2026).
+| Parámetro | Valor Verificado en Vivo |
+| --- | --- |
+| **URL Pública de Producción** | **[https://dev.apiscusco.com](https://dev.apiscusco.com)** |
+| **Alias de Cloudflare Pages** | `https://main.portafolio-marcio.pages.dev` |
+| **Estado del Dominio en Cloudflare** | `active` (Zone Tag: `a8181df75b17d5d5f1dd184216a6a521`) |
+| **Certificado SSL/TLS** | Activo y emitido por Google Trust Services vía Cloudflare |
+| **Protocolo HTTP** | HTTP/2 y HTTP/3 (QUIC) con Anycast global |
+| **Cabeceras de Seguridad Verificadas** | CSP, X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy, Permissions-Policy |
+| **Página 404** | Status HTTP 404 real probado en `/ruta-inexistente` |
 
 ---
 
-## 2. Recomendación de Arquitectura
+## 2. Comprobaciones de Rutas en Vivo
 
-**Recomendación principal:** **Cloudflare Pages** (o **GitHub Pages** como respaldo idéntico y portable).
-Al compilar a un directorio estático puro (`dist/`), el portafolio puede desplegarse indistintamente en cualquiera de los dos con costo de operación de $0 y cero fricción de migración.
-
-> [!IMPORTANT]
-> **No se promete gratuidad perpetua:** Las cuotas gratuitas están sujetas a los Términos y Condiciones vigentes del proveedor a noviembre de 2026. Para el volumen esperado de un portafolio profesional de alta calidad, el consumo se sitúa muy por debajo del 1% de los límites de Cloudflare Pages.
-
----
-
-## 3. Instrucciones Reproducibles de Despliegue
-
-### Opción A: Despliegue en Cloudflare Pages vía Wrangler (Recomendado)
 ```bash
-# 1. Compilar el proyecto en modo producción
-npm run verify
+curl.exe -I https://dev.apiscusco.com/
+# HTTP/1.1 200 OK
 
-# 2. Desplegar el directorio estático
-npx wrangler pages deploy dist --project-name=marciosequeiros-portfolio
+curl.exe -I https://dev.apiscusco.com/proyectos/
+# HTTP/1.1 200 OK
+
+curl.exe -I https://dev.apiscusco.com/proyectos/banca-streaming-jakarta/
+# HTTP/1.1 200 OK
+
+curl.exe -I https://dev.apiscusco.com/sobre-mi/
+# HTTP/1.1 200 OK
+
+curl.exe -I https://dev.apiscusco.com/contacto/
+# HTTP/1.1 200 OK
+
+curl.exe -I https://dev.apiscusco.com/ruta-inexistente
+# HTTP/1.1 404 Not Found
 ```
 
-### Opción B: Despliegue en GitHub Pages vía Actions
-El proyecto incluye el workflow `.github/workflows/deploy.yml` configurado para compilar con `npm run verify` y publicar en la rama `gh-pages` o mediante GitHub Pages Artifacts.
-
 ---
 
-## 4. Estrategia de Cabeceras de Seguridad y Rutas
+## 3. Procedimiento para Futuras Actualizaciones
 
-El build genera los siguientes artefactos en la raíz de salida:
-- `_headers`: Define cabeceras HTTP de seguridad para Cloudflare Pages (`Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, y caché inmutable de 1 año para assets versionados en `/_astro/*`).
-- `_redirects`: Reglas de enrutamiento y captura de 404 estricta.
-- `404.html`: Página de error 404 semántica con diseño integrado y enlace de rescate.
+Cada vez que desees publicar cambios:
+```bash
+# 1. Ejecutar validación integral y build
+npm run verify
 
+# 2. Desplegar a producción en Cloudflare Pages
+npx wrangler pages deploy dist --project-name=portafolio-marcio --branch=main
+```
+Los cambios se reflejarán instantáneamente en **`https://dev.apiscusco.com`**.
