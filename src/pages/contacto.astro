@@ -236,8 +236,8 @@ const web3formsAccessKey = import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY || '';
           headers: { 'Accept': 'application/json' }
         });
 
-        const payload = await response.json().catch(() => null);
-        if (response.ok && payload && payload.success) {
+        const result = await response.json().catch(() => null);
+        if (response.ok && result && result.success) {
           statusBox.className = 'text-xs font-mono font-bold p-3 rounded-sm bg-success/15 text-success border border-success/30';
           statusBox.textContent = '✓ Mensaje recibido correctamente. Me pondré en contacto en menos de 24 horas.';
           form.reset();

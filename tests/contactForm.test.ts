@@ -23,7 +23,7 @@ describe('Formulario de contacto con envío real (Web3Forms en cliente)', () => 
     expect(contacto).toContain('https://api.web3forms.com/submit');
     expect(contacto).toContain('PUBLIC_WEB3FORMS_ACCESS_KEY');
     expect(contacto).toContain('access_key: web3formsAccessKey');
-    expect(contacto).toContain('payload.success');
+    expect(contacto).toContain('result.success');
     expect(contacto).not.toContain('formsubmit.co');
     expect(contacto).not.toMatch(UUID_RE);
   });
