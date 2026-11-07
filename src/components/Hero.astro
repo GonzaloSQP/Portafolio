@@ -74,27 +74,9 @@ import StreamCanvas from '../generative/StreamCanvas.astro';
         </div>
       </div>
 
-      <!-- Columna Derecha: Panel de Telemetría y Pipeline Visual -->
-      <div class="lg:col-span-5 flex flex-col rounded-sm border border-border bg-surface overflow-hidden shadow-sm">
-        <!-- Barra de Estado del Panel -->
-        <div class="px-3 py-2 border-b border-border bg-surface-hover/50 flex items-center justify-between text-xs font-mono text-text-muted">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-none bg-accent animate-pulse"></span>
-            <span class="font-bold text-text-main text-[11px]">TELEMETRY_PIPELINE</span>
-          </div>
-          <span class="text-[10px] text-accent font-semibold uppercase">ACTIVE // STREAMING</span>
-        </div>
-
-        <!-- Canvas del Pipeline -->
-        <div class="flex-1 min-h-[300px] sm:min-h-[340px] relative bg-bg">
-          <StreamCanvas />
-        </div>
-
-        <!-- Barra Inferior de Métricas del Pipeline -->
-        <div class="px-3 py-1.5 border-t border-border bg-surface-hover/30 flex items-center justify-between text-[11px] font-mono text-text-muted">
-          <span>BATCH: <strong class="text-text-main">2,500 ROWS</strong></span>
-          <span>HEAP: <strong class="text-success">380 MB STABLE</strong></span>
-        </div>
+      <!-- Columna Derecha: Panel de Telemetría y Pipeline Visual Interactivo -->
+      <div class="lg:col-span-5 flex flex-col justify-start">
+        <StreamCanvas />
       </div>
     </div>
   </div>

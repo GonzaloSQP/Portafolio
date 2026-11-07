@@ -1,6 +1,6 @@
 import { getSafeDevicePixelRatio } from '../lib/animationMath';
 
-interface PipelineNode {
+export interface PipelineNode {
   x: number;
   y: number;
   label: string;
@@ -19,8 +19,8 @@ export class StreamAnimation {
 
   // Parámetros del pipeline
   private nodes: PipelineNode[] = [];
-  private packetCount = 42;
-  // TypedArrays contiguos para paquetes: [x, y, speed, targetIndex, alpha]
+  private packetCount = 48;
+  // TypedArrays contiguos para paquetes
   private packetX!: Float32Array;
   private packetY!: Float32Array;
   private packetSpeed!: Float32Array;
@@ -28,9 +28,15 @@ export class StreamAnimation {
   private packetTarget!: Uint8Array;
   private packetProgress!: Float32Array;
 
-  // Interacción
+  // Estado interactivo
   private mouseX = -9999;
   private mouseY = -9999;
+  private selectedNodeIndex: number | null = 3; // Reactive Engine por defecto
+  private hoveredNodeIndex: number | null = null;
+  private isPaused = false;
+  private speedMultiplier = 1.0;
+  private pulsePhase = 0;
+  private nodeSelectListeners: ((index: number, node: PipelineNode) => void)[] = [];
 
   private resizeObserver: ResizeObserver | null = null;
   private intersectionObserver: IntersectionObserver | null = null;
@@ -72,7 +78,7 @@ export class StreamAnimation {
     this.nodes = [
       // Ingesta (Izquierda)
       { x: w * 0.15, y: h * 0.28, label: 'Oracle SQL (Cursor)', type: 'source', radius: 14 },
-      { x: w * 0.15, y: h * 0.72, label: 'SUNAT / Client Events', type: 'source', radius: 14 },
+      { x: w * 0.15, y: h * 0.72, label: 'SUNAT / Fiscal Events', type: 'source', radius: 14 },
 
       // Procesamiento Streaming (Centro)
       { x: w * 0.50, y: h * 0.22, label: 'Jakarta Buffer', type: 'worker', radius: 18 },
@@ -93,7 +99,6 @@ export class StreamAnimation {
   }
 
   private resetPacket(i: number): void {
-    // Escoger una fuente (0 o 1) y un nodo de procesamiento intermedio (2, 3 o 4)
     const isStageTwo = Math.random() > 0.5;
     if (!isStageTwo) {
       this.packetSource[i] = Math.random() > 0.5 ? 0 : 1;
@@ -107,7 +112,7 @@ export class StreamAnimation {
     this.packetSpeed[i] = 0.006 + Math.random() * 0.009;
   }
 
-  private resizeCanvas(): void {
+  public resizeCanvas(): void {
     if (!this.canvas) return;
     const dpr = getSafeDevicePixelRatio(window.devicePixelRatio);
     const w = this.canvas.clientWidth || 600;
@@ -137,8 +142,9 @@ export class StreamAnimation {
 
   private setupListeners(): void {
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
-    window.addEventListener('mousemove', this.handleMouseMove, { passive: true });
-    window.addEventListener('mouseleave', this.handleMouseLeave, { passive: true });
+    this.canvas.addEventListener('mousemove', this.handleMouseMove, { passive: true });
+    this.canvas.addEventListener('mouseleave', this.handleMouseLeave, { passive: true });
+    this.canvas.addEventListener('click', this.handleClick);
   }
 
   private handleVisibilityChange = (): void => {
@@ -151,12 +157,81 @@ export class StreamAnimation {
     const rect = this.canvas.getBoundingClientRect();
     this.mouseX = e.clientX - rect.left;
     this.mouseY = e.clientY - rect.top;
+
+    let foundHover: number | null = null;
+    for (let i = 0; i < this.nodes.length; i++) {
+      const node = this.nodes[i];
+      const dx = this.mouseX - node.x;
+      const dy = this.mouseY - node.y;
+      if (dx * dx + dy * dy <= (node.radius + 10) * (node.radius + 10)) {
+        foundHover = i;
+        break;
+      }
+    }
+
+    this.hoveredNodeIndex = foundHover;
+    this.canvas.style.cursor = foundHover !== null ? 'pointer' : 'default';
   };
 
   private handleMouseLeave = (): void => {
     this.mouseX = -9999;
     this.mouseY = -9999;
+    this.hoveredNodeIndex = null;
+    this.canvas.style.cursor = 'default';
   };
+
+  private handleClick = (e: MouseEvent): void => {
+    const rect = this.canvas.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
+    for (let i = 0; i < this.nodes.length; i++) {
+      const node = this.nodes[i];
+      const dx = clickX - node.x;
+      const dy = clickY - node.y;
+      if (dx * dx + dy * dy <= (node.radius + 12) * (node.radius + 12)) {
+        this.selectNode(i);
+        break;
+      }
+    }
+  };
+
+  public selectNode(index: number | null, emit = true): void {
+    if (this.selectedNodeIndex === index) return;
+    this.selectedNodeIndex = index;
+    if (emit && index !== null && this.nodes[index]) {
+      this.nodeSelectListeners.forEach((fn) => fn(index, this.nodes[index]));
+    }
+  }
+
+  public getSelectedNodeIndex(): number | null {
+    return this.selectedNodeIndex;
+  }
+
+  public onNodeSelect(callback: (index: number, node: PipelineNode) => void): void {
+    this.nodeSelectListeners.push(callback);
+  }
+
+  public setSpeed(multiplier: number): void {
+    this.speedMultiplier = Math.max(0.1, Math.min(multiplier, 4.0));
+  }
+
+  public togglePause(): boolean {
+    this.isPaused = !this.isPaused;
+    return this.isPaused;
+  }
+
+  public isAnimationPaused(): boolean {
+    return this.isPaused;
+  }
+
+  public burst(count = 20): void {
+    for (let k = 0; k < count; k++) {
+      const i = Math.floor(Math.random() * this.packetCount);
+      this.resetPacket(i);
+      this.packetSpeed[i] *= 2.2;
+    }
+  }
 
   private start(): void {
     if (this.isRunning || this.prefersReducedMotion) return;
@@ -179,7 +254,11 @@ export class StreamAnimation {
     const dt = Math.min((timestamp - this.lastTime) / 16.667, 2.5);
     this.lastTime = timestamp;
 
-    this.update(dt);
+    this.pulsePhase = (this.pulsePhase + 0.05 * dt) % (Math.PI * 2);
+
+    if (!this.isPaused) {
+      this.update(dt * this.speedMultiplier);
+    }
     this.render();
 
     this.animFrameId = requestAnimationFrame(this.loop);
@@ -189,13 +268,21 @@ export class StreamAnimation {
     for (let i = 0; i < this.packetCount; i++) {
       let speed = this.packetSpeed[i];
 
-      // Aceleración sutil si el cursor está cerca del paquete
+      // Aceleración reactiva si el cursor está cerca del paquete
       const px = this.packetX[i];
       const py = this.packetY[i];
       const dx = px - this.mouseX;
       const dy = py - this.mouseY;
       if (dx * dx + dy * dy < 8000) {
-        speed *= 1.8; // Burst de rendimiento reactivo ante interacción
+        speed *= 1.8;
+      }
+
+      // Si el paquete viaja hacia/desde el nodo seleccionado, aumenta su velocidad y foco
+      if (
+        this.selectedNodeIndex !== null &&
+        (this.packetSource[i] === this.selectedNodeIndex || this.packetTarget[i] === this.selectedNodeIndex)
+      ) {
+        speed *= 1.35;
       }
 
       this.packetProgress[i] += speed * dt;
@@ -208,7 +295,6 @@ export class StreamAnimation {
       const tgt = this.nodes[this.packetTarget[i]];
       if (src && tgt) {
         const t = this.packetProgress[i];
-        // Interpolación cúbica suave para simular flujo en tuberías de datos
         this.packetX[i] = src.x + (tgt.x - src.x) * t;
         this.packetY[i] = src.y + (tgt.y - src.y) * t + Math.sin(t * Math.PI) * (i % 2 === 0 ? 8 : -8);
       }
@@ -224,84 +310,118 @@ export class StreamAnimation {
 
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     const pipeColor = isDark ? 'rgba(56, 189, 248, 0.12)' : 'rgba(2, 132, 199, 0.12)';
-    const activePipeColor = isDark ? 'rgba(56, 189, 248, 0.35)' : 'rgba(2, 132, 199, 0.25)';
+    const activePipeColor = isDark ? 'rgba(56, 189, 248, 0.45)' : 'rgba(2, 132, 199, 0.35)';
     const packetColor = isDark ? '#38bdf8' : '#0284c7';
+    const selectedPacketColor = isDark ? '#34d399' : '#059669';
     const packetGlow = isDark ? 'rgba(56, 189, 248, 0.4)' : 'rgba(2, 132, 199, 0.3)';
     const nodeBg = isDark ? '#0f172a' : '#ffffff';
     const nodeBorder = isDark ? '#334155' : '#cbd5e1';
-    const textColor = isDark ? '#94a3b8' : '#475569';
+    const textColor = isDark ? '#cbd5e1' : '#334155';
 
-    // 1. Dibujar tuberías fijas de la arquitectura
+    // 1. Tuberías fijas de la arquitectura
     const connections: [number, number][] = [
       [0, 2], [0, 3], [1, 3], [1, 4],
       [2, 5], [3, 5], [3, 6], [4, 6]
     ];
 
-    this.ctx.lineWidth = 1.5;
     for (const [from, to] of connections) {
       const src = this.nodes[from];
       const tgt = this.nodes[to];
       if (!src || !tgt) continue;
 
-      this.ctx.strokeStyle = pipeColor;
+      const isConnectedToSelected =
+        this.selectedNodeIndex !== null &&
+        (from === this.selectedNodeIndex || to === this.selectedNodeIndex);
+
+      this.ctx.lineWidth = isConnectedToSelected ? 2.5 : 1.5;
+      this.ctx.strokeStyle = isConnectedToSelected ? activePipeColor : pipeColor;
       this.ctx.beginPath();
       this.ctx.moveTo(src.x, src.y);
       this.ctx.lineTo(tgt.x, tgt.y);
       this.ctx.stroke();
     }
 
-    // 2. Dibujar paquetes de datos en tránsito con estela de flujo
+    // 2. Paquetes de datos en tránsito
     for (let i = 0; i < this.packetCount; i++) {
       const x = this.packetX[i];
       const y = this.packetY[i];
 
+      const isTargetingSelected =
+        this.selectedNodeIndex !== null &&
+        (this.packetSource[i] === this.selectedNodeIndex || this.packetTarget[i] === this.selectedNodeIndex);
+
+      const color = isTargetingSelected ? selectedPacketColor : packetColor;
+      const radius = isTargetingSelected ? 3.5 : 2.5;
+
       // Brillo del paquete
       this.ctx.fillStyle = packetGlow;
       this.ctx.beginPath();
-      this.ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+      this.ctx.arc(x, y, radius + 2, 0, Math.PI * 2);
       this.ctx.fill();
 
-      // Centro del paquete (núcleo)
-      this.ctx.fillStyle = packetColor;
+      // Centro del paquete
+      this.ctx.fillStyle = color;
       this.ctx.beginPath();
-      this.ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
       this.ctx.fill();
     }
 
-    // 3. Dibujar nodos de arquitectura con etiquetas
+    // 3. Nodos de arquitectura con etiquetas
     this.ctx.font = '10px ui-monospace, SFMono-Regular, Menlo, monospace';
     this.ctx.textAlign = 'center';
 
     for (let i = 0; i < this.nodes.length; i++) {
       const n = this.nodes[i];
+      const isSelected = i === this.selectedNodeIndex;
+      const isHovered = i === this.hoveredNodeIndex;
 
-      // Pulso sutil alrededor del motor reactivo
-      if (i === 3) {
-        this.ctx.strokeStyle = activePipeColor;
-        this.ctx.lineWidth = 2;
+      // Pulso alrededor del nodo seleccionado o del motor reactivo
+      if (isSelected || (this.selectedNodeIndex === null && i === 3)) {
+        const pulseSize = 4 + Math.sin(this.pulsePhase) * 3;
+        this.ctx.strokeStyle = isSelected ? 'rgba(52, 211, 153, 0.6)' : activePipeColor;
+        this.ctx.lineWidth = isSelected ? 2.5 : 1.5;
         this.ctx.beginPath();
-        this.ctx.arc(n.x, n.y, n.radius + 5, 0, Math.PI * 2);
+        this.ctx.arc(n.x, n.y, n.radius + pulseSize, 0, Math.PI * 2);
         this.ctx.stroke();
       }
 
-      // Círculo de nodo
+      // Hover halo
+      if (isHovered && !isSelected) {
+        this.ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.arc(n.x, n.y, n.radius + 3, 0, Math.PI * 2);
+        this.ctx.stroke();
+      }
+
+      // Círculo del nodo
       this.ctx.fillStyle = nodeBg;
-      this.ctx.strokeStyle = i === 3 ? packetColor : nodeBorder;
-      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = isSelected ? '#34d399' : (i === 3 ? packetColor : nodeBorder);
+      this.ctx.lineWidth = isSelected ? 3 : 2;
       this.ctx.beginPath();
       this.ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
       this.ctx.fill();
       this.ctx.stroke();
 
-      // Indicador de estado del nodo
-      this.ctx.fillStyle = i === 3 ? '#10b981' : packetColor;
+      // Núcleo del estado del nodo
+      this.ctx.fillStyle = isSelected ? '#34d399' : (i === 3 ? '#10b981' : packetColor);
       this.ctx.beginPath();
-      this.ctx.arc(n.x, n.y, 3, 0, Math.PI * 2);
+      this.ctx.arc(n.x, n.y, isSelected ? 4 : 3, 0, Math.PI * 2);
       this.ctx.fill();
 
       // Etiqueta del nodo
-      this.ctx.fillStyle = textColor;
-      this.ctx.fillText(n.label, n.x, n.y + n.radius + 14);
+      this.ctx.fillStyle = isSelected ? (isDark ? '#38bdf8' : '#0284c7') : textColor;
+      this.ctx.font = isSelected
+        ? 'bold 11px ui-monospace, SFMono-Regular, Menlo, monospace'
+        : '10px ui-monospace, SFMono-Regular, Menlo, monospace';
+      this.ctx.fillText(n.label, n.x, n.y + n.radius + 15);
+
+      // Badge activo si está seleccionado
+      if (isSelected) {
+        this.ctx.fillStyle = '#34d399';
+        this.ctx.font = 'bold 8px ui-monospace, monospace';
+        this.ctx.fillText('▼ SELECCIONADO', n.x, n.y - n.radius - 5);
+      }
     }
   }
 
@@ -310,7 +430,8 @@ export class StreamAnimation {
     if (this.resizeObserver) this.resizeObserver.disconnect();
     if (this.intersectionObserver) this.intersectionObserver.disconnect();
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
-    window.removeEventListener('mousemove', this.handleMouseMove);
-    window.removeEventListener('mouseleave', this.handleMouseLeave);
+    this.canvas.removeEventListener('mousemove', this.handleMouseMove);
+    this.canvas.removeEventListener('mouseleave', this.handleMouseLeave);
+    this.canvas.removeEventListener('click', this.handleClick);
   }
 }

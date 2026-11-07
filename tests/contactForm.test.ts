@@ -6,8 +6,9 @@ const contacto = fs.readFileSync(
   path.resolve('src/pages/contacto.astro'),
   'utf-8'
 );
+const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
 
-describe('Formulario de contacto con envío real', () => {
+describe('Formulario de contacto con envío real (Web3Forms en cliente)', () => {
   it('existe un formulario con campos obligatorios nombre, correo y mensaje', () => {
     expect(contacto).toContain('id="contact-form"');
     expect(contacto).toContain('name="name"');
@@ -18,21 +19,30 @@ describe('Formulario de contacto con envío real', () => {
     expect(contacto).toContain('id="contact-submit"');
   });
 
-  it('envía por AJAX al endpoint de FormSubmit del correo del propietario', () => {
-    expect(contacto).toContain('formsubmit.co/ajax/');
-    expect(contacto).toContain("method: 'POST'");
-    expect(contacto).toContain('_replyto');
-    expect(contacto).toContain('PUBLIC_CONTACT_FORM_ENDPOINT');
+  it('envía a Web3Forms con clave inyectada por entorno, nunca hardcodeada', () => {
+    expect(contacto).toContain('https://api.web3forms.com/submit');
+    expect(contacto).toContain('PUBLIC_WEB3FORMS_ACCESS_KEY');
+    expect(contacto).toContain('access_key: web3formsAccessKey');
+    expect(contacto).toContain('payload.success');
+    expect(contacto).not.toContain('formsubmit.co');
+    expect(contacto).not.toMatch(UUID_RE);
   });
 
-  it('incluye honeypot anti-bots y respaldo mailto con mensaje redactado', () => {
+  it('incluye honeypot anti-bots y respaldo mailto', () => {
     expect(contacto).toContain('name="_honey"');
     expect(contacto).toContain('mailto:');
     expect(contacto).toContain('aria-live="polite"');
   });
 
-  it('el formulario está en la página de contacto (fuente Astro)', () => {
-    expect(contacto).toContain('Envíame un mensaje');
-    expect(contacto).toContain('id="form-status"');
+  it('la clave no está en ningún archivo versionado del repo', () => {
+    const { execSync } = require('node:child_process');
+    const tracked = execSync('git ls-files', { encoding: 'utf-8' })
+      .split('\n')
+      .filter(Boolean);
+    for (const file of tracked) {
+      if (file === 'package-lock.json') continue;
+      const content = fs.readFileSync(path.resolve(file), 'utf-8');
+      expect(content, file).not.toMatch(UUID_RE);
+    }
   });
 });

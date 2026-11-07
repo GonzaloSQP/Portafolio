@@ -1,54 +1,344 @@
 ---
-// StreamCanvas.astro: Visualización interactiva de la arquitectura de streaming reactivo y microservicios
+// StreamCanvas.astro: Visualización interactiva y telemetría de streaming reactivo
+// Permite seleccionar fases para ver explicaciones detalladas y ampliar la simulación en pantalla completa.
+
+const phases = [
+  {
+    id: 'fase-cursor',
+    nodeIndex: 0,
+    tabLabel: '01: ORACLE CURSOR',
+    title: 'Fase 01: Ingesta por Cursor JDBC en Oracle SQL',
+    badge: 'FETCH_FORWARD // 2,500 ROWS',
+    description:
+      'En lugar de cargar 1M de registros con un SELECT monolítico o paginar con OFFSET (que degrada en tiempo cuadrático O(N²)), se abre un puntero hacia adelante (ResultSet.FETCH_FORWARD). El driver JDBC extrae bloques continuos de 2,500 filas solo cuando el hilo consumidor está listo.',
+    metrics: [
+      { label: 'FetchSize', value: '2,500 filas' },
+      { label: 'Roundtrips Red', value: '-90% viajes' },
+      { label: 'CPU en Oracle', value: 'Carga plana' }
+    ],
+    code: `// Cursor JDBC hacia adelante con FetchSize optimizado
+preparedStatement.setFetchSize(2500);
+preparedStatement.setFetchDirection(ResultSet.FETCH_FORWARD);
+ResultSet rs = preparedStatement.executeQuery();`
+  },
+  {
+    id: 'fase-buffer',
+    nodeIndex: 2,
+    tabLabel: '02: BUFFER REACTIVO',
+    title: 'Fase 02: Buffer Reactivo & Contrapresión (Backpressure)',
+    badge: 'ZERO-HEAP OVERFLOW // GATHERER',
+    description:
+      'Aplica contrapresión reactiva al flujo de datos. Si los microservicios aguas abajo están saturados, el buffer suspende la lectura del cursor. Esto impide que la JVM acumule objetos en memoria y mantiene el Heap plano en 380 MB durante todo el proceso de 1M de registros.',
+    metrics: [
+      { label: 'Memoria JVM', value: '380 MB fijo' },
+      { label: 'Backpressure', value: '0 - 12 ms' },
+      { label: 'Límite Buffer', value: '1 lote activo' }
+    ],
+    code: `// Conversión reactiva con ventana fija de contrapresión
+try (Stream<MovimientoDTO> stream = mapper.stream(rs)) {
+  stream.gather(Gatherers.windowFixed(2500))
+        .forEach(chunk -> workerPool.dispatch(chunk));
+}`
+  },
+  {
+    id: 'fase-jakarta',
+    nodeIndex: 3,
+    tabLabel: '03: MOTOR JAKARTA',
+    title: 'Fase 03: Microservicios Jakarta EE & Transformación',
+    badge: 'NON-BLOCKING // VIRTUAL THREADS',
+    description:
+      'Worker Jakarta EE que valida reglas de negocio bancarias y fiscales en memoria sin contención de locks. Deserializa DTOs, audita catálogos y prepara las transacciones concurrentes en menos de 15 ms por lote de 2,500 registros.',
+    metrics: [
+      { label: 'Throughput', value: '> 1,200 msg/s' },
+      { label: 'Latencia Lote', value: '< 15 ms' },
+      { label: 'Concurrencia', value: 'Hilos virtuales' }
+    ],
+    code: `// Procesamiento concurrente de lotes sin bloqueo
+@ApplicationScoped
+public class StreamWorker {
+  public void dispatch(List<MovimientoDTO> chunk) {
+    chunk.parallelStream().forEach(this::processAtomic);
+  }
+}`
+  },
+  {
+    id: 'fase-insert',
+    nodeIndex: 6,
+    tabLabel: '04: BATCH INSERT',
+    title: 'Fase 04: Batch Insert Atómico & Idempotencia',
+    badge: 'ATOMIC COMMIT // RECOVERY',
+    description:
+      'Persistencia por bloques de 2,500 registros con PreparedStatement.executeBatch(). Si un registro produce un error o timeout, solo se reintenta ese bloque aislado, garantizando idempotencia y cerrando el proceso completo en menos de 15 minutos.',
+    metrics: [
+      { label: 'Tiempo 1M Regs', value: '< 15 min' },
+      { label: 'Idempotencia', value: '100% garantizada' },
+      { label: 'Transacción', value: 'Por bloque atómico' }
+    ],
+    code: `// Inserción y actualización masiva por lotes
+try (PreparedStatement ps = conn.prepareStatement(SQL_BATCH)) {
+  for (MovimientoDTO row : chunk) {
+    bindParams(ps, row);
+    ps.addBatch();
+  }
+  ps.executeBatch();
+  conn.commit();
+}`
+  }
+];
 ---
 
-<div class="relative w-full h-full min-h-[400px] lg:min-h-[480px] overflow-hidden rounded-2xl border border-border bg-surface/50 backdrop-blur-md shadow-lg" aria-hidden="true">
-  <!-- Alternativa estática SVG (para prefers-reduced-motion y modo sin JS) -->
-  <svg class="stream-static-fallback absolute inset-0 w-full h-full opacity-35 dark:opacity-45" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 800 500">
-    <defs>
-      <linearGradient id="streamGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="var(--color-accent)" stop-opacity="0.7"/>
-        <stop offset="50%" stop-color="var(--color-accent-hover)" stop-opacity="0.4"/>
-        <stop offset="100%" stop-color="var(--color-success)" stop-opacity="0.6"/>
-      </linearGradient>
-    </defs>
-    <!-- Tuberías estáticas -->
-    <path d="M 120,140 C 280,140 320,250 400,250 S 520,160 680,160" fill="none" stroke="url(#streamGrad2)" stroke-width="2" stroke-dasharray="6,6"/>
-    <path d="M 120,360 C 280,360 320,250 400,250 S 520,340 680,340" fill="none" stroke="url(#streamGrad2)" stroke-width="2" stroke-dasharray="6,6"/>
-    <circle cx="120" cy="140" r="14" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="2"/>
-    <circle cx="120" cy="360" r="14" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="2"/>
-    <circle cx="400" cy="250" r="22" fill="var(--color-surface)" stroke="var(--color-accent)" stroke-width="3"/>
-    <circle cx="680" cy="160" r="16" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="2"/>
-    <circle cx="680" cy="340" r="16" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="2"/>
-  </svg>
-
-  <!-- Barra de Telemetría Superior del Pipeline -->
-  <div class="absolute top-3 inset-x-3 z-20 flex items-center justify-between px-3 py-1.5 rounded-xl bg-bg/80 border border-border text-[11px] font-mono text-text-muted backdrop-blur-sm select-none">
+<div class="telemetry-pipeline-widget flex flex-col w-full h-full bg-surface border border-border rounded-sm overflow-hidden shadow-sm" aria-label="Pipeline de telemetría de streaming reactivo">
+  <!-- Barra Superior de Estado y Controles del Pipeline -->
+  <header class="px-3 py-2 border-b border-border bg-surface-hover/50 flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-text-muted select-none">
     <div class="flex items-center gap-2">
-      <span class="w-2 h-2 rounded-full bg-success animate-pulse"></span>
-      <span class="text-text-main font-semibold">REACTIVE STREAM ENGINE</span>
+      <span class="w-2 h-2 rounded-none bg-accent animate-pulse" aria-hidden="true"></span>
+      <span class="font-bold text-text-main text-[11px] tracking-wider">TELEMETRY_PIPELINE</span>
+      <span class="text-[10px] px-1.5 py-0.2 rounded-sm bg-accent-bg text-accent font-semibold uppercase hidden sm:inline">
+        ACTIVE // STREAMING
+      </span>
     </div>
-    <div class="hidden sm:flex items-center gap-3">
-      <span>THROUGHPUT: <strong class="text-accent">&gt; 1,200 msg/s</strong></span>
-      <span class="text-border">|</span>
-      <span>BACKPRESSURE: <strong class="text-success">0 ms</strong></span>
+
+    <div class="flex items-center gap-2">
+      <!-- Indicador de Throughput en Vivo -->
+      <span class="text-[10px] hidden md:inline text-text-muted">
+        THROUGHPUT: <strong id="telemetry-live-throughput" class="text-accent">&gt; 1,200 msg/s</strong>
+      </span>
+      <span class="text-border hidden md:inline">|</span>
+      <!-- Botón para Ampliar la Simulación a Pantalla Completa / Modal -->
+      <button
+        id="btn-expand-simulation"
+        type="button"
+        class="px-2 py-1 rounded-sm bg-bg border border-border hover:border-accent text-accent font-bold text-[10px] uppercase transition-colors inline-flex items-center gap-1 focus-visible:outline-accent"
+        aria-label="Ampliar animación y ver simulación a detalle"
+        title="Ampliar simulación en pantalla completa"
+      >
+        <svg class="w-3 h-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+        </svg>
+        <span>Ampliar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenedor del Canvas de Streaming -->
+  <div class="relative w-full h-[230px] sm:h-[260px] bg-bg overflow-hidden cursor-crosshair">
+    <!-- Alternativa estática SVG (para prefers-reduced-motion y modo sin JS) -->
+    <svg class="stream-static-fallback absolute inset-0 w-full h-full opacity-35 dark:opacity-45" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 800 500">
+      <defs>
+        <linearGradient id="streamGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="var(--color-accent)" stop-opacity="0.7"/>
+          <stop offset="50%" stop-color="var(--color-accent-hover)" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="var(--color-success)" stop-opacity="0.6"/>
+        </linearGradient>
+      </defs>
+      <path d="M 120,140 C 280,140 320,250 400,250 S 520,160 680,160" fill="none" stroke="url(#streamGrad2)" stroke-width="2" stroke-dasharray="6,6"/>
+      <path d="M 120,360 C 280,360 320,250 400,250 S 520,340 680,340" fill="none" stroke="url(#streamGrad2)" stroke-width="2" stroke-dasharray="6,6"/>
+      <circle cx="120" cy="140" r="14" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="2"/>
+      <circle cx="120" cy="360" r="14" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="2"/>
+      <circle cx="400" cy="250" r="22" fill="var(--color-surface)" stroke="var(--color-accent)" stroke-width="3"/>
+      <circle cx="680" cy="160" r="16" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="2"/>
+      <circle cx="680" cy="340" r="16" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="2"/>
+    </svg>
+
+    <!-- Canvas interactivo 2D con eventos de ratón activos -->
+    <canvas id="stream-canvas" class="relative z-10 w-full h-full block" aria-label="Simulación visual de streaming reactivo por cursores"></canvas>
+
+    <!-- Tooltip flotante de nodo interactivo -->
+    <div
+      id="canvas-node-tooltip"
+      class="absolute z-20 hidden px-2 py-1 rounded-sm bg-bg/95 border border-accent text-[10px] font-mono text-text-main pointer-events-none shadow-md backdrop-blur-sm"
+      role="tooltip"
+    >
+      Clic para inspeccionar fase
+    </div>
+
+    <!-- Indicador de interacción en esquina inferior -->
+    <div class="absolute bottom-2 right-2 z-20 pointer-events-none">
+      <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-sm bg-surface/85 border border-border text-text-muted">
+        [ HAZ CLIC EN CUALQUIER NODO ]
+      </span>
     </div>
   </div>
 
-  <!-- Canvas interactivo 2D -->
-  <canvas id="stream-canvas" class="relative z-10 w-full h-full block pointer-events-none"></canvas>
+  <!-- Selector Rápido de Fases de Arquitectura (Tabs Accesibles) -->
+  <nav class="grid grid-cols-2 sm:grid-cols-4 border-t border-b border-border bg-surface-hover/30 divide-x divide-border" role="tablist" aria-label="Fases del Pipeline">
+    {phases.map((p, idx) => (
+      <button
+        type="button"
+        role="tab"
+        id={`tab-${p.id}`}
+        aria-selected={idx === 2 ? 'true' : 'false'}
+        aria-controls={`panel-${p.id}`}
+        data-phase-index={idx}
+        data-node-index={p.nodeIndex}
+        class={`phase-tab-btn px-2 py-2 text-center text-[10px] font-mono font-bold tracking-tight transition-colors focus-visible:outline-accent ${
+          idx === 2
+            ? 'bg-accent/15 text-accent border-b-2 border-accent'
+            : 'text-text-muted hover:text-text-main hover:bg-surface-hover'
+        }`}
+      >
+        <span>{p.tabLabel}</span>
+      </button>
+    ))}
+  </nav>
 
-  <!-- Barra Inferior de Capas de Arquitectura -->
-  <div class="absolute bottom-3 inset-x-3 z-20 flex items-center justify-between px-3 py-1.5 rounded-xl bg-bg/80 border border-border text-[10px] font-mono text-text-muted backdrop-blur-sm select-none">
-    <span>[1] INGESTA / ORACLE</span>
-    <span class="text-accent font-bold">➔ [2] CHUNKS BUFFER</span>
-    <span>➔ [3] MICROSERVICES CORE</span>
+  <!-- Panel Dinámico de Explicación Técnica y Métricas de la Fase Seleccionada -->
+  <div class="p-3 sm:p-4 bg-surface text-text-main space-y-3 flex-1 flex flex-col justify-between">
+    {phases.map((p, idx) => (
+      <div
+        id={`panel-${p.id}`}
+        role="tabpanel"
+        aria-labelledby={`tab-${p.id}`}
+        class={`phase-panel space-y-2.5 ${idx === 2 ? 'block' : 'hidden'}`}
+      >
+        <div class="flex flex-wrap items-center justify-between gap-1.5">
+          <h2 class="text-xs sm:text-sm font-bold text-text-main flex items-center gap-1.5 font-mono">
+            <span class="w-1.5 h-3 bg-accent inline-block"></span>
+            <span>{p.title}</span>
+          </h2>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-sm bg-accent-bg text-accent border border-accent/25 font-bold uppercase">
+            {p.badge}
+          </span>
+        </div>
+
+        <p class="text-xs text-text-muted leading-relaxed font-sans">
+          {p.description}
+        </p>
+
+        <!-- Métricas Específicas de la Fase -->
+        <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-center">
+          {p.metrics.map((m) => (
+            <div class="p-1.5 rounded-sm bg-bg border border-border">
+              <span class="block text-[9px] text-text-muted uppercase">{m.label}</span>
+              <strong class="text-[11px] text-text-main font-bold">{m.value}</strong>
+            </div>
+          ))}
+        </div>
+
+        <!-- Código de Implementación Colapsable -->
+        <details class="text-xs font-mono group border border-border/70 rounded-sm bg-bg overflow-hidden">
+          <summary class="px-2.5 py-1.5 cursor-pointer text-[10px] font-bold text-accent hover:text-text-main flex items-center justify-between select-none">
+            <span>[ VER IMPLEMENTACIÓN EN CÓDIGO ]</span>
+            <span class="group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-2.5 border-t border-border bg-[#0a0f18] text-[10px] text-[#e2e8f0] overflow-x-auto leading-relaxed">
+            <pre><code>{p.code}</code></pre>
+          </div>
+        </details>
+      </div>
+    ))}
+
+    <!-- Barra Inferior de Métricas Globales del Pipeline -->
+    <div class="pt-2 border-t border-border flex items-center justify-between text-[10px] font-mono text-text-muted">
+      <span>CURSOR: <strong class="text-text-main">FETCH_FORWARD</strong></span>
+      <span>HEAP JVM: <strong class="text-success font-bold">380 MB CONSTANTE</strong></span>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL DE SIMULACIÓN EXPANDIDA (PANTALLA COMPLETA / DETALLE MÁXIMO) -->
+<!-- ========================================================================= -->
+<div
+  id="simulation-expanded-modal"
+  class="fixed inset-0 z-50 hidden bg-bg/90 backdrop-blur-md p-3 sm:p-6 overflow-y-auto"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="expanded-modal-title"
+>
+  <div class="relative mx-auto max-w-5xl rounded-sm border border-border bg-surface shadow-2xl overflow-hidden flex flex-col my-auto space-y-0">
+    <!-- Header del Modal -->
+    <div class="px-4 py-3 border-b border-border bg-surface-hover/60 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-none bg-accent animate-pulse" aria-hidden="true"></span>
+        <div>
+          <h2 id="expanded-modal-title" class="text-xs sm:text-sm font-black font-mono text-text-main tracking-tight uppercase">
+            SIMULADOR TELEMÉTRICO DE STREAMING REACTIVO // MODO DETALLE
+          </h2>
+          <span class="text-[10px] font-mono text-accent">Análisis de flujo de datos por cursores JDBC y contrapresión Jakarta</span>
+        </div>
+      </div>
+
+      <button
+        id="btn-close-modal"
+        type="button"
+        class="px-2.5 py-1 rounded-sm bg-bg border border-border hover:border-error hover:text-error text-text-muted font-mono text-xs font-bold transition-colors focus-visible:outline-accent"
+        aria-label="Cerrar simulación ampliada"
+      >
+        ✕ Cerrar [ESC]
+      </button>
+    </div>
+
+    <!-- Barra de Controles de Simulación Activa -->
+    <div class="px-4 py-2 border-b border-border bg-bg/80 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+      <!-- Control de Pausa -->
+      <div class="flex items-center gap-2">
+        <button
+          id="btn-modal-pause"
+          type="button"
+          class="px-3 py-1 rounded-sm bg-surface border border-border hover:border-accent text-text-main font-bold text-xs inline-flex items-center gap-1.5 transition-colors"
+        >
+          <span id="pause-icon">⏸</span>
+          <span id="pause-label">Pausar Flujo</span>
+        </button>
+
+        <!-- Selector de Velocidad -->
+        <div class="flex items-center border border-border rounded-sm overflow-hidden text-xs">
+          <button type="button" data-speed="0.5" class="speed-btn px-2 py-1 bg-surface text-text-muted hover:text-text-main">0.5x</button>
+          <button type="button" data-speed="1.0" class="speed-btn px-2 py-1 bg-accent/20 text-accent font-bold">1.0x</button>
+          <button type="button" data-speed="2.0" class="speed-btn px-2 py-1 bg-surface text-text-muted hover:text-text-main">2.0x</button>
+        </div>
+      </div>
+
+      <!-- Inyección de Carga -->
+      <button
+        id="btn-modal-burst"
+        type="button"
+        class="px-3 py-1 rounded-sm bg-accent text-bg font-bold text-xs hover:bg-accent-hover transition-colors inline-flex items-center gap-1.5 shadow-sm"
+      >
+        <span>⚡ Inyectar Lote 10,000 Regs</span>
+      </button>
+    </div>
+
+    <!-- Canvas en Gran Formato -->
+    <div class="relative w-full h-[280px] sm:h-[360px] bg-bg overflow-hidden cursor-crosshair border-b border-border">
+      <canvas id="stream-modal-canvas" class="w-full h-full block" aria-label="Simulación visual ampliada"></canvas>
+      <div class="absolute bottom-2 left-3 z-10 pointer-events-none">
+        <span class="text-[10px] font-mono px-2 py-0.5 rounded-sm bg-surface/85 border border-border text-text-muted">
+          Haz clic en cualquier nodo para inspeccionar su comportamiento y parámetros JDBC
+        </span>
+      </div>
+    </div>
+
+    <!-- Inspector Inferior del Modal -->
+    <div class="p-4 bg-surface space-y-4">
+      <!-- Pestañas de Fase en Modal -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 border border-border divide-x divide-border rounded-sm overflow-hidden bg-bg">
+        {phases.map((p, idx) => (
+          <button
+            type="button"
+            data-modal-phase={idx}
+            class={`modal-phase-tab px-3 py-2 text-center text-xs font-mono font-bold transition-colors ${
+              idx === 2 ? 'bg-accent/20 text-accent' : 'text-text-muted hover:text-text-main hover:bg-surface-hover'
+            }`}
+          >
+            {p.tabLabel}
+          </button>
+        ))}
+      </div>
+
+      <!-- Detalle de la Fase en Modal -->
+      <div id="modal-phase-detail" class="space-y-3">
+        <!-- Renderizado dinámico vía JavaScript -->
+      </div>
+    </div>
   </div>
 </div>
 
 <style>
   @media (prefers-reduced-motion: reduce) {
-    #stream-canvas {
+    #stream-canvas,
+    #stream-modal-canvas {
       display: none !important;
     }
     .stream-static-fallback {
@@ -59,26 +349,321 @@
 </style>
 
 <script>
-  import { StreamAnimation } from './StreamAnimation';
+  import { StreamAnimation, type PipelineNode } from './StreamAnimation';
 
-  function initStreamCanvas() {
-    const canvas = document.getElementById('stream-canvas') as HTMLCanvasElement | null;
-    if (!canvas) return;
+  interface PhaseData {
+    id: string;
+    nodeIndex: number;
+    tabLabel: string;
+    title: string;
+    badge: string;
+    description: string;
+    metrics: { label: string; value: string }[];
+    code: string;
+  }
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
+  const phaseDataList: PhaseData[] = [
+    {
+      id: 'fase-cursor',
+      nodeIndex: 0,
+      tabLabel: '01: ORACLE CURSOR',
+      title: 'Fase 01: Ingesta por Cursor JDBC en Oracle SQL',
+      badge: 'FETCH_FORWARD // 2,500 ROWS',
+      description:
+        'En lugar de cargar 1M de registros con un SELECT monolítico o paginar con OFFSET (que degrada en tiempo cuadrático O(N²)), se abre un puntero hacia adelante (ResultSet.FETCH_FORWARD). El driver JDBC extrae bloques continuos de 2,500 filas solo cuando el hilo consumidor está listo.',
+      metrics: [
+        { label: 'FetchSize', value: '2,500 filas' },
+        { label: 'Roundtrips Red', value: '-90% viajes' },
+        { label: 'CPU en Oracle', value: 'Carga plana' }
+      ],
+      code: `// Cursor JDBC hacia adelante con FetchSize optimizado\npreparedStatement.setFetchSize(2500);\npreparedStatement.setFetchDirection(ResultSet.FETCH_FORWARD);\nResultSet rs = preparedStatement.executeQuery();`
+    },
+    {
+      id: 'fase-buffer',
+      nodeIndex: 2,
+      tabLabel: '02: BUFFER REACTIVO',
+      title: 'Fase 02: Buffer Reactivo & Contrapresión (Backpressure)',
+      badge: 'ZERO-HEAP OVERFLOW // GATHERER',
+      description:
+        'Aplica contrapresión reactiva al flujo de datos. Si los microservicios aguas abajo están saturados, el buffer suspende la lectura del cursor. Esto impide que la JVM acumule objetos en memoria y mantiene el Heap plano en 380 MB durante todo el proceso de 1M de registros.',
+      metrics: [
+        { label: 'Memoria JVM', value: '380 MB fijo' },
+        { label: 'Backpressure', value: '0 - 12 ms' },
+        { label: 'Límite Buffer', value: '1 lote activo' }
+      ],
+      code: `// Conversión reactiva con ventana fija de contrapresión\ntry (Stream<MovimientoDTO> stream = mapper.stream(rs)) {\n  stream.gather(Gatherers.windowFixed(2500))\n        .forEach(chunk -> workerPool.dispatch(chunk));\n}`
+    },
+    {
+      id: 'fase-jakarta',
+      nodeIndex: 3,
+      tabLabel: '03: MOTOR JAKARTA',
+      title: 'Fase 03: Microservicios Jakarta EE & Transformación',
+      badge: 'NON-BLOCKING // VIRTUAL THREADS',
+      description:
+        'Worker Jakarta EE que valida reglas de negocio bancarias y fiscales en memoria sin contención de locks. Deserializa DTOs, audita catálogos y prepara las transacciones concurrentes en menos de 15 ms por lote de 2,500 registros.',
+      metrics: [
+        { label: 'Throughput', value: '> 1,200 msg/s' },
+        { label: 'Latencia Lote', value: '< 15 ms' },
+        { label: 'Concurrencia', value: 'Hilos virtuales' }
+      ],
+      code: `// Procesamiento concurrente de lotes sin bloqueo\n@ApplicationScoped\npublic class StreamWorker {\n  public void dispatch(List<MovimientoDTO> chunk) {\n    chunk.parallelStream().forEach(this::processAtomic);\n  }\n}`
+    },
+    {
+      id: 'fase-insert',
+      nodeIndex: 6,
+      tabLabel: '04: BATCH INSERT',
+      title: 'Fase 04: Batch Insert Atómico & Idempotencia',
+      badge: 'ATOMIC COMMIT // RECOVERY',
+      description:
+        'Persistencia por bloques de 2,500 registros con PreparedStatement.executeBatch(). Si un registro produce un error o timeout, solo se reintenta ese bloque aislado, garantizando idempotencia y cerrando el proceso completo en menos de 15 minutos.',
+      metrics: [
+        { label: 'Tiempo 1M Regs', value: '< 15 min' },
+        { label: 'Idempotencia', value: '100% garantizada' },
+        { label: 'Transacción', value: 'Por bloque atómico' }
+      ],
+      code: `// Inserción y actualización masiva por lotes\ntry (PreparedStatement ps = conn.prepareStatement(SQL_BATCH)) {\n  for (MovimientoDTO row : chunk) {\n    bindParams(ps, row);\n    ps.addBatch();\n  }\n  ps.executeBatch();\n  conn.commit();\n}`
+    }
+  ];
+
+  function initInteractivePipeline() {
+    const mainCanvas = document.getElementById('stream-canvas') as HTMLCanvasElement | null;
+    if (!mainCanvas) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let mainAnimation: StreamAnimation | null = null;
+    let modalAnimation: StreamAnimation | null = null;
+    let currentPhaseIndex = 2; // Default: 03 Motor Jakarta
+
+    if (!prefersReducedMotion) {
+      try {
+        mainAnimation = new StreamAnimation(mainCanvas);
+        mainAnimation.selectNode(phaseDataList[currentPhaseIndex].nodeIndex);
+      } catch (e) {
+        console.warn('Error inicializando StreamAnimation principal:', e);
+      }
     }
 
-    try {
-      new StreamAnimation(canvas);
-    } catch (e) {
-      console.warn('No se pudo inicializar la animación Canvas 2D:', e);
+    // Pestañas principales
+    const tabButtons = document.querySelectorAll<HTMLButtonElement>('.phase-tab-btn');
+    const tabPanels = document.querySelectorAll<HTMLElement>('.phase-panel');
+
+    function selectPhase(phaseIndex: number) {
+      currentPhaseIndex = phaseIndex;
+      const phase = phaseDataList[phaseIndex];
+
+      // Actualizar botones de pestaña
+      tabButtons.forEach((btn, idx) => {
+        const isSelected = idx === phaseIndex;
+        btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        if (isSelected) {
+          btn.className = 'phase-tab-btn px-2 py-2 text-center text-[10px] font-mono font-bold tracking-tight transition-colors bg-accent/15 text-accent border-b-2 border-accent';
+        } else {
+          btn.className = 'phase-tab-btn px-2 py-2 text-center text-[10px] font-mono font-bold tracking-tight transition-colors text-text-muted hover:text-text-main hover:bg-surface-hover';
+        }
+      });
+
+      // Actualizar paneles de texto
+      tabPanels.forEach((panel, idx) => {
+        if (idx === phaseIndex) panel.classList.remove('hidden');
+        else panel.classList.add('hidden');
+      });
+
+      // Sincronizar nodo en animación principal (sin re-emitir al listener UI)
+      if (mainAnimation) {
+        mainAnimation.selectNode(phase.nodeIndex, false);
+      }
+
+      // Sincronizar en modal si está abierto
+      if (modalAnimation) {
+        modalAnimation.selectNode(phase.nodeIndex, false);
+      }
+      renderModalDetail(phaseIndex);
+    }
+
+    tabButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const pIdx = parseInt(btn.getAttribute('data-phase-index') || '0', 10);
+        selectPhase(pIdx);
+      });
+    });
+
+    // Mapeo cuando el usuario hace clic directamente en un nodo del canvas
+    if (mainAnimation) {
+      mainAnimation.onNodeSelect((nodeIndex) => {
+        let targetPhase = 2;
+        if (nodeIndex === 0 || nodeIndex === 1) targetPhase = 0;
+        else if (nodeIndex === 2) targetPhase = 1;
+        else if (nodeIndex === 3 || nodeIndex === 4 || nodeIndex === 5) targetPhase = 2;
+        else if (nodeIndex === 6) targetPhase = 3;
+
+        if (targetPhase !== currentPhaseIndex) {
+          selectPhase(targetPhase);
+        }
+      });
+    }
+
+    // =========================================================================
+    // LÓGICA DEL MODAL DE SIMULACIÓN EXPANDIDA
+    // =========================================================================
+    const modal = document.getElementById('simulation-expanded-modal');
+    const openModalBtn = document.getElementById('btn-expand-simulation');
+    const closeModalBtn = document.getElementById('btn-close-modal');
+    const modalCanvas = document.getElementById('stream-modal-canvas') as HTMLCanvasElement | null;
+    const modalDetailContainer = document.getElementById('modal-phase-detail');
+    const modalPhaseTabs = document.querySelectorAll<HTMLButtonElement>('.modal-phase-tab');
+    const pauseBtn = document.getElementById('btn-modal-pause');
+    const pauseLabel = document.getElementById('pause-label');
+    const pauseIcon = document.getElementById('pause-icon');
+    const speedButtons = document.querySelectorAll<HTMLButtonElement>('.speed-btn');
+    const burstBtn = document.getElementById('btn-modal-burst');
+
+    function renderModalDetail(phaseIndex: number) {
+      if (!modalDetailContainer) return;
+      const p = phaseDataList[phaseIndex];
+
+      modalPhaseTabs.forEach((tab, idx) => {
+        if (idx === phaseIndex) {
+          tab.className = 'modal-phase-tab px-3 py-2 text-center text-xs font-mono font-bold transition-colors bg-accent/20 text-accent';
+        } else {
+          tab.className = 'modal-phase-tab px-3 py-2 text-center text-xs font-mono font-bold transition-colors text-text-muted hover:text-text-main hover:bg-surface-hover';
+        }
+      });
+
+      modalDetailContainer.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2">
+          <div>
+            <span class="text-xs font-mono text-accent font-bold uppercase">${p.badge}</span>
+            <h3 class="text-sm sm:text-base font-bold text-text-main tracking-tight font-mono">${p.title}</h3>
+          </div>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-sm bg-success/15 text-success border border-success/30 font-bold uppercase">ESTADO: ACTIVO</span>
+        </div>
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed font-sans">${p.description}</p>
+        <div class="grid grid-cols-3 gap-3 font-mono text-center">
+          ${p.metrics.map((m) => `
+            <div class="p-2 rounded-sm bg-bg border border-border">
+              <span class="block text-[10px] text-text-muted uppercase">${m.label}</span>
+              <strong class="text-xs text-text-main font-bold">${m.value}</strong>
+            </div>
+          `).join('')}
+        </div>
+        <div class="p-3 rounded-sm bg-[#0a0f18] border border-border text-[11px] font-mono text-[#e2e8f0] overflow-x-auto">
+          <pre><code>${p.code}</code></pre>
+        </div>
+      `;
+    }
+
+    function openModal() {
+      if (!modal || !modalCanvas) return;
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      if (!modalAnimation) {
+        modalAnimation = new StreamAnimation(modalCanvas);
+        modalAnimation.onNodeSelect((nodeIdx) => {
+          let targetPhase = 2;
+          if (nodeIdx === 0 || nodeIdx === 1) targetPhase = 0;
+          else if (nodeIdx === 2) targetPhase = 1;
+          else if (nodeIdx === 3 || nodeIdx === 4 || nodeIdx === 5) targetPhase = 2;
+          else if (nodeIdx === 6) targetPhase = 3;
+          if (targetPhase !== currentPhaseIndex) {
+            selectPhase(targetPhase);
+          }
+        });
+      }
+
+      modalAnimation.resizeCanvas();
+      modalAnimation.selectNode(phaseDataList[currentPhaseIndex].nodeIndex, false);
+      renderModalDetail(currentPhaseIndex);
+    }
+
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+      if (modalAnimation) {
+        modalAnimation.destroy();
+        modalAnimation = null;
+      }
+    }
+
+    if (openModalBtn) openModalBtn.addEventListener('click', openModal);
+    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+
+    // Cerrar al presionar Escape o clic fuera
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+    }
+
+    // Tabs del modal
+    modalPhaseTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const pIdx = parseInt(tab.getAttribute('data-modal-phase') || '0', 10);
+        selectPhase(pIdx);
+      });
+    });
+
+    // Control de Pausa en Modal
+    if (pauseBtn && pauseLabel && pauseIcon) {
+      pauseBtn.addEventListener('click', () => {
+        if (!modalAnimation) return;
+        const isPaused = modalAnimation.togglePause();
+        if (isPaused) {
+          pauseLabel.textContent = 'Reanudar Flujo';
+          pauseIcon.textContent = '▶';
+          pauseBtn.classList.add('border-accent', 'text-accent');
+        } else {
+          pauseLabel.textContent = 'Pausar Flujo';
+          pauseIcon.textContent = '⏸';
+          pauseBtn.classList.remove('border-accent', 'text-accent');
+        }
+      });
+    }
+
+    // Control de Velocidad en Modal
+    speedButtons.forEach((sBtn) => {
+      sBtn.addEventListener('click', () => {
+        const speed = parseFloat(sBtn.getAttribute('data-speed') || '1.0');
+        if (modalAnimation) modalAnimation.setSpeed(speed);
+        if (mainAnimation) mainAnimation.setSpeed(speed);
+
+        speedButtons.forEach((b) => {
+          b.className = 'speed-btn px-2 py-1 bg-surface text-text-muted hover:text-text-main';
+        });
+        sBtn.className = 'speed-btn px-2 py-1 bg-accent/20 text-accent font-bold';
+      });
+    });
+
+    // Inyección de Ráfaga en Modal
+    if (burstBtn) {
+      burstBtn.addEventListener('click', () => {
+        if (modalAnimation) modalAnimation.burst(30);
+        if (mainAnimation) mainAnimation.burst(30);
+
+        const throughputEl = document.getElementById('telemetry-live-throughput');
+        if (throughputEl) {
+          throughputEl.textContent = '2,840 msg/s [BURST]';
+          throughputEl.classList.add('text-success');
+          setTimeout(() => {
+            throughputEl.textContent = '> 1,200 msg/s';
+            throughputEl.classList.remove('text-success');
+          }, 2500);
+        }
+      });
     }
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initStreamCanvas, { once: true });
+    document.addEventListener('DOMContentLoaded', initInteractivePipeline, { once: true });
   } else {
-    initStreamCanvas();
+    initInteractivePipeline();
   }
 </script>

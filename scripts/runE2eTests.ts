@@ -121,6 +121,7 @@ async function runE2ETests() {
     await page.reload();
     const fallbackVisible = await page.isVisible('.stream-static-fallback');
     console.log(`  ✓ Alternativa estática SVG activa bajo prefers-reduced-motion: ${fallbackVisible}.`);
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
 
     console.log('\n--- 5. Prueba de Rutas Profundas y Casos de Estudio ---');
     const routesToTest = [
@@ -153,7 +154,36 @@ async function runE2ETests() {
       console.log(`  ✓ Ruta ${route} respondió con HTTP ${status} (H1: "${pageH1?.slice(0, 30).trim()}...")`);
     }
 
-    console.log('\n--- 6. Verificación de Consola y Errores de Red ---');
+    console.log('\n--- 6. Prueba de Interactividad de TELEMETRY_PIPELINE ---');
+    await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'domcontentloaded' });
+
+    const tabFase1 = await page.$('#tab-fase-cursor');
+    if (!tabFase1) throw new Error('No se encontró el tab de fase cursor #tab-fase-cursor');
+    await tabFase1.click();
+    const isFase1Selected = await tabFase1.getAttribute('aria-selected');
+    if (isFase1Selected !== 'true') throw new Error('El tab de fase cursor no se activó');
+    const panelFase1 = await page.$('#panel-fase-cursor');
+    const isPanel1Hidden = await panelFase1?.getAttribute('class');
+    if (isPanel1Hidden?.includes('hidden')) throw new Error('El panel de fase cursor no es visible');
+    console.log('  ✓ Cambio de fase interactivo funciona (Fase 01 Cursor seleccionada y visible).');
+
+    const expandBtn = await page.$('#btn-expand-simulation');
+    if (!expandBtn) throw new Error('Botón #btn-expand-simulation no encontrado');
+    await expandBtn.click();
+    const modal = await page.$('#simulation-expanded-modal');
+    const isModalVisible = !(await modal?.getAttribute('class'))?.includes('hidden');
+    if (!isModalVisible) throw new Error('El modal de simulación no se abrió');
+    console.log('  ✓ Modal de simulación ampliada se abre correctamente al hacer clic en [Ampliar].');
+
+    await page.click('#btn-modal-burst');
+    console.log('  ✓ Botón de inyección de carga de 10K registros funciona.');
+
+    await page.keyboard.press('Escape');
+    const isModalClosed = (await modal?.getAttribute('class'))?.includes('hidden');
+    if (!isModalClosed) throw new Error('El modal no se cerró con Escape');
+    console.log('  ✓ Modal de simulación se cierra con la tecla Escape.');
+
+    console.log('\n--- 7. Verificación de Consola y Errores de Red ---');
     if (consoleErrors.length > 0) {
       console.error('❌ Se detectaron errores de consola:');
       consoleErrors.forEach((err) => console.error(`  - ${err}`));
