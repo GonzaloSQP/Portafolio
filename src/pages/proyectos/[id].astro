@@ -70,8 +70,8 @@ const currentStatusColor = statusColors[project.status] || 'text-success bg-succ
           {project.summary}
         </p>
 
-        <!-- Enlaces en producción (si existen) -->
-        {project.links.demo && (
+        <!-- Enlaces en producción o credencial de entorno privado confidencial -->
+        {project.links.demo ? (
           <div class="pt-2 flex flex-wrap items-center gap-4">
             <a
               href={project.links.demo}
@@ -86,6 +86,18 @@ const currentStatusColor = statusColors[project.status] || 'text-success bg-succ
             </a>
             <span class="text-xs font-mono text-text-muted">
               URL: <code class="text-text-main">{project.links.demo}</code>
+            </span>
+          </div>
+        ) : (
+          <div class="pt-2 flex flex-wrap items-center gap-3">
+            <span class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-amber-500/30 text-amber-400 text-xs sm:text-sm font-mono font-medium shadow-sm">
+              <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              <span>Sistema en entorno privado del cliente (confidencial bajo NDA)</span>
+            </span>
+            <span class="text-xs text-text-muted">
+              Core bancario y microservicios desplegados en infraestructura interna privada.
             </span>
           </div>
         )}
@@ -190,6 +202,76 @@ const currentStatusColor = statusColors[project.status] || 'text-success bg-succ
         </div>
       </section>
 
+      <!-- Trade-offs y Alternativas Evaluadas (Si existen) -->
+      {project.tradeoffs && project.tradeoffs.length > 0 && (
+        <section class="space-y-4" aria-labelledby="tradeoffs-title">
+          <h2 id="tradeoffs-title" class="text-xl sm:text-2xl font-bold text-text-main tracking-tight flex items-center gap-2">
+            <span class="w-2.5 h-6 rounded bg-accent inline-block"></span>
+            Trade-offs y Alternativas Evaluadas
+          </h2>
+          <div class="space-y-4">
+            {project.tradeoffs.map((t) => (
+              <div class="p-6 rounded-2xl bg-surface border border-border space-y-4">
+                <h3 class="font-bold text-base sm:text-lg text-text-main flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-accent"></span>
+                  {t.decision}
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-sm">
+                  <div class="p-4 rounded-xl bg-bg border border-success/40 space-y-1">
+                    <span class="font-mono font-bold text-success flex items-center gap-1.5">
+                      <span>✓</span> Solución Adoptada
+                    </span>
+                    <p class="text-text-main font-semibold leading-relaxed">{t.chosen}</p>
+                  </div>
+                  <div class="p-4 rounded-xl bg-bg border border-error/30 space-y-1">
+                    <span class="font-mono font-bold text-error flex items-center gap-1.5">
+                      <span>✕</span> Enfoque Descartado
+                    </span>
+                    <p class="text-text-muted leading-relaxed">{t.discarded}</p>
+                  </div>
+                </div>
+                <div class="pt-2 border-t border-border/70 text-xs sm:text-sm text-text-muted leading-relaxed">
+                  <strong class="text-text-main font-mono">Justificación de Ingeniería:</strong> {t.why}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Evidencia de Código y Planes de Ejecución (Si existe) -->
+      {project.codeSnippet && (
+        <section class="space-y-4" aria-labelledby="code-title">
+          <div class="flex items-center justify-between">
+            <h2 id="code-title" class="text-xl sm:text-2xl font-bold text-text-main tracking-tight flex items-center gap-2">
+              <span class="w-2.5 h-6 rounded bg-accent inline-block"></span>
+              {project.codeSnippet.title}
+            </h2>
+            <span class="text-xs font-mono px-2.5 py-1 rounded bg-accent/10 text-accent border border-accent/20 uppercase font-bold">
+              {project.codeSnippet.language}
+            </span>
+          </div>
+
+          <div class="rounded-2xl border border-border bg-[#0a0f18] overflow-hidden shadow-xl">
+            <div class="px-4 py-2.5 border-b border-border/80 bg-surface/60 flex items-center justify-between text-xs font-mono text-text-muted">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-error/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-success/80"></span>
+              </div>
+              <span>Evidencia Técnica & Métricas de Producción</span>
+            </div>
+            <pre class="p-5 sm:p-6 text-xs sm:text-sm font-mono overflow-x-auto text-[#e2e8f0] leading-relaxed"><code>{project.codeSnippet.code}</code></pre>
+          </div>
+
+          {project.codeSnippet.explanation && (
+            <p class="text-xs sm:text-sm text-text-muted italic bg-surface/40 p-4 rounded-xl border border-border">
+              💡 <span class="font-semibold text-text-main">Detalle de Implementación:</span> {project.codeSnippet.explanation}
+            </p>
+          )}
+        </section>
+      )}
+
       <!-- Stack Tecnológico Completo (Sin cortes) -->
       <section class="space-y-4" aria-labelledby="stack-title">
         <h2 id="stack-title" class="text-xl sm:text-2xl font-bold text-text-main tracking-tight flex items-center gap-2">
@@ -205,23 +287,45 @@ const currentStatusColor = statusColors[project.status] || 'text-success bg-succ
         </div>
       </section>
 
-      <!-- Resultados Verificables -->
+      <!-- Resultados & Métricas de Impacto -->
       <section class="p-6 sm:p-8 rounded-2xl bg-surface border border-border shadow-sm space-y-4" aria-labelledby="results-title">
         <h2 id="results-title" class="text-lg font-bold font-mono text-text-main uppercase tracking-wider flex items-center gap-2">
           <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Resultados Verificables de Rendimiento
+          Resultados & Métricas de Impacto
         </h2>
         <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
           {project.results.map((res) => (
             <li class="p-4 rounded-xl bg-surface-hover/70 border border-border/80 flex items-start gap-3">
               <span class="w-2 h-2 rounded-full bg-success shrink-0 mt-2"></span>
-              <span class="text-sm font-semibold text-text-main">{res}</span>
+              <span class="text-sm font-semibold text-text-main leading-relaxed">{res}</span>
             </li>
           ))}
         </ul>
       </section>
+
+      <!-- Lecciones de Ingeniería (Si existen) -->
+      {project.lessonsLearned && project.lessonsLearned.length > 0 && (
+        <section class="p-6 sm:p-8 rounded-2xl bg-surface/60 border border-border space-y-4" aria-labelledby="lessons-title">
+          <h2 id="lessons-title" class="text-lg font-bold font-mono text-text-main uppercase tracking-wider flex items-center gap-2">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Lecciones de Ingeniería & Principios Extraídos
+          </h2>
+          <ul class="space-y-3 pt-1">
+            {project.lessonsLearned.map((lesson) => (
+              <li class="p-4 rounded-xl bg-bg border border-border/80 flex items-start gap-3">
+                <span class="text-accent font-bold text-base mt-0.5">›</span>
+                <p class="text-sm text-text-muted leading-relaxed">
+                  {lesson}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <!-- Navegación Entre Proyectos -->
       <nav class="pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4" aria-label="Navegación entre proyectos">

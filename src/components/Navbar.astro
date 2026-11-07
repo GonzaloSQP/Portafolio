@@ -11,6 +11,7 @@ const { currentPath = '/' } = Astro.props;
 const navLinks = [
   { href: '/', label: 'Inicio' },
   { href: '/proyectos', label: 'Proyectos & Arquitectura' },
+  { href: '/notas', label: 'Notas de Ingeniería' },
   { href: '/sobre-mi', label: 'Sobre Mí' },
   { href: '/contacto', label: 'Contacto' },
 ];
@@ -91,11 +92,11 @@ const navLinks = [
     </div>
   </div>
 
-  <!-- Menú Móvil Desplegable -->
-  <div
+  <!-- Menú Móvil Desplegable Accesible -->
+  <nav
     id="mobile-menu"
     class="md:hidden hidden border-b border-border bg-surface px-4 pt-2 pb-4 space-y-1 shadow-lg"
-    aria-label="Menú móvil"
+    aria-label="Menú de navegación móvil"
   >
     {navLinks.map((link) => {
       const isActive = currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href));
@@ -113,7 +114,7 @@ const navLinks = [
         </a>
       );
     })}
-  </div>
+  </nav>
 </header>
 
 <CommandMenu />

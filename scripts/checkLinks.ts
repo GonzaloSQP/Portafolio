@@ -13,6 +13,10 @@ async function checkLinks() {
       '404.html',
       path.join('sobre-mi', 'index.html'),
       path.join('contacto', 'index.html'),
+      path.join('cv', 'index.html'),
+      path.join('notas', 'index.html'),
+      path.join('notas', 'streaming-reactivo-oracle-jakarta', 'index.html'),
+      path.join('notas', 'pre-auditoria-ubl-sunat', 'index.html'),
       path.join('proyectos', 'index.html'),
       ...portfolioData.projects.map((p) => path.join('proyectos', p.id, 'index.html')),
     ];

@@ -11,9 +11,11 @@ interface Props {
   currentPath?: string;
 }
 
+const defaultDescription = "Arquitecto de software senior especializado en sistemas distribuidos, streaming reactivo Jakarta EE, optimización Oracle SQL y facturación masiva SUNAT.";
+
 const {
   title = `${portfolioData.name} | Arquitecto de Software & Sistemas Distribuidos`,
-  description = portfolioData.summary,
+  description = defaultDescription,
   image = '/og-image.png',
   currentPath = Astro.url.pathname,
 } = Astro.props;

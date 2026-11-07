@@ -46,6 +46,20 @@ export const BenchmarkMetricSchema = z.object({
   improvement: z.string(),
 });
 
+export const TradeoffSchema = z.object({
+  decision: z.string(),
+  chosen: z.string(),
+  discarded: z.string(),
+  why: z.string(),
+});
+
+export const CodeSnippetSchema = z.object({
+  title: z.string(),
+  language: z.string(),
+  code: z.string(),
+  explanation: z.string().optional(),
+});
+
 export const ProjectSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/, 'El ID debe contener solo minúsculas, números y guiones'),
   title: z.string().min(3),
@@ -64,6 +78,9 @@ export const ProjectSchema = z.object({
   measurementMethod: z.string().optional(),
   architectureFlow: z.array(z.string()).optional(),
   benchmarks: z.array(BenchmarkMetricSchema).optional(),
+  tradeoffs: z.array(TradeoffSchema).optional(),
+  codeSnippet: CodeSnippetSchema.optional(),
+  lessonsLearned: z.array(z.string()).optional(),
   links: z.object({
     demo: z.string().url().regex(/^https:\/\//, 'Las URLs de demo deben ser HTTPS').optional(),
     repo: z.string().url().regex(/^https:\/\//, 'Las URLs de repositorio deben ser HTTPS').optional(),
@@ -131,3 +148,5 @@ export type Certification = z.infer<typeof CertificationSchema>;
 export type Education = z.infer<typeof EducationSchema>;
 export type Experience = z.infer<typeof ExperienceSchema>;
 export type BenchmarkMetric = z.infer<typeof BenchmarkMetricSchema>;
+export type Tradeoff = z.infer<typeof TradeoffSchema>;
+export type CodeSnippet = z.infer<typeof CodeSnippetSchema>;

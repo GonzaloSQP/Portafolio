@@ -1,0 +1,149 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { portfolioData } from '../../data/portfolioData';
+
+const codeSample = `// Verificación de integridad en memoria sin efectos secundarios
+export async function auditUblDocument(payload: InvoicePayload): Promise<AuditReport> {
+  // 1. Verificación de precisión decimal y redondeo bancario
+  const arithmeticErrors = checkItemCalculations(payload.items, payload.totalTax);
+  if (arithmeticErrors.length > 0) return { status: 'REJECTED_PRE_SIGN', errors: arithmeticErrors };
+
+  // 2. Validación de coherencia de catálogos (Operación Gravada vs IGV 18%)
+  const catalogErrors = checkCatalogIntegrity(payload.operationType, payload.items);
+  if (catalogErrors.length > 0) return { status: 'REJECTED_PRE_SIGN', errors: catalogErrors };
+
+  // 3. Validez y expiración del certificado digital X.509 de la empresa
+  await securityManager.checkCertNotExpired(payload.companyRuc);
+
+  return { status: 'PASSED_READY_FOR_ENCRYPTION' };
+}`;
+---
+
+<BaseLayout
+  title={`Arquitectura de Pre-Auditoría UBL 2.1 | Notas de ${portfolioData.name}`}
+  description="Cómo reducir el 95% de los rechazos fiscales en facturación electrónica SUNAT mediante validación en memoria y colas asíncronas Redis."
+  currentPath="/notas/pre-auditoria-ubl-sunat"
+>
+  <article class="py-12 sm:py-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-xs sm:text-sm text-text-muted" aria-label="Migas de pan">
+        <a href="/" class="hover:text-accent transition-colors">Inicio</a>
+        <span>/</span>
+        <a href="/notas" class="hover:text-accent transition-colors">Notas</a>
+        <span>/</span>
+        <span class="text-text-main font-semibold truncate">Pre-Auditoría UBL 2.1 SUNAT</span>
+      </nav>
+
+      <!-- Cabecera del Artículo -->
+      <header class="space-y-4 border-b border-border pb-8">
+        <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+          <span class="px-2.5 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20 font-bold">
+            Facturación Electrónica & Microservicios
+          </span>
+          <span class="text-text-muted">5 min de lectura · Octubre 2025</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-black text-text-main tracking-tight leading-tight">
+          Arquitectura de pre-auditoría UBL 2.1: Reducción del 95% de rechazos fiscales antes de la firma digital
+        </h1>
+
+        <p class="text-lg text-text-muted leading-relaxed">
+          Diseño e implementación de un centralizador de comprobantes electrónicos multi-tenant con validación en memoria, colas asíncronas Redis y tolerancia a caídas de la sede electrónica de SUNAT.
+        </p>
+      </header>
+
+      <!-- Contenido del Artículo -->
+      <div class="prose prose-invert max-w-none space-y-8 text-base text-text-main leading-relaxed">
+        <section class="space-y-4">
+          <h2 class="text-2xl font-bold tracking-tight text-text-main">
+            1. El contexto fiscal y el costo de un comprobante rechazado
+          </h2>
+          <p class="text-text-muted">
+            En el sistema tributario peruano (SUNAT), la emisión de facturas y boletas electrónicas bajo el estándar XML UBL 2.1 es un proceso estrictamente regulado. Cuando una empresa emite un comprobante con discrepancias en catálogos (ej. Catálogo 07 para afectación al IGV o Catálogo 51 para tipo de operación), SUNAT emite una Constancia de Recepción (CDR) con código de rechazo (código 2000 a 4000).
+          </p>
+          <p class="text-text-muted">
+            Un comprobante rechazado por SUNAT tiene consecuencias graves:
+          </p>
+          <ul class="list-disc list-inside space-y-2 text-text-muted pl-4">
+            <li>El correlativo tributario queda invalidado y no puede reutilizarse.</li>
+            <li>El cliente que pagó no puede sustentar crédito fiscal ni deducir gastos.</li>
+            <li>En más de 30 empresas de diferentes giros comerciales, la tasa histórica de rechazos alcanzaba el <strong class="text-error font-bold">24.8%</strong>.</li>
+          </ul>
+        </section>
+
+        <section class="space-y-4">
+          <h2 class="text-2xl font-bold tracking-tight text-text-main">
+            2. El error común: firmar antes de validar
+          </h2>
+          <p class="text-text-muted">
+            La mayoría de integraciones tributarias comerciales siguen un flujo secuencial ingenuo:
+          </p>
+          <div class="p-4 rounded-xl bg-surface border border-error/30 font-mono text-xs text-text-muted space-y-1">
+            <span class="text-error font-bold">Flujo Antiguo Defectuoso:</span>
+            <p>ERP genera XML → Se firma con certificado X.509 → Se envía a SUNAT → SUNAT rechaza → Se pierde tiempo, certificado y correlativo.</p>
+          </div>
+          <p class="text-text-muted">
+            La firma digital con certificados X.509 (algoritmo SHA-256 con RSA) es una operación computacionalmente pesada. Firmar un documento que de antemano viola una regla aritmética o de catálogo es un desperdicio de ciclos de CPU y provoca rechazos irreversibles.
+          </p>
+        </section>
+
+        <section class="space-y-4">
+          <h2 class="text-2xl font-bold tracking-tight text-text-main">
+            3. La solución arquitectónica: Motor de Pre-Auditoría en Memoria
+          </h2>
+          <p class="text-text-muted">
+            Diseñamos una capa de pre-auditoría desacoplada que intercepta el comprobante en memoria antes de invocar el motor de firma digital:
+          </p>
+          <div class="p-4 rounded-xl bg-[#0a0f18] border border-border text-xs font-mono overflow-x-auto text-[#e2e8f0]">
+<pre><code>{codeSample}</code></pre>
+          </div>
+          <p class="text-text-muted">
+            Si se detecta cualquier discrepancia, el sistema responde al ERP emisor en menos de <strong class="text-accent">15 milisegundos</strong> con un mensaje claro en español indicando el campo exacto que debe corregir el cajero o vendedor, antes de consumir un número correlativo fiscal.
+          </p>
+        </section>
+
+        <section class="space-y-4">
+          <h2 class="text-2xl font-bold tracking-tight text-text-main">
+            4. Desacoplamiento con colas Redis y resiliencia ante caídas de SUNAT
+          </h2>
+          <p class="text-text-muted">
+            Los servidores web de SUNAT sufren recurrentemente degradaciones de rendimiento y caídas en horas punta (especialmente fin de mes y días de vencimiento tributario). Si la llamada a SUNAT fuera síncrona en el punto de venta, la caja registradora se congelaría durante más de 20 segundos por cada cliente.
+          </p>
+          <p class="text-text-muted">
+            Implementamos un despacho desacoplado mediante <strong class="text-text-main">colas asíncronas en Redis con reintentos exponenciales</strong>:
+          </p>
+          <ul class="list-disc list-inside space-y-2 text-text-muted pl-4">
+            <li>El cliente recibe su ticket de venta y factura firmada digitalmente en menos de <strong class="text-success font-semibold">200 ms</strong>.</li>
+            <li>El despacho del paquete ZIP y la consulta del CDR se ejecuta en background por trabajadores Jakarta EE tolerantes a fallos.</li>
+            <li>Si SUNAT responde con código HTTP 500 o timeout, el worker reintenta con retroceso exponencial (jitter) sin generar duplicados.</li>
+          </ul>
+        </section>
+
+        <section class="space-y-4">
+          <h2 class="text-2xl font-bold tracking-tight text-text-main">
+            5. Impacto en producción
+          </h2>
+          <div class="p-6 rounded-2xl bg-surface border border-success/40 space-y-3">
+            <h3 class="text-base font-bold font-mono text-success uppercase">Resultados Verificados en 30+ Empresas:</h3>
+            <ul class="space-y-2 text-sm text-text-main">
+              <li>📉 <strong>Tasa de rechazo:</strong> Se desplomó de un 24.8% histórico a menos del 1.2% auditado.</li>
+              <li>⚡ <strong>Tiempo de emisión en caja:</strong> De 45s a menos de 200ms para el comprobante al cliente.</li>
+              <li>🛡️ <strong>Cero pérdida de correlativos:</strong> Cero facturas emitidas con errores de catálogo irreparables.</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <!-- Pie del Artículo -->
+      <footer class="pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+        <a href="/notas" class="text-sm font-semibold text-accent hover:underline">
+          ← Volver a todas las notas de ingeniería
+        </a>
+        <a href="/proyectos/centralizador-facturacion-electronica" class="text-sm font-semibold text-text-main hover:text-accent">
+          Ver caso de estudio del centralizador tributario →
+        </a>
+      </footer>
+    </div>
+  </article>
+</BaseLayout>

@@ -64,4 +64,18 @@ describe('Integridad de Datos y Esquema', () => {
     expect(portfolioData.contact.github).toMatch(/^https:\/\//);
     expect(portfolioData.contact.linkedin).toMatch(/^https:\/\//);
   });
+
+  it('el caso bancario es privado y no expone demo pública incorrecta', () => {
+    const banking = portfolioData.projects.find((p) => p.id === 'banca-streaming-jakarta');
+    expect(banking).toBeDefined();
+    expect(banking?.links.demo).toBeUndefined();
+    expect(banking?.status).toBe('Entregado');
+    expect(banking?.tradeoffs).toBeDefined();
+    expect(banking?.tradeoffs?.length).toBeGreaterThan(0);
+    expect(banking?.codeSnippet).toBeDefined();
+  });
+
+  it('el correo de contacto oficial es chalot_6@hotmail.com', () => {
+    expect(portfolioData.contact.email).toBe('chalot_6@hotmail.com');
+  });
 });
