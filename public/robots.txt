@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dev.apiscusco.com/sitemap-index.xml
+Disallow: /404
+

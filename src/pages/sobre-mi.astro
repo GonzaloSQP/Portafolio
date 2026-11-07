@@ -1,0 +1,179 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { portfolioData } from '../data/portfolioData';
+
+const pmiCert = portfolioData.certifications[0];
+---
+
+<BaseLayout
+  title={`Sobre Mí | ${portfolioData.name}`}
+  description={`Perfil profesional de ${portfolioData.name}, Arquitecto de Software & Ingeniero Backend Senior con certificación PMI.`}
+  currentPath="/sobre-mi"
+>
+  <div class="py-12 sm:py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      <!-- Encabezado de Perfil -->
+      <header class="space-y-4">
+        <span class="text-xs font-mono text-accent font-semibold tracking-wider uppercase">
+          Perfil Profesional & Trayectoria
+        </span>
+        <h1 class="text-3xl sm:text-5xl font-black text-text-main tracking-tight">
+          Marcio Gonzalo Sequeiros Palomino
+        </h1>
+        <p class="text-xl font-medium text-accent">
+          {portfolioData.title} · {portfolioData.location} ({portfolioData.age} años)
+        </p>
+        <p class="text-base sm:text-lg text-text-muted leading-relaxed pt-2">
+          {portfolioData.summary}
+        </p>
+      </header>
+
+      <!-- Certificación Oficial Verificada PMI -->
+      <section class="p-8 rounded-3xl border border-accent/40 bg-surface shadow-lg space-y-6" aria-labelledby="pmi-cert-heading">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="p-3.5 rounded-2xl bg-accent text-bg shadow-md">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <div>
+              <span class="text-xs font-mono font-bold text-success uppercase">Acreditación Oficial Global</span>
+              <h2 id="pmi-cert-heading" class="text-2xl font-black text-text-main">
+                {pmiCert.name}
+              </h2>
+              <p class="text-sm text-text-muted">{pmiCert.issuer}</p>
+            </div>
+          </div>
+
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 border border-success/20 text-success text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-success"></span>
+            <span>Vigente (Expedido: {pmiCert.issueDate})</span>
+          </div>
+        </div>
+
+        <p class="text-sm text-text-muted leading-relaxed">
+          Evaluación formal en niveles fundamentales de metodologías predictivas y tradicionales de gestión de proyectos, marcos ágiles (Agile) y análisis de requerimientos de negocio otorgada por el <strong>Project Management Institute</strong>.
+        </p>
+
+        <div class="pt-4 border-t border-border flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+          <div>
+            <span class="text-text-muted">Código de Verificación: </span>
+            <code class="px-2 py-1 rounded bg-surface-hover text-text-main font-bold">{pmiCert.credentialId}</code>
+          </div>
+          <a
+            href={pmiCert.verificationUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 text-accent font-bold hover:underline"
+          >
+            <span>Validar en Certiport (verify.certiport.com)</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
+      </section>
+
+      <!-- Experiencia Laboral y Proyectos Críticos -->
+      <section class="space-y-8" aria-labelledby="experience-title">
+        <div>
+          <span class="text-xs font-mono text-accent font-semibold tracking-wider uppercase">
+            Historial Comprobado
+          </span>
+          <h2 id="experience-title" class="text-2xl sm:text-3xl font-black text-text-main tracking-tight mt-1">
+            Experiencia en Sistemas de Producción
+          </h2>
+        </div>
+
+        <div class="space-y-8 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-border">
+          {portfolioData.experience.map((exp) => (
+            <div class="relative pl-10 sm:pl-12 space-y-3">
+              <!-- Punto de la línea de tiempo -->
+              <span class="absolute left-2.5 top-1.5 -translate-x-1/2 w-3.5 h-3.5 rounded-full border-2 border-accent bg-bg"></span>
+
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <h3 class="text-xl font-bold text-text-main">
+                  {exp.role}
+                </h3>
+                <span class="text-xs font-mono px-2.5 py-1 rounded-full bg-surface border border-border text-text-muted">
+                  {exp.period}
+                </span>
+              </div>
+
+              <p class="text-sm font-semibold text-accent">
+                {exp.company} · {exp.location}
+              </p>
+
+              <ul class="space-y-2 text-sm text-text-muted leading-relaxed pt-2">
+                {exp.highlights.map((h) => (
+                  <li class="flex items-start gap-2.5">
+                    <span class="text-accent font-bold mt-0.5">›</span>
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div class="pt-3 flex flex-wrap gap-1.5">
+                {exp.technologies.map((t) => (
+                  <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-surface border border-border text-text-muted">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Principios de Ingeniería -->
+      <section class="p-8 rounded-3xl bg-surface/50 border border-border space-y-6" aria-labelledby="principles-title">
+        <h2 id="principles-title" class="text-xl sm:text-2xl font-bold text-text-main tracking-tight">
+          Filosofía y Principios Técnicos
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+          <div class="space-y-2">
+            <h3 class="font-bold text-text-main flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-accent"></span>
+              Streaming sobre Cargas Masivas en Memoria
+            </h3>
+            <p class="text-text-muted leading-relaxed">
+              Evitar desbordamientos de heap y bloqueos transaccionales procesando flujos continuos y cursores eficientes, con transacciones atómicas e inserciones por chunks.
+            </p>
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="font-bold text-text-main flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-accent"></span>
+              Resiliencia Fiscal y Pre-auditoría
+            </h3>
+            <p class="text-text-muted leading-relaxed">
+              En facturación electrónica y servicios tributarios SUNAT, la validación previa de reglas de negocio en el XML evita rechazos y penalidades regulatorias antes de la firma digital.
+            </p>
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="font-bold text-text-main flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-accent"></span>
+              Simplicidad y Baja Latencia
+            </h3>
+            <p class="text-text-muted leading-relaxed">
+              Priorizar arquitecturas limpias y desacopladas. Evitar dependencias superfluas para maximizar la velocidad de respuesta tanto en microservicios backend como en interfaces web.
+            </p>
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="font-bold text-text-main flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-accent"></span>
+              Rigor de Gestión Predictiva y Ágil
+            </h3>
+            <p class="text-text-muted leading-relaxed">
+              Alineación estricta entre los objetivos de negocio y la entrega técnica continua, respaldada por la disciplina de estándares PMI.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+

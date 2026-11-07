@@ -1,0 +1,71 @@
+---
+// StreamCanvas.astro: Componente de visualización procedimental de pipelines de datos y streaming
+---
+
+<div class="relative w-full h-full min-h-[380px] lg:min-h-[460px] overflow-hidden rounded-2xl border border-border bg-surface/40 backdrop-blur-sm" aria-hidden="true">
+  <!-- Alternativa estática SVG (siempre presente para prefers-reduced-motion y sin JS) -->
+  <svg class="stream-static-fallback absolute inset-0 w-full h-full opacity-35 dark:opacity-45" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 800 500">
+    <defs>
+      <linearGradient id="streamGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="var(--color-accent)" stop-opacity="0.6"/>
+        <stop offset="50%" stop-color="var(--color-accent-hover)" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="var(--color-success)" stop-opacity="0.4"/>
+      </linearGradient>
+    </defs>
+    <path d="M 50,250 Q 200,80 400,250 T 750,250" fill="none" stroke="url(#streamGrad)" stroke-width="2" stroke-dasharray="6,6"/>
+    <path d="M 50,300 Q 250,150 450,300 T 750,200" fill="none" stroke="url(#streamGrad)" stroke-width="1.5" stroke-opacity="0.5"/>
+    <circle cx="200" cy="165" r="4" fill="var(--color-accent)" />
+    <circle cx="400" cy="250" r="5" fill="var(--color-accent)" />
+    <circle cx="600" cy="250" r="4" fill="var(--color-success)" />
+    <line x1="200" y1="165" x2="400" y2="250" stroke="var(--color-accent)" stroke-opacity="0.3" stroke-width="1"/>
+    <line x1="400" y1="250" x2="600" y2="250" stroke="var(--color-success)" stroke-opacity="0.3" stroke-width="1"/>
+  </svg>
+
+  <!-- Canvas interactivo 2D -->
+  <canvas id="stream-canvas" class="relative z-10 w-full h-full block pointer-events-none"></canvas>
+
+  <!-- Indicador técnico decorativo -->
+  <div class="absolute bottom-3 right-4 z-20 flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface/80 border border-border text-[11px] font-mono text-text-muted select-none">
+    <span class="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+    <span>pipeline: reactive-stream active</span>
+  </div>
+</div>
+
+<style>
+  @media (prefers-reduced-motion: reduce) {
+    #stream-canvas {
+      display: none !important;
+    }
+    .stream-static-fallback {
+      display: block !important;
+      opacity: 0.6 !important;
+    }
+  }
+</style>
+
+<script>
+  import { StreamAnimation } from './StreamAnimation';
+
+  function initStreamCanvas() {
+    const canvas = document.getElementById('stream-canvas') as HTMLCanvasElement | null;
+    if (!canvas) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    try {
+      new StreamAnimation(canvas);
+    } catch (e) {
+      console.warn('No se pudo inicializar la animación Canvas 2D:', e);
+    }
+  }
+
+  // Inicialización cuando el DOM esté listo sin bloquear el renderizado crítico
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStreamCanvas, { once: true });
+  } else {
+    initStreamCanvas();
+  }
+</script>
+

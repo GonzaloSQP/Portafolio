@@ -1,0 +1,194 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { portfolioData } from '../../data/portfolioData';
+import type { Project } from '../../schemas/portfolioSchema';
+
+export function getStaticPaths() {
+  return portfolioData.projects.map((project, index) => {
+    const prev = index > 0 ? portfolioData.projects[index - 1] : null;
+    const next = index < portfolioData.projects.length - 1 ? portfolioData.projects[index + 1] : null;
+    return {
+      params: { id: project.id },
+      props: { project, prev, next },
+    };
+  });
+}
+
+interface Props {
+  project: Project;
+  prev: Project | null;
+  next: Project | null;
+}
+
+const { project, prev, next } = Astro.props;
+---
+
+<BaseLayout
+  title={`${project.title} | Caso de Estudio - ${portfolioData.name}`}
+  description={project.summary}
+  currentPath={`/proyectos/${project.id}`}
+>
+  <div class="py-12 sm:py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <!-- Breadcrumb y Volver -->
+      <nav class="flex items-center gap-2 text-xs sm:text-sm text-text-muted" aria-label="Migas de pan">
+        <a href="/" class="hover:text-accent transition-colors">Inicio</a>
+        <span>/</span>
+        <a href="/proyectos" class="hover:text-accent transition-colors">Proyectos</a>
+        <span>/</span>
+        <span class="text-text-main font-semibold truncate max-w-xs">{project.title}</span>
+      </nav>
+
+      <!-- Cabecera del Caso de Estudio -->
+      <header class="space-y-4">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-accent/10 text-accent border border-accent/20">
+            {project.category}
+          </span>
+          <div class="inline-flex items-center gap-1.5 text-xs font-medium text-success px-3 py-1 rounded-full bg-success/10 border border-success/20">
+            <span class="w-2 h-2 rounded-full bg-success"></span>
+            <span class="capitalize">Estado: {project.status}</span>
+          </div>
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-black text-text-main tracking-tight leading-tight">
+          {project.title}
+        </h1>
+
+        <p class="text-lg sm:text-xl text-text-muted leading-relaxed">
+          {project.summary}
+        </p>
+
+        <!-- Enlaces en producción (si existen) -->
+        {project.links.demo && (
+          <div class="pt-2 flex flex-wrap items-center gap-4">
+            <a
+              href={project.links.demo}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-bg font-bold text-sm hover:bg-accent-hover transition-colors shadow-sm focus-visible:outline-accent"
+            >
+              <span>Acceder al Servicio en Producción</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+            <span class="text-xs font-mono text-text-muted">
+              URL: <code class="text-text-main">{project.links.demo}</code>
+            </span>
+          </div>
+        )}
+      </header>
+
+      <!-- Métricas y Resultados Verificables (Impacto) -->
+      <section class="p-6 sm:p-8 rounded-2xl bg-surface border border-border shadow-sm space-y-4" aria-labelledby="results-title">
+        <h2 id="results-title" class="text-lg font-bold font-mono text-text-main uppercase tracking-wider flex items-center gap-2">
+          <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Resultados Verificables de Rendimiento
+        </h2>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          {project.results.map((res) => (
+            <li class="p-4 rounded-xl bg-surface-hover/70 border border-border/80 flex items-start gap-3">
+              <span class="w-2 h-2 rounded-full bg-success shrink-0 mt-2"></span>
+              <span class="text-sm font-semibold text-text-main">{res}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- Problema Técnico -->
+      <section class="space-y-4" aria-labelledby="problem-title">
+        <h2 id="problem-title" class="text-xl sm:text-2xl font-bold text-text-main tracking-tight flex items-center gap-2">
+          <span class="w-2.5 h-6 rounded bg-accent inline-block"></span>
+          El Problema Técnico & Restricciones
+        </h2>
+        <div class="p-6 rounded-2xl bg-surface border border-border text-base text-text-muted leading-relaxed">
+          {project.problem}
+        </div>
+      </section>
+
+      <!-- Contribución y Rol Personal Real -->
+      <section class="space-y-4" aria-labelledby="contribution-title">
+        <h2 id="contribution-title" class="text-xl sm:text-2xl font-bold text-text-main tracking-tight flex items-center gap-2">
+          <span class="w-2.5 h-6 rounded bg-accent inline-block"></span>
+          Mi Rol Personal e Implementación
+        </h2>
+        <div class="p-6 rounded-2xl bg-surface border border-border text-base text-text-muted leading-relaxed">
+          {project.contribution}
+        </div>
+      </section>
+
+      <!-- Decisiones de Arquitectura -->
+      <section class="space-y-4" aria-labelledby="decisions-title">
+        <h2 id="decisions-title" class="text-xl sm:text-2xl font-bold text-text-main tracking-tight flex items-center gap-2">
+          <span class="w-2.5 h-6 rounded bg-accent inline-block"></span>
+          Decisiones de Arquitectura y Diseño
+        </h2>
+        <div class="space-y-3">
+          {project.decisions.map((dec, i) => (
+            <div class="p-4 rounded-xl bg-surface border border-border flex items-start gap-3">
+              <span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-accent/10 text-accent shrink-0 mt-0.5">
+                0{i + 1}
+              </span>
+              <p class="text-sm sm:text-base text-text-main leading-relaxed">
+                {dec}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Stack Tecnológico Empleado -->
+      <section class="space-y-4" aria-labelledby="stack-title">
+        <h2 id="stack-title" class="text-xl sm:text-2xl font-bold text-text-main tracking-tight flex items-center gap-2">
+          <span class="w-2.5 h-6 rounded bg-accent inline-block"></span>
+          Stack Tecnológico
+        </h2>
+        <div class="flex flex-wrap gap-2">
+          {project.technologies.map((tech) => (
+            <span class="px-3.5 py-1.5 rounded-lg bg-surface border border-border font-mono text-xs sm:text-sm text-text-main font-medium shadow-sm">
+              {tech}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <!-- Navegación Entre Proyectos -->
+      <nav class="pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4" aria-label="Navegación entre proyectos">
+        {prev ? (
+          <a
+            href={`/proyectos/${prev.id}`}
+            class="w-full sm:w-auto p-4 rounded-xl bg-surface border border-border hover:border-accent text-left transition-colors group"
+          >
+            <span class="text-xs font-mono text-text-muted block">← Proyecto anterior</span>
+            <span class="text-sm font-bold text-text-main group-hover:text-accent transition-colors truncate block max-w-xs">
+              {prev.title}
+            </span>
+          </a>
+        ) : <div />}
+
+        <a
+          href="/proyectos"
+          class="px-4 py-2 rounded-lg text-sm font-semibold text-text-muted hover:text-text-main hover:bg-surface transition-colors"
+        >
+          Volver a todos los proyectos
+        </a>
+
+        {next ? (
+          <a
+            href={`/proyectos/${next.id}`}
+            class="w-full sm:w-auto p-4 rounded-xl bg-surface border border-border hover:border-accent text-right transition-colors group"
+          >
+            <span class="text-xs font-mono text-text-muted block">Siguiente proyecto →</span>
+            <span class="text-sm font-bold text-text-main group-hover:text-accent transition-colors truncate block max-w-xs">
+              {next.title}
+            </span>
+          </a>
+        ) : <div />}
+      </nav>
+    </div>
+  </div>
+</BaseLayout>
+

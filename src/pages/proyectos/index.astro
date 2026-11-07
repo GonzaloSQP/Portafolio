@@ -1,0 +1,151 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { portfolioData } from '../../data/portfolioData';
+import { ALLOWED_CATEGORIES } from '../../schemas/portfolioSchema';
+
+const projects = portfolioData.projects;
+---
+
+<BaseLayout
+  title={`Proyectos y Casos de Estudio | ${portfolioData.name}`}
+  description="Catálogo de proyectos de arquitectura de software, migración a microservicios con streaming y plataformas tributarias a gran escala."
+  currentPath="/proyectos"
+>
+  <div class="py-12 sm:py-16">
+    <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Encabezado de página -->
+      <div class="max-w-3xl mb-10">
+        <span class="text-xs font-mono text-accent font-semibold tracking-wider uppercase">
+          Portafolio de Ingeniería
+        </span>
+        <h1 class="text-3xl sm:text-5xl font-black text-text-main tracking-tight mt-1">
+          Proyectos & Arquitecturas
+        </h1>
+        <p class="mt-4 text-base sm:text-lg text-text-muted leading-relaxed">
+          Sistemas en producción, migraciones críticas de bases de datos masivas y microservicios de alta concurrencia desarrollados con estándares rigurosos de fiabilidad y rendimiento.
+        </p>
+      </div>
+
+      <!-- Barra de Filtros por Categoría -->
+      <div class="mb-10 flex flex-wrap items-center gap-2" role="group" aria-label="Filtro de proyectos por categoría">
+        <button
+          type="button"
+          data-category="all"
+          class="category-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-accent bg-accent text-bg shadow-sm transition-all focus-visible:outline-accent"
+          aria-pressed="true"
+        >
+          Todos ({projects.length})
+        </button>
+        {ALLOWED_CATEGORIES.map((cat) => {
+          const count = projects.filter((p) => p.category === cat).length;
+          return (
+            <button
+              type="button"
+              data-category={cat}
+              class="category-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-border bg-surface text-text-muted hover:text-text-main hover:bg-surface-hover transition-all focus-visible:outline-accent"
+              aria-pressed="false"
+            >
+              {cat} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      <!-- Anuncio dinámico para lectores de pantalla -->
+      <div id="filter-status" class="sr-only" aria-live="polite" aria-atomic="true">
+        Mostrando todos los {projects.length} proyectos.
+      </div>
+
+      <!-- Grid de Proyectos -->
+      <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+        {projects.map((project) => (
+          <div class="project-item" data-category={project.category}>
+            <ProjectCard project={project} />
+          </div>
+        ))}
+      </div>
+
+      <!-- Estado Vacío (si no hay resultados en el filtro) -->
+      <div id="empty-state" class="hidden py-16 text-center space-y-4 rounded-2xl border border-dashed border-border bg-surface/30">
+        <svg class="w-12 h-12 mx-auto text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-lg font-bold text-text-main">No se encontraron proyectos en esta categoría</h3>
+        <p class="text-sm text-text-muted">Intenta restablecer el filtro para ver el catálogo completo.</p>
+        <button
+          id="reset-filter-btn"
+          type="button"
+          class="px-4 py-2 rounded-xl bg-accent text-bg text-sm font-bold hover:bg-accent-hover transition-colors"
+        >
+          Restablecer Filtros
+        </button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  function setupFilters() {
+    const filterButtons = document.querySelectorAll<HTMLButtonElement>('.category-filter-btn');
+    const projectItems = document.querySelectorAll<HTMLElement>('.project-item');
+    const emptyState = document.getElementById('empty-state');
+    const filterStatus = document.getElementById('filter-status');
+    const resetBtn = document.getElementById('reset-filter-btn');
+
+    function filterByCategory(category: string) {
+      let visibleCount = 0;
+
+      filterButtons.forEach((btn) => {
+        const cat = btn.getAttribute('data-category');
+        if (cat === category) {
+          btn.classList.add('bg-accent', 'text-bg', 'border-accent');
+          btn.classList.remove('bg-surface', 'text-text-muted', 'border-border');
+          btn.setAttribute('aria-pressed', 'true');
+        } else {
+          btn.classList.remove('bg-accent', 'text-bg', 'border-accent');
+          btn.classList.add('bg-surface', 'text-text-muted', 'border-border');
+          btn.setAttribute('aria-pressed', 'false');
+        }
+      });
+
+      projectItems.forEach((item) => {
+        const itemCat = item.getAttribute('data-category');
+        if (category === 'all' || itemCat === category) {
+          item.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+
+      if (emptyState) {
+        if (visibleCount === 0) {
+          emptyState.classList.remove('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+        }
+      }
+
+      if (filterStatus) {
+        filterStatus.textContent = `Mostrando ${visibleCount} proyectos para el filtro ${category === 'all' ? 'todos' : category}.`;
+      }
+    }
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cat = btn.getAttribute('data-category') || 'all';
+        filterByCategory(cat);
+      });
+    });
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        filterByCategory('all');
+      });
+    }
+  }
+
+  setupFilters();
+</script>
+

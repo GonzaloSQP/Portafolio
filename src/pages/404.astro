@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { portfolioData } from '../data/portfolioData';
+---
+
+<BaseLayout
+  title={`404 - Página No Encontrada | ${portfolioData.name}`}
+  description="La página o recurso que buscas no existe o ha sido movido."
+  currentPath="/404"
+>
+  <div class="min-h-[60vh] flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 text-center">
+    <div class="max-w-md space-y-6">
+      <div class="font-mono text-7xl sm:text-8xl font-black text-accent tracking-tighter">
+        404
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-black text-text-main tracking-tight">
+        Ruta no encontrada
+      </h1>
+      <p class="text-sm sm:text-base text-text-muted">
+        El recurso solicitado no existe en este servidor o fue reubicado en una ruta distinta.
+      </p>
+      <div class="pt-4">
+        <a
+          href="/"
+          class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-accent text-bg font-bold text-sm hover:bg-accent-hover transition-colors shadow-md focus-visible:outline-accent"
+        >
+          ← Regresar al Inicio Seguro
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+

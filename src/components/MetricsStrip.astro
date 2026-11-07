@@ -1,0 +1,55 @@
+---
+// MetricsStrip.astro: Banda de métricas técnicas comprobadas y logros cuantitativos
+const metrics = [
+  {
+    value: '> 1M Registros',
+    subtext: 'Procesados en <15 min',
+    desc: 'Streaming reactivo Jakarta EE & Oracle SQL masivo',
+    badge: 'Big Data / Streaming'
+  },
+  {
+    value: '30+ Empresas',
+    subtext: 'Facturación Centralizada',
+    desc: 'Gestión tributaria, auditoría XML y envíos a SUNAT',
+    badge: 'Misión Crítica'
+  },
+  {
+    value: '< 120 ms',
+    subtext: 'Latencia de Consulta',
+    desc: 'Microservicios APIS Cusco (DNI, RUC, Placas, SOAT)',
+    badge: 'Alta Concurrencia'
+  },
+  {
+    value: 'PMI Credential',
+    subtext: 'Project Management Ready®',
+    desc: 'Certificación oficial Project Management Institute',
+    badge: 'ID: FJpF-XMpP'
+  }
+];
+---
+
+<section class="py-10 border-y border-border bg-surface/30" aria-label="Métricas técnicas comprobadas">
+  <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {metrics.map((m) => (
+        <div class="p-5 rounded-xl bg-surface border border-border shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="inline-block text-[11px] font-mono px-2 py-0.5 rounded-full bg-accent/10 text-accent mb-2">
+              {m.badge}
+            </span>
+            <div class="text-2xl sm:text-3xl font-black font-mono tracking-tight text-text-main">
+              {m.value}
+            </div>
+            <div class="text-sm font-semibold text-text-main mt-0.5">
+              {m.subtext}
+            </div>
+          </div>
+          <p class="text-xs text-text-muted mt-3">
+            {m.desc}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+

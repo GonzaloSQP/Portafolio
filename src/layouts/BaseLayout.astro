@@ -1,0 +1,106 @@
+---
+import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import { portfolioData } from '../data/portfolioData';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  currentPath?: string;
+}
+
+const {
+  title = `${portfolioData.name} | Arquitecto de Software & Sistemas Distribuidos`,
+  description = portfolioData.summary,
+  image = '/og-image.png',
+  currentPath = Astro.url.pathname,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://dev.apiscusco.com');
+
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": portfolioData.name,
+  "jobTitle": portfolioData.title,
+  "url": Astro.site?.toString() || "https://dev.apiscusco.com",
+  "sameAs": [
+    portfolioData.contact.github,
+    portfolioData.contact.linkedin
+  ],
+  "knowsAbout": portfolioData.specialties,
+  "hasCredential": portfolioData.certifications.map(c => ({
+    "@type": "EducationalOccupationalCredential",
+    "name": c.name,
+    "credentialCategory": "Professional Certification",
+    "recognizedBy": {
+      "@type": "Organization",
+      "name": c.issuer
+    }
+  }))
+};
+---
+
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph / Redes Sociales -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#080c14" />
+
+    <!-- JSON-LD Datos Estructurados -->
+    <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+
+    <!-- Script crítico inline para prevención estricta de FOUC -->
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme-preference');
+          var theme = stored;
+          if (!theme || theme === 'system') {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col bg-bg text-text-main selection:bg-accent selection:text-bg">
+    <!-- Enlace de salto accesible WCAG 2.2 -->
+    <a href="#main-content" class="skip-link">
+      Saltar al contenido principal
+    </a>
+
+    <Navbar currentPath={currentPath} />
+
+    <main id="main-content" class="flex-1 w-full">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>
+
